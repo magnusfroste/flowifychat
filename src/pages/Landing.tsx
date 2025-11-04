@@ -1,0 +1,127 @@
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight } from "lucide-react";
+
+const Landing = () => {
+  return (
+    <div className="min-h-screen bg-gradient-subtle">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-primary opacity-10 blur-3xl" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pt-24 sm:pb-32">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm text-primary font-medium">Built for n8n Flowgrammers</span>
+            </div>
+            
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-primary bg-clip-text text-transparent">
+              Beautiful Chat Interfaces
+              <br />
+              For Your n8n Workflows
+            </h1>
+            
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
+              Stop rebuilding chat UIs. Create ChatGPT-quality interfaces for your n8n webhooks in seconds. 
+              Just paste, customize, and share.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/auth">
+                <Button size="lg" className="bg-primary hover:bg-primary-glow shadow-glow transition-all">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="secondary">
+                View Demo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Everything You Need, Nothing You Don't
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            Purpose-built for n8n users who want stunning chat experiences
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <FeatureCard
+            icon={<MessageSquare className="h-6 w-6" />}
+            title="Modern Chat UI"
+            description="ChatGPT-quality interfaces that your users will love. Streaming responses, markdown, and more."
+          />
+          <FeatureCard
+            icon={<Zap className="h-6 w-6" />}
+            title="Instant Setup"
+            description="Paste your n8n webhook URL. Customize the look. Share the link. That's it."
+          />
+          <FeatureCard
+            icon={<Share2 className="h-6 w-6" />}
+            title="Shareable Links"
+            description="Get a beautiful URL for each chat instance. Embed anywhere or share directly."
+          />
+          <FeatureCard
+            icon={<Code className="h-6 w-6" />}
+            title="Multi-Tenant"
+            description="Manage unlimited chat interfaces. Perfect for agencies and power users."
+          />
+          <FeatureCard
+            icon={<Sparkles className="h-6 w-6" />}
+            title="Customizable"
+            description="Brand colors, avatars, welcome messages. Make it yours without code."
+          />
+          <FeatureCard
+            icon={<Zap className="h-6 w-6" />}
+            title="Real-time"
+            description="Streaming responses. Typing indicators. Everything your users expect."
+          />
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="relative rounded-3xl bg-gradient-primary p-12 shadow-elegant overflow-hidden">
+          <div className="absolute inset-0 bg-grid-white/5" />
+          
+          <div className="relative text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Ready to Deploy Beautiful Chats?
+            </h2>
+            <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+              Join n8n flowgrammers who've stopped rebuilding the same chat UI over and over.
+            </p>
+            <Link to="/auth">
+              <Button size="lg" variant="secondary" className="shadow-lg">
+                Start Building Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
+  return (
+    <div className="group p-6 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all hover:shadow-glow">
+      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
+    </div>
+  );
+};
+
+export default Landing;
