@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
 import { trackAnalyticsEvent } from "@/lib/analytics";
+import {
+  getOrCreateSessionId,
+  clearSessionId,
+  getChatKeyFromRouteOrInstance,
+  migrateSessionId,
+} from "@/lib/session";
 
 interface ChatInstance {
   id: string;
@@ -30,6 +36,7 @@ interface Message {
 
 const Chat = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -38,7 +45,18 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [sessionId, setSessionId] = useState(() => {
+    // Check if ?new=1 param forces a new session
+    const forceNew = searchParams.get("new") === "1";
+    const routeKey = getChatKeyFromRouteOrInstance(id);
+    
+    if (forceNew) {
+      clearSessionId(routeKey);
+    }
+    
+    return getOrCreateSessionId(routeKey);
+  });
+  const [viewTracked, setViewTracked] = useState(false);
 
   useEffect(() => {
     const loadChatInstance = async () => {
@@ -75,15 +93,28 @@ const Chat = () => {
 
         if (error) throw error;
 
-        setChatInstance(data as unknown as ChatInstance);
+        const instance = data as unknown as ChatInstance;
+        setChatInstance(instance);
+        
+        // Migrate sessionId to canonical key (instance.id) if needed
+        const routeKey = getChatKeyFromRouteOrInstance(id);
+        const canonicalKey = getChatKeyFromRouteOrInstance(id, instance.id);
+        
+        if (routeKey !== canonicalKey) {
+          migrateSessionId(routeKey, canonicalKey);
+          const migratedSessionId = getOrCreateSessionId(canonicalKey);
+          setSessionId(migratedSessionId);
+        }
         
         // Track view event (only for public shared chats accessed via slug)
-        if (!isUUID) {
+        // Delay until sessionId is confirmed from canonical key
+        if (!isUUID && !viewTracked) {
           await trackAnalyticsEvent({
-            chat_instance_id: data.id,
-            session_id: sessionId,
+            chat_instance_id: instance.id,
+            session_id: routeKey !== canonicalKey ? getOrCreateSessionId(canonicalKey) : sessionId,
             event_type: "view",
           });
+          setViewTracked(true);
         }
         
         // Add welcome message
@@ -110,7 +141,7 @@ const Chat = () => {
     };
 
     loadChatInstance();
-  }, [id, navigate, toast]);
+  }, [id, navigate, toast, sessionId, viewTracked]);
 
   const handleSend = async () => {
     if (!input.trim() || !chatInstance) return;
@@ -239,6 +270,30 @@ const Chat = () => {
 
   if (!chatInstance) return null;
 
+  const handleResetSession = () => {
+    const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance.id);
+    clearSessionId(canonicalKey);
+    const newSessionId = getOrCreateSessionId(canonicalKey);
+    setSessionId(newSessionId);
+    setViewTracked(false);
+    
+    // Reset messages to welcome message
+    const branding = chatInstance.custom_branding;
+    setMessages([
+      {
+        id: "welcome",
+        role: "assistant",
+        content: branding.welcomeMessage,
+        timestamp: new Date(),
+      },
+    ]);
+    
+    toast({
+      title: "Session reset",
+      description: "Started a new conversation",
+    });
+  };
+
   return (
     <div
       className="min-h-screen bg-gradient-subtle"
@@ -268,15 +323,25 @@ const Chat = () => {
                 {chatInstance.custom_branding.chatTitle}
               </h1>
             </div>
-            {/* Show branding badge if accessed via slug */}
-            {!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '') && (
-              <a
-                href="/"
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetSession}
+                title="Reset conversation"
               >
-                Powered by <span className="font-semibold">FlowChat</span>
-              </a>
-            )}
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+              {/* Show branding badge if accessed via slug */}
+              {!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '') && (
+                <a
+                  href="/"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                >
+                  Powered by <span className="font-semibold">FlowChat</span>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </header>
