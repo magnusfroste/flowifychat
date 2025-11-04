@@ -113,10 +113,9 @@ const Chat = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: userMessage.content,
-          chatId: chatInstance.id,
+          action: "sendMessage",
           sessionId: sessionId,
-          timestamp: userMessage.timestamp,
+          chatInput: userMessage.content,
         }),
       });
 
@@ -126,11 +125,16 @@ const Chat = () => {
 
       const data = await response.json();
 
-      // Add assistant response
+      // Handle error responses from n8n
+      if (data.type === "error") {
+        throw new Error(data.content || "Error from webhook");
+      }
+
+      // Add assistant response - handle multiple n8n response formats
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.response || "I received your message!",
+        content: data.output || data.content || data.response || "I received your message!",
         timestamp: new Date(),
       };
 
