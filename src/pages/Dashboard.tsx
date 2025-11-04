@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, LogOut, MessageSquare, ExternalLink } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { CreateChatDialog } from "@/components/CreateChatDialog";
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
@@ -84,12 +85,9 @@ const Dashboard = () => {
         </div>
 
         {/* Create New Button */}
-        <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
+        <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors">
           <CardContent className="flex items-center justify-center py-12">
-            <Button size="lg" className="bg-primary hover:bg-primary-glow shadow-glow">
-              <Plus className="mr-2 h-5 w-5" />
-              Create New Chat Interface
-            </Button>
+            <CreateChatDialog />
           </CardContent>
         </Card>
 
