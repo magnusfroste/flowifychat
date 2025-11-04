@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getChatAnalytics } from "@/lib/analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2 } from "lucide-react";
+import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { CreateChatDialog } from "@/components/CreateChatDialog";
@@ -37,6 +38,12 @@ interface ChatInstance {
   custom_branding: {
     primaryColor: string;
     chatTitle: string;
+  };
+  analytics?: {
+    total_views: number;
+    unique_views: number;
+    total_messages: number;
+    active_sessions: number;
   };
 }
 
@@ -114,7 +121,23 @@ const Dashboard = () => {
 
       if (error) throw error;
 
-      setChatInstances(data as unknown as ChatInstance[]);
+      // Fetch analytics for each chat instance
+      const instancesWithAnalytics = await Promise.all(
+        (data || []).map(async (instance) => {
+          const analytics = await getChatAnalytics(instance.id);
+          return {
+            ...instance,
+            analytics: {
+              total_views: analytics.total_views || 0,
+              unique_views: analytics.unique_views || 0,
+              total_messages: analytics.total_messages || 0,
+              active_sessions: analytics.active_sessions || 0,
+            },
+          };
+        })
+      );
+
+      setChatInstances(instancesWithAnalytics as unknown as ChatInstance[]);
     } catch (error: any) {
       console.error("Error loading chat instances:", error);
       toast({
@@ -314,6 +337,45 @@ const Dashboard = () => {
                                 <Copy className="h-3 w-3" />
                               )}
                             </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Analytics */}
+                      {chat.analytics && (
+                        <div className="bg-primary/5 rounded-md p-3">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                            <Activity className="h-3 w-3" />
+                            <span className="font-medium">Analytics</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-foreground">
+                                {chat.analytics.unique_views}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                Views
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-foreground">
+                                {chat.analytics.total_messages}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                <MessageSquare className="h-3 w-3" />
+                                Messages
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-foreground">
+                                {chat.analytics.active_sessions}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                <Users className="h-3 w-3" />
+                                Sessions
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 interface ChatInstance {
   id: string;
@@ -76,6 +77,15 @@ const Chat = () => {
 
         setChatInstance(data as unknown as ChatInstance);
         
+        // Track view event (only for public shared chats accessed via slug)
+        if (!isUUID) {
+          await trackAnalyticsEvent({
+            chat_instance_id: data.id,
+            session_id: sessionId,
+            event_type: "view",
+          });
+        }
+        
         // Add welcome message
         const branding = data.custom_branding as unknown as ChatInstance["custom_branding"];
         setMessages([
@@ -115,6 +125,16 @@ const Chat = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setSending(true);
+
+    // Track message sent event
+    await trackAnalyticsEvent({
+      chat_instance_id: chatInstance.id,
+      session_id: sessionId,
+      event_type: "message_sent",
+      metadata: {
+        message_length: userMessage.content.length,
+      },
+    });
 
     try {
       // Send to n8n webhook
@@ -187,6 +207,16 @@ const Chat = () => {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      
+      // Track message received event
+      await trackAnalyticsEvent({
+        chat_instance_id: chatInstance.id,
+        session_id: sessionId,
+        event_type: "message_received",
+        metadata: {
+          response_length: assistantContent.length,
+        },
+      });
     } catch (error: any) {
       console.error("Error sending message:", error);
       toast({

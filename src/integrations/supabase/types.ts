@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_analytics: {
+        Row: {
+          chat_instance_id: string
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string
+        }
+        Insert: {
+          chat_instance_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id: string
+        }
+        Update: {
+          chat_instance_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_analytics_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_instances: {
         Row: {
           created_at: string
@@ -52,7 +87,25 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      chat_analytics_summary: {
+        Row: {
+          active_sessions: number | null
+          chat_instance_id: string | null
+          last_activity: string | null
+          total_messages: number | null
+          total_views: number | null
+          unique_views: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_analytics_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       generate_slug_from_name: { Args: { name: string }; Returns: string }
