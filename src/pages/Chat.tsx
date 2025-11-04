@@ -123,18 +123,56 @@ const Chat = () => {
         throw new Error("Failed to send message to webhook");
       }
 
-      const data = await response.json();
+      // Read response as text first (works for both streaming and non-streaming)
+      const text = await response.text();
+      let assistantContent = '';
 
-      // Handle error responses from n8n
-      if (data.type === "error") {
-        throw new Error(data.content || "Error from webhook");
+      // Try parsing as regular JSON first (non-streaming)
+      try {
+        const data = JSON.parse(text);
+        
+        // Handle error responses
+        if (data.type === "error") {
+          throw new Error(data.content || "Error from webhook");
+        }
+        
+        // Handle single JSON response (non-streaming)
+        assistantContent = data.output || data.content || data.response || '';
+        
+      } catch (e) {
+        // If single JSON parse fails, try NDJSON (streaming format)
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line);
+            
+            // Handle streaming error
+            if (parsed.type === 'error') {
+              throw new Error(parsed.content || 'Error from webhook');
+            }
+            
+            // Accumulate content from streaming items
+            if (parsed.type === 'item' && parsed.content) {
+              assistantContent += parsed.content;
+            }
+            
+            // Also handle direct output/content in each line
+            if (parsed.output || parsed.content) {
+              assistantContent += parsed.output || parsed.content;
+            }
+          } catch (lineError) {
+            // Skip invalid JSON lines
+            console.warn('Skipping invalid JSON line:', line);
+          }
+        }
       }
 
-      // Add assistant response - handle multiple n8n response formats
+      // Add assistant response with accumulated content
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.output || data.content || data.response || "I received your message!",
+        content: assistantContent || "I received your message!",
         timestamp: new Date(),
       };
 
