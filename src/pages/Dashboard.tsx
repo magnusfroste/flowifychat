@@ -23,6 +23,7 @@ import {
 import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CreateChatDialog } from "@/components/CreateChatDialog";
+import { EditChatDialog } from "@/components/EditChatDialog";
 import { formatDistanceToNow } from "date-fns";
 
 interface ChatInstance {
@@ -44,6 +45,8 @@ const Dashboard = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -122,6 +125,11 @@ const Dashboard = () => {
   const handleDeleteClick = (id: string) => {
     setDeletingId(id);
     setDeleteDialogOpen(true);
+  };
+
+  const handleEditClick = (id: string) => {
+    setEditingId(id);
+    setEditDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
@@ -249,6 +257,13 @@ const Dashboard = () => {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => handleEditClick(chat.id)}
+                          >
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             className="text-destructive focus:text-destructive cursor-pointer"
                             onClick={() => handleDeleteClick(chat.id)}
                           >
@@ -319,6 +334,16 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
+        )}
+
+        {/* Edit Chat Dialog */}
+        {editingId && (
+          <EditChatDialog
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            chatId={editingId}
+            onChatCreated={loadChatInstances}
+          />
         )}
 
         {/* Delete Confirmation Dialog */}
