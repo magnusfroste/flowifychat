@@ -1,15 +1,49 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, LogOut, MessageSquare, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CreateChatDialog } from "@/components/CreateChatDialog";
+import { formatDistanceToNow } from "date-fns";
+
+interface ChatInstance {
+  id: string;
+  name: string;
+  webhook_url: string;
+  is_active: boolean;
+  created_at: string;
+  custom_branding: {
+    primaryColor: string;
+    chatTitle: string;
+  };
+}
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [chatInstances, setChatInstances] = useState<ChatInstance[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -23,6 +57,7 @@ const Dashboard = () => {
       }
       
       setUser(session.user);
+      await loadChatInstances();
       setLoading(false);
     };
 
@@ -38,6 +73,88 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Set up real-time subscription for chat instances
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('chat-instances-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chat_instances',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          loadChatInstances();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const loadChatInstances = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("chat_instances")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setChatInstances(data as unknown as ChatInstance[]);
+    } catch (error: any) {
+      console.error("Error loading chat instances:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load chat instances",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeletingId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingId) return;
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("chat_instances")
+        .delete()
+        .eq("id", deletingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Deleted",
+        description: "Chat instance has been removed.",
+      });
+
+      setChatInstances((prev) => prev.filter((chat) => chat.id !== deletingId));
+    } catch (error: any) {
+      console.error("Error deleting chat instance:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete chat instance",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setDeletingId(null);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -87,26 +204,152 @@ const Dashboard = () => {
         {/* Create New Button */}
         <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors">
           <CardContent className="flex items-center justify-center py-12">
-            <CreateChatDialog />
+            <CreateChatDialog onChatCreated={loadChatInstances} />
           </CardContent>
         </Card>
 
-        {/* Empty State - Will be replaced with actual chat instances */}
-        <div className="text-center py-16">
-          <div className="inline-flex h-16 w-16 rounded-full bg-primary/10 items-center justify-center mb-4">
-            <MessageSquare className="h-8 w-8 text-primary" />
+        {/* Chat Instances Grid */}
+        {chatInstances.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {chatInstances.map((chat) => {
+              const branding = chat.custom_branding as ChatInstance["custom_branding"];
+              return (
+                <Card
+                  key={chat.id}
+                  className="group hover:border-primary/50 transition-all hover:shadow-glow"
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="truncate text-lg mb-2">
+                          {chat.name}
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                          {branding.chatTitle}
+                        </CardDescription>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link
+                              to={`/chat/${chat.id}`}
+                              className="cursor-pointer"
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Open Chat
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive cursor-pointer"
+                            onClick={() => handleDeleteClick(chat.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Status
+                        </span>
+                        <Badge
+                          variant={chat.is_active ? "default" : "secondary"}
+                          className={
+                            chat.is_active
+                              ? "bg-primary/20 text-primary border-primary/30"
+                              : ""
+                          }
+                        >
+                          {chat.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Created
+                        </span>
+                        <span className="text-sm">
+                          {formatDistanceToNow(new Date(chat.created_at), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      </div>
+                      <div className="pt-3 border-t border-border">
+                        <Button
+                          asChild
+                          className="w-full bg-primary hover:bg-primary-glow"
+                        >
+                          <Link to={`/chat/${chat.id}`}>
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Open Chat
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-          <h3 className="text-xl font-semibold mb-2">No chat interfaces yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Create your first chat interface to get started
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="secondary">
-              <ExternalLink className="mr-2 h-4 w-4" />
-              View Documentation
-            </Button>
+        ) : (
+          <div className="text-center py-16">
+            <div className="inline-flex h-16 w-16 rounded-full bg-primary/10 items-center justify-center mb-4">
+              <MessageSquare className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">No chat interfaces yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Create your first chat interface to get started
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button variant="secondary">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Documentation
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete this chat instance. This action cannot be
+                undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
