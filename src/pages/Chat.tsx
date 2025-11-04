@@ -37,6 +37,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
     const loadChatInstance = async () => {
@@ -114,6 +115,7 @@ const Chat = () => {
         body: JSON.stringify({
           message: userMessage.content,
           chatId: chatInstance.id,
+          sessionId: sessionId,
           timestamp: userMessage.timestamp,
         }),
       });
