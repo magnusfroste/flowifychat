@@ -25,7 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Sparkles } from "lucide-react";
+import { Loader2, Plus, Sparkles, Link as LinkIcon } from "lucide-react";
+import { generateSlug, isSlugAvailable, isReservedSlug, getShareableUrl } from "@/lib/slugUtils";
 
 const chatSchema = z.object({
   name: z
@@ -33,6 +34,12 @@ const chatSchema = z.object({
     .trim()
     .min(1, "Chat name is required")
     .max(100, "Chat name must be less than 100 characters"),
+  slug: z
+    .string()
+    .trim()
+    .min(3, "Slug must be at least 3 characters")
+    .max(50, "Slug must be less than 50 characters")
+    .regex(/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
   webhookUrl: z
     .string()
     .trim()
@@ -71,6 +78,8 @@ interface CreateChatDialogProps {
 export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingSlug, setCheckingSlug] = useState(false);
+  const [slugError, setSlugError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -78,6 +87,7 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
     resolver: zodResolver(chatSchema),
     defaultValues: {
       name: "",
+      slug: "",
       webhookUrl: "",
       welcomeMessage: "Hi! How can I help you today?",
       chatTitle: "Chat Assistant",
@@ -86,7 +96,49 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
     },
   });
 
+  // Auto-generate slug when name changes
+  const handleNameChange = async (value: string) => {
+    form.setValue("name", value);
+    if (value) {
+      const generatedSlug = generateSlug(value);
+      form.setValue("slug", generatedSlug);
+      await checkSlugAvailability(generatedSlug);
+    }
+  };
+
+  const checkSlugAvailability = async (slug: string) => {
+    if (!slug || slug.length < 3) {
+      setSlugError(null);
+      return;
+    }
+
+    setCheckingSlug(true);
+    setSlugError(null);
+
+    if (isReservedSlug(slug)) {
+      setSlugError("This slug is reserved and cannot be used");
+      setCheckingSlug(false);
+      return;
+    }
+
+    const available = await isSlugAvailable(slug);
+    if (!available) {
+      setSlugError("This slug is already taken");
+    }
+    setCheckingSlug(false);
+  };
+
   const onSubmit = async (values: ChatFormValues) => {
+    // Final slug check
+    if (slugError) {
+      toast({
+        title: "Invalid Slug",
+        description: slugError,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -101,6 +153,7 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
         .insert({
           user_id: user.id,
           name: values.name,
+          slug: values.slug,
           webhook_url: values.webhookUrl,
           custom_branding: {
             primaryColor: values.primaryColor,
@@ -176,11 +229,54 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
                     <Input
                       placeholder="e.g., Customer Support Bot"
                       {...field}
+                      onChange={(e) => handleNameChange(e.target.value)}
                       className="bg-background"
                     />
                   </FormControl>
                   <FormDescription>
                     Internal name to identify this chat instance
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Slug */}
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Share Link Slug</FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="e.g., my-chat"
+                          {...field}
+                          onChange={async (e) => {
+                            field.onChange(e);
+                            await checkSlugAvailability(e.target.value);
+                          }}
+                          className={`bg-background font-mono ${
+                            slugError ? "border-destructive" : ""
+                          }`}
+                        />
+                        {checkingSlug && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                      </div>
+                      {field.value && !slugError && !checkingSlug && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                          <LinkIcon className="h-3 w-3" />
+                          <span className="font-mono">{getShareableUrl(field.value)}</span>
+                        </div>
+                      )}
+                      {slugError && (
+                        <p className="text-sm text-destructive">{slugError}</p>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Your public chat link (lowercase, numbers, hyphens only)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

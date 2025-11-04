@@ -20,7 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2 } from "lucide-react";
+import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2 } from "lucide-react";
+import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { CreateChatDialog } from "@/components/CreateChatDialog";
 import { EditChatDialog } from "@/components/EditChatDialog";
@@ -29,6 +30,7 @@ import { formatDistanceToNow } from "date-fns";
 interface ChatInstance {
   id: string;
   name: string;
+  slug: string | null;
   webhook_url: string;
   is_active: boolean;
   created_at: string;
@@ -47,6 +49,7 @@ const Dashboard = () => {
   const [deleting, setDeleting] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -130,6 +133,16 @@ const Dashboard = () => {
   const handleEditClick = (id: string) => {
     setEditingId(id);
     setEditDialogOpen(true);
+  };
+
+  const handleCopyLink = (slug: string, chatId: string) => {
+    navigator.clipboard.writeText(getShareableUrl(slug));
+    setCopiedId(chatId);
+    setTimeout(() => setCopiedId(null), 2000);
+    toast({
+      title: "Link copied!",
+      description: "Share link copied to clipboard",
+    });
   };
 
   const handleDeleteConfirm = async () => {
@@ -276,6 +289,35 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
+                      {/* Share Link */}
+                      {chat.slug && (
+                        <div className="bg-muted/50 rounded-md p-3 space-y-2">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Share2 className="h-3 w-3" />
+                            <span className="font-medium">Public Share Link</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-mono truncate text-foreground">
+                                {getShareableUrl(chat.slug)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 shrink-0"
+                              onClick={() => handleCopyLink(chat.slug!, chat.id)}
+                            >
+                              {copiedId === chat.id ? (
+                                <Check className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
                           Status

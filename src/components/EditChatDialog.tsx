@@ -23,10 +23,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Link as LinkIcon, Copy, Check } from "lucide-react";
+import { generateSlug, isSlugAvailable, isReservedSlug, getShareableUrl } from "@/lib/slugUtils";
 
 const formSchema = z.object({
   name: z.string().min(1, "Chat name is required"),
+  slug: z
+    .string()
+    .trim()
+    .min(3, "Slug must be at least 3 characters")
+    .max(50, "Slug must be less than 50 characters")
+    .regex(/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
   webhookUrl: z.string().url("Must be a valid URL").startsWith("https://", "Must use HTTPS"),
   welcomeMessage: z.string().min(1, "Welcome message is required"),
   chatTitle: z.string().min(1, "Chat title is required"),
@@ -47,11 +54,15 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [checkingSlug, setCheckingSlug] = useState(false);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      slug: "",
       webhookUrl: "",
       welcomeMessage: "Hi! How can I help you today?",
       chatTitle: "Chat Assistant",
@@ -59,6 +70,41 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
       accentColor: "#8b5cf6",
     },
   });
+
+  const checkSlugAvailability = async (slug: string) => {
+    if (!slug || slug.length < 3) {
+      setSlugError(null);
+      return;
+    }
+
+    setCheckingSlug(true);
+    setSlugError(null);
+
+    if (isReservedSlug(slug)) {
+      setSlugError("This slug is reserved and cannot be used");
+      setCheckingSlug(false);
+      return;
+    }
+
+    const available = await isSlugAvailable(slug, chatId);
+    if (!available) {
+      setSlugError("This slug is already taken");
+    }
+    setCheckingSlug(false);
+  };
+
+  const handleCopyLink = () => {
+    const slug = form.getValues("slug");
+    if (slug) {
+      navigator.clipboard.writeText(getShareableUrl(slug));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({
+        title: "Copied!",
+        description: "Share link copied to clipboard",
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchChatInstance = async () => {
@@ -77,6 +123,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
         const branding = data.custom_branding as any;
         form.reset({
           name: data.name,
+          slug: data.slug || "",
           webhookUrl: data.webhook_url,
           welcomeMessage: branding.welcomeMessage,
           chatTitle: branding.chatTitle,
@@ -100,6 +147,16 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
   }, [open, chatId, form, toast, onOpenChange]);
 
   const onSubmit = async (values: FormValues) => {
+    // Final slug check
+    if (slugError) {
+      toast({
+        title: "Invalid Slug",
+        description: slugError,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -118,6 +175,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
         .from("chat_instances")
         .update({
           name: values.name,
+          slug: values.slug,
           webhook_url: values.webhookUrl,
           custom_branding: {
             primaryColor: values.primaryColor,
@@ -178,6 +236,60 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
                     <FormLabel>Chat Name</FormLabel>
                     <FormControl>
                       <Input placeholder="My Chat Bot" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Slug with Copy Button */}
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Share Link Slug</FormLabel>
+                    <FormControl>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="e.g., my-chat"
+                            {...field}
+                            onChange={async (e) => {
+                              field.onChange(e);
+                              await checkSlugAvailability(e.target.value);
+                            }}
+                            className={`bg-background font-mono ${
+                              slugError ? "border-destructive" : ""
+                            }`}
+                          />
+                          {checkingSlug && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                        </div>
+                        {field.value && !slugError && !checkingSlug && (
+                          <div className="flex items-center gap-2 bg-muted/50 p-2 rounded">
+                            <LinkIcon className="h-3 w-3 text-muted-foreground" />
+                            <span className="flex-1 text-xs font-mono text-muted-foreground truncate">
+                              {getShareableUrl(field.value)}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2"
+                              onClick={handleCopyLink}
+                            >
+                              {copied ? (
+                                <Check className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                        {slugError && (
+                          <p className="text-sm text-destructive">{slugError}</p>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

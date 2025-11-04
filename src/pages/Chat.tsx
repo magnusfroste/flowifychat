@@ -47,19 +47,30 @@ const Chat = () => {
       }
 
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          navigate("/auth");
-          return;
+        // Try loading by UUID first (for owner access)
+        let query = supabase
+          .from("chat_instances")
+          .select("*");
+
+        // Check if id is a valid UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+        if (isUUID) {
+          // Load by UUID (owner view - requires authentication)
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (!user) {
+            navigate("/auth");
+            return;
+          }
+
+          query = query.eq("id", id).eq("user_id", user.id);
+        } else {
+          // Load by slug (public view - no authentication required)
+          query = query.eq("slug", id);
         }
 
-        const { data, error } = await supabase
-          .from("chat_instances")
-          .select("*")
-          .eq("id", id)
-          .eq("user_id", user.id)
-          .single();
+        const { data, error } = await query.single();
 
         if (error) throw error;
 
@@ -212,18 +223,30 @@ const Chat = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/dashboard")}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
+              {/* Only show back button if viewing by UUID (owner) */}
+              {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+              )}
               <h1 className="text-xl font-semibold">
                 {chatInstance.custom_branding.chatTitle}
               </h1>
             </div>
+            {/* Show branding badge if accessed via slug */}
+            {!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '') && (
+              <a
+                href="/"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                Powered by <span className="font-semibold">FlowChat</span>
+              </a>
+            )}
           </div>
         </div>
       </header>

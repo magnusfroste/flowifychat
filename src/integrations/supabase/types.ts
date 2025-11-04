@@ -21,6 +21,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          slug: string | null
           updated_at: string
           user_id: string
           webhook_url: string
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          slug?: string | null
           updated_at?: string
           user_id: string
           webhook_url: string
@@ -41,6 +43,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          slug?: string | null
           updated_at?: string
           user_id?: string
           webhook_url?: string
@@ -52,7 +55,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_slug_from_name: { Args: { name: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
