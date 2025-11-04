@@ -152,14 +152,13 @@ const Chat = () => {
               throw new Error(parsed.content || 'Error from webhook');
             }
             
-            // Accumulate content from streaming items
+            // Handle streaming items (n8n streaming format)
             if (parsed.type === 'item' && parsed.content) {
               assistantContent += parsed.content;
             }
-            
-            // Also handle direct output/content in each line
-            if (parsed.output || parsed.content) {
-              assistantContent += parsed.output || parsed.content;
+            // Handle non-streaming single-line format (fallback for NDJSON without 'type')
+            else if (!parsed.type && (parsed.output || parsed.content || parsed.response)) {
+              assistantContent += parsed.output || parsed.content || parsed.response;
             }
           } catch (lineError) {
             // Skip invalid JSON lines
