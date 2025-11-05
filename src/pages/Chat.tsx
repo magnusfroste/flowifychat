@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check } from "lucide-react";
 import { trackAnalyticsEvent, buildWebhookPayload } from "@/lib/analytics";
 import {
   getOrCreateSessionId,
@@ -58,6 +58,7 @@ const Chat = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [chatMode, setChatMode] = useState<'landing' | 'welcome' | 'chat'>('landing');
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState(() => {
     // Check if ?new=1 param forces a new session
     const forceNew = searchParams.get("new") === "1";
@@ -318,6 +319,24 @@ const Chat = () => {
     }
   };
 
+  const handleCopyMessage = async (messageId: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessageId(messageId);
+      toast({
+        title: "Copied to clipboard",
+        description: "Message copied successfully",
+      });
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (error) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy message to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleResetSession = () => {
     const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
     clearSessionId(canonicalKey);
@@ -477,30 +496,45 @@ const Chat = () => {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex animate-scale-in ${
+                  className={`flex animate-scale-in group ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <Card
-                    className={`max-w-[80%] ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-card"
-                    }`}
-                  >
-                    <div className="p-4">
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      <p
-                        className={`text-xs mt-2 ${
-                          message.role === "user"
-                            ? "text-primary-foreground/70"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {message.timestamp.toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </Card>
+                  <div className="relative">
+                    <Card
+                      className={`max-w-[80%] ${
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-card"
+                      }`}
+                    >
+                      <div className="p-4">
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p
+                          className={`text-xs mt-2 ${
+                            message.role === "user"
+                              ? "text-primary-foreground/70"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </Card>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyMessage(message.id, message.content)}
+                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                      title="Copy message"
+                    >
+                      {copiedMessageId === message.id ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               ))}
               {sending && (
