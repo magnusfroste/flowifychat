@@ -23,6 +23,7 @@ import {
 import { QuickStartPrompts } from "@/components/QuickStartPrompts";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
+import { TypingIndicator } from "@/components/TypingIndicator";
 
 interface ChatInstance {
   id: string;
@@ -503,10 +504,10 @@ const Chat = () => {
                 </div>
               ))}
               {sending && (
-                <div className="flex justify-start">
+                <div className="flex justify-start animate-fade-in">
                   <Card className="bg-card">
                     <div className="p-4">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <TypingIndicator />
                     </div>
                   </Card>
                 </div>
