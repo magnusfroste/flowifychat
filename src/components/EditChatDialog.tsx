@@ -58,6 +58,7 @@ const formSchema = z.object({
   welcomeSubtitle: z.string().max(200).optional(),
   welcomeDisclaimer: z.string().max(300).optional(),
   inputPlaceholder: z.string().max(100).optional(),
+  useLandingPageMode: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -93,6 +94,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
       welcomeSubtitle: "",
       welcomeDisclaimer: "",
       inputPlaceholder: "",
+      useLandingPageMode: true,
     },
   });
 
@@ -160,6 +162,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
           welcomeSubtitle: branding.welcomeScreen?.subtitle || "",
           welcomeDisclaimer: branding.welcomeScreen?.disclaimer || "",
           inputPlaceholder: branding.inputPlaceholder || "",
+          useLandingPageMode: branding.useLandingPageMode ?? true,
         });
       } catch (error: any) {
         console.error("Error fetching chat instance:", error);
@@ -225,6 +228,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
               : { enabled: false },
             inputPlaceholder: values.inputPlaceholder || "Type your message...",
             inputSubmitLabel: "Send",
+            useLandingPageMode: values.useLandingPageMode ?? true,
             metadata: {
               includeReferrer: true,
               includeUserAgent: true,
@@ -471,6 +475,45 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
                       </FormItem>
                     )}
                   />
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Entry Experience Configuration */}
+              <Collapsible className="border rounded-lg p-4 space-y-4">
+                <CollapsibleTrigger className="flex items-center justify-between w-full">
+                  <div>
+                    <h3 className="font-medium">Entry Experience</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Choose how users first interact with your chat
+                    </p>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <FormField
+                    control={form.control}
+                    name="useLandingPageMode"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                        <div className="space-y-0.5">
+                          <FormLabel>Landing Page Mode</FormLabel>
+                          <p className="text-xs text-muted-foreground">
+                            Show centered input field (like Claude/ChatGPT) instead of full chat interface
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  {!form.watch("useLandingPageMode") && (
+                    <p className="text-xs text-muted-foreground px-3">
+                      When disabled, users will see the full chat interface immediately or the welcome screen if enabled below.
+                    </p>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 

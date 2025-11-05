@@ -31,6 +31,10 @@ export interface QuickStartPromptsConfig {
   autoSend: boolean;
 }
 
+export interface ChatUXConfig {
+  useLandingPageMode: boolean;
+}
+
 export interface ChatBranding {
   primaryColor: string;
   accentColor: string;
@@ -42,6 +46,7 @@ export interface ChatBranding {
   inputPlaceholder?: string;
   inputSubmitLabel?: string;
   metadata?: MetadataConfig;
+  useLandingPageMode?: boolean;
 }
 
 /**
@@ -83,5 +88,14 @@ export const getMetadataConfig = (branding: any): MetadataConfig => {
     includeReferrer: branding?.metadata?.includeReferrer ?? true,
     includeUserAgent: branding?.metadata?.includeUserAgent ?? true,
     customFields: branding?.metadata?.customFields || {},
+  };
+};
+
+/**
+ * Get UX configuration with fallback defaults
+ */
+export const getUXConfig = (branding: any): ChatUXConfig => {
+  return {
+    useLandingPageMode: branding?.useLandingPageMode ?? true, // Default to landing page mode
   };
 };

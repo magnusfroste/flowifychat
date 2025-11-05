@@ -18,9 +18,11 @@ import {
   getWelcomeScreen,
   getInputConfig,
   getMetadataConfig,
+  getUXConfig,
 } from "@/lib/chatConfig";
 import { QuickStartPrompts } from "@/components/QuickStartPrompts";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { ChatLandingPage } from "@/components/ChatLandingPage";
 
 interface ChatInstance {
   id: string;
@@ -54,7 +56,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
+  const [chatMode, setChatMode] = useState<'landing' | 'welcome' | 'chat'>('landing');
   const [sessionId, setSessionId] = useState(() => {
     // Check if ?new=1 param forces a new session
     const forceNew = searchParams.get("new") === "1";
@@ -153,6 +155,28 @@ const Chat = () => {
     loadChatInstance();
   }, [id, navigate, toast, sessionId, viewTracked]);
 
+  // Determine chat mode based on configuration and message count
+  useEffect(() => {
+    if (!chatInstance) return;
+
+    const branding = chatInstance.custom_branding as any;
+    const uxConfig = getUXConfig(branding);
+    const welcomeScreenConfig = getWelcomeScreen(branding);
+
+    // Only show landing/welcome if we just have the initial welcome message
+    if (messages.length <= 1) {
+      if (uxConfig.useLandingPageMode) {
+        setChatMode('landing');
+      } else if (welcomeScreenConfig.enabled) {
+        setChatMode('welcome');
+      } else {
+        setChatMode('chat');
+      }
+    } else {
+      setChatMode('chat');
+    }
+  }, [chatInstance, messages.length]);
+
   const handleSend = async () => {
     if (!input.trim() || !chatInstance) return;
 
@@ -167,9 +191,9 @@ const Chat = () => {
     setInput("");
     setSending(true);
 
-    // Hide welcome screen after first message
-    if (showWelcomeScreen) {
-      setShowWelcomeScreen(false);
+    // Transition to chat mode after first message
+    if (chatMode === 'landing' || chatMode === 'welcome') {
+      setChatMode('chat');
     }
 
     // Track message sent event
@@ -287,10 +311,9 @@ const Chat = () => {
     const newSessionId = getOrCreateSessionId(canonicalKey);
     setSessionId(newSessionId);
     setViewTracked(false);
-    setShowWelcomeScreen(true);
     
     // Reset messages to welcome message
-    const branding = chatInstance?.custom_branding;
+    const branding = chatInstance?.custom_branding as any;
     setMessages([
       {
         id: "welcome",
@@ -299,6 +322,18 @@ const Chat = () => {
         timestamp: new Date(),
       },
     ]);
+
+    // Reset to initial mode based on configuration
+    const uxConfig = getUXConfig(branding);
+    const welcomeScreenConfig = getWelcomeScreen(branding);
+    
+    if (uxConfig.useLandingPageMode) {
+      setChatMode('landing');
+    } else if (welcomeScreenConfig.enabled) {
+      setChatMode('welcome');
+    } else {
+      setChatMode('chat');
+    }
     
     toast({
       title: "Session reset",
@@ -322,11 +357,44 @@ const Chat = () => {
   const inputConfig = getInputConfig(branding);
   const isOwner = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
+  // Landing page mode - no header, just centered input
+  if (chatMode === 'landing') {
+    return (
+      <div
+        className="min-h-screen bg-gradient-subtle"
+        style={{
+          "--chat-primary": chatInstance.custom_branding.primaryColor,
+          "--chat-accent": chatInstance.custom_branding.accentColor,
+        } as React.CSSProperties}
+      >
+        <ChatLandingPage
+          chatTitle={branding.chatTitle}
+          primaryColor={branding.primaryColor}
+          quickStartPrompts={quickStartConfig.prompts}
+          inputPlaceholder={inputConfig.placeholder}
+          input={input}
+          onInputChange={setInput}
+          onSend={handleSend}
+          onPromptClick={(text) => {
+            if (quickStartConfig.autoSend) {
+              setInput(text);
+              setTimeout(() => handleSend(), 0);
+            } else {
+              setInput(text);
+            }
+          }}
+          sending={sending}
+          autoSend={quickStartConfig.autoSend}
+        />
+      </div>
+    );
+  }
+
+  // Full chat interface with header
   return (
     <div
       className="min-h-screen bg-gradient-subtle"
       style={{
-        // Apply custom branding
         "--chat-primary": chatInstance.custom_branding.primaryColor,
         "--chat-accent": chatInstance.custom_branding.accentColor,
       } as React.CSSProperties}
@@ -375,12 +443,12 @@ const Chat = () => {
       </header>
 
       {/* Main Content */}
-      {showWelcomeScreen && welcomeScreenConfig.enabled ? (
+      {chatMode === 'welcome' ? (
         <WelcomeScreen
           config={welcomeScreenConfig}
           chatTitle={branding.chatTitle}
           primaryColor={branding.primaryColor}
-          onStart={() => setShowWelcomeScreen(false)}
+          onStart={() => setChatMode('chat')}
         />
       ) : (
         <>
