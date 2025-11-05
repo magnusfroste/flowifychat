@@ -6,17 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Send, Loader2, RotateCcw } from "lucide-react";
-import { trackAnalyticsEvent } from "@/lib/analytics";
+import { trackAnalyticsEvent, buildWebhookPayload } from "@/lib/analytics";
 import {
   getOrCreateSessionId,
   clearSessionId,
   getChatKeyFromRouteOrInstance,
   migrateSessionId,
 } from "@/lib/session";
+import {
+  getQuickStartPrompts,
+  getWelcomeScreen,
+  getInputConfig,
+  getMetadataConfig,
+} from "@/lib/chatConfig";
+import { QuickStartPrompts } from "@/components/QuickStartPrompts";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 
 interface ChatInstance {
   id: string;
   name: string;
+  slug: string | null;
   webhook_url: string;
   custom_branding: {
     primaryColor: string;
@@ -45,6 +54,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
   const [sessionId, setSessionId] = useState(() => {
     // Check if ?new=1 param forces a new session
     const forceNew = searchParams.get("new") === "1";
@@ -157,6 +167,11 @@ const Chat = () => {
     setInput("");
     setSending(true);
 
+    // Hide welcome screen after first message
+    if (showWelcomeScreen) {
+      setShowWelcomeScreen(false);
+    }
+
     // Track message sent event
     await trackAnalyticsEvent({
       chat_instance_id: chatInstance.id,
@@ -168,17 +183,23 @@ const Chat = () => {
     });
 
     try {
+      // Build enhanced webhook payload
+      const branding = chatInstance.custom_branding as any;
+      const metadataConfig = getMetadataConfig(branding);
+      const payload = buildWebhookPayload(
+        userMessage.content,
+        sessionId,
+        { id: chatInstance.id, slug: chatInstance.slug },
+        metadataConfig
+      );
+
       // Send to n8n webhook
       const response = await fetch(chatInstance.webhook_url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          action: "sendMessage",
-          sessionId: sessionId,
-          chatInput: userMessage.content,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -260,6 +281,31 @@ const Chat = () => {
     }
   };
 
+  const handleResetSession = () => {
+    const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
+    clearSessionId(canonicalKey);
+    const newSessionId = getOrCreateSessionId(canonicalKey);
+    setSessionId(newSessionId);
+    setViewTracked(false);
+    setShowWelcomeScreen(true);
+    
+    // Reset messages to welcome message
+    const branding = chatInstance?.custom_branding;
+    setMessages([
+      {
+        id: "welcome",
+        role: "assistant",
+        content: branding?.welcomeMessage || "Hi! How can I help you today?",
+        timestamp: new Date(),
+      },
+    ]);
+    
+    toast({
+      title: "Session reset",
+      description: "Started a new conversation",
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -270,29 +316,11 @@ const Chat = () => {
 
   if (!chatInstance) return null;
 
-  const handleResetSession = () => {
-    const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance.id);
-    clearSessionId(canonicalKey);
-    const newSessionId = getOrCreateSessionId(canonicalKey);
-    setSessionId(newSessionId);
-    setViewTracked(false);
-    
-    // Reset messages to welcome message
-    const branding = chatInstance.custom_branding;
-    setMessages([
-      {
-        id: "welcome",
-        role: "assistant",
-        content: branding.welcomeMessage,
-        timestamp: new Date(),
-      },
-    ]);
-    
-    toast({
-      title: "Session reset",
-      description: "Started a new conversation",
-    });
-  };
+  const branding = chatInstance.custom_branding as any;
+  const quickStartPrompts = getQuickStartPrompts(branding);
+  const welcomeScreenConfig = getWelcomeScreen(branding);
+  const inputConfig = getInputConfig(branding);
+  const isOwner = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
   return (
     <div
@@ -309,7 +337,7 @@ const Chat = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Only show back button if viewing by UUID (owner) */}
-              {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '') && (
+              {isOwner && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -333,7 +361,7 @@ const Chat = () => {
                 <RotateCcw className="h-4 w-4" />
               </Button>
               {/* Show branding badge if accessed via slug */}
-              {!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '') && (
+              {!isOwner && (
                 <a
                   href="/"
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
@@ -346,76 +374,106 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* Chat Messages */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6 mb-32">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <Card
-                className={`max-w-[80%] ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card"
-                }`}
-              >
-                <div className="p-4">
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p
-                    className={`text-xs mt-2 ${
+      {/* Main Content */}
+      {showWelcomeScreen && welcomeScreenConfig.enabled ? (
+        <WelcomeScreen
+          config={welcomeScreenConfig}
+          chatTitle={branding.chatTitle}
+          primaryColor={branding.primaryColor}
+          onStart={() => setShowWelcomeScreen(false)}
+        />
+      ) : (
+        <>
+          {/* Chat Messages */}
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-6 mb-32">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <Card
+                    className={`max-w-[80%] ${
                       message.role === "user"
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-card"
                     }`}
                   >
-                    {message.timestamp.toLocaleTimeString()}
-                  </p>
+                    <div className="p-4">
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p
+                        className={`text-xs mt-2 ${
+                          message.role === "user"
+                            ? "text-primary-foreground/70"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-          ))}
-          {sending && (
-            <div className="flex justify-start">
-              <Card className="bg-card">
-                <div className="p-4">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              ))}
+              {sending && (
+                <div className="flex justify-start">
+                  <Card className="bg-card">
+                    <div className="p-4">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    </div>
+                  </Card>
                 </div>
-              </Card>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Input Area - Fixed at bottom */}
-        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                placeholder="Type your message..."
-                className="bg-background"
-                disabled={sending}
-              />
-              <Button
-                onClick={handleSend}
-                disabled={!input.trim() || sending}
-                className="bg-primary hover:bg-primary-glow"
-              >
-                {sending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
+            {/* Quick Start Prompts - Show only when there's just the welcome message */}
+            {messages.length === 1 && quickStartPrompts.length > 0 && (
+              <div className="mb-32">
+                <QuickStartPrompts
+                  prompts={quickStartPrompts}
+                  onPromptClick={(text) => {
+                    setInput(text);
+                  }}
+                  disabled={sending}
+                  primaryColor={branding.primaryColor}
+                />
+              </div>
+            )}
+
+            {/* Input Area - Fixed at bottom */}
+            <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm">
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                    placeholder={inputConfig.placeholder}
+                    className="bg-background"
+                    disabled={sending}
+                  />
+                  <Button
+                    onClick={handleSend}
+                    disabled={!input.trim() || sending}
+                    style={{ backgroundColor: branding.primaryColor }}
+                    className="text-white"
+                  >
+                    {sending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        {inputConfig.submitLabel}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

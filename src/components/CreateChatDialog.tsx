@@ -27,6 +27,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Sparkles, Link as LinkIcon } from "lucide-react";
 import { generateSlug, isSlugAvailable, isReservedSlug, getShareableUrl } from "@/lib/slugUtils";
+import { QuickStartPromptsEditor } from "@/components/QuickStartPromptsEditor";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
+import type { QuickStartPrompt } from "@/lib/chatConfig";
 
 const chatSchema = z.object({
   name: z
@@ -66,6 +70,20 @@ const chatSchema = z.object({
   accentColor: z
     .string()
     .regex(/^#[0-9A-F]{6}$/i, "Must be a valid hex color"),
+  quickStartPrompts: z
+    .array(
+      z.object({
+        id: z.string(),
+        text: z.string().min(1).max(100),
+        enabled: z.boolean(),
+      })
+    )
+    .max(5)
+    .optional(),
+  welcomeScreenEnabled: z.boolean().optional(),
+  welcomeSubtitle: z.string().max(200).optional(),
+  welcomeDisclaimer: z.string().max(300).optional(),
+  inputPlaceholder: z.string().max(100).optional(),
 });
 
 type ChatFormValues = z.infer<typeof chatSchema>;
@@ -93,6 +111,11 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
       chatTitle: "Chat Assistant",
       primaryColor: "#3b82f6",
       accentColor: "#8b5cf6",
+      quickStartPrompts: [],
+      welcomeScreenEnabled: false,
+      welcomeSubtitle: "",
+      welcomeDisclaimer: "",
+      inputPlaceholder: "",
     },
   });
 
@@ -161,6 +184,21 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
             avatarUrl: null,
             welcomeMessage: values.welcomeMessage,
             chatTitle: values.chatTitle,
+            quickStartPrompts: values.quickStartPrompts || [],
+            welcomeScreen: values.welcomeScreenEnabled
+              ? {
+                  enabled: true,
+                  subtitle: values.welcomeSubtitle,
+                  disclaimer: values.welcomeDisclaimer,
+                }
+              : { enabled: false },
+            inputPlaceholder: values.inputPlaceholder || "Type your message...",
+            inputSubmitLabel: "Send",
+            metadata: {
+              includeReferrer: true,
+              includeUserAgent: true,
+              customFields: {},
+            },
           },
           is_active: true,
         })
@@ -406,6 +444,134 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
                 )}
               />
             </div>
+
+            {/* Quick Start Prompts */}
+            <Collapsible className="border rounded-lg p-4 space-y-4">
+              <CollapsibleTrigger className="flex items-center justify-between w-full">
+                <div>
+                  <h3 className="font-medium">Quick Start Prompts (Optional)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Suggested messages to help users get started
+                  </p>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <FormField
+                  control={form.control}
+                  name="quickStartPrompts"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <QuickStartPromptsEditor
+                          prompts={(field.value as QuickStartPrompt[]) || []}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Welcome Screen Configuration */}
+            <Collapsible className="border rounded-lg p-4 space-y-4">
+              <CollapsibleTrigger className="flex items-center justify-between w-full">
+                <div>
+                  <h3 className="font-medium">Welcome Screen (Optional)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Show a welcome screen before chat starts
+                  </p>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-4">
+                <FormField
+                  control={form.control}
+                  name="welcomeScreenEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between">
+                      <FormLabel>Enable Welcome Screen</FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                {form.watch("welcomeScreenEnabled") && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="welcomeSubtitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subtitle</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Get instant answers to your questions"
+                              {...field}
+                              className="bg-background"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="welcomeDisclaimer"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Disclaimer (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="This bot is powered by AI. Responses may vary."
+                              {...field}
+                              className="bg-background resize-none"
+                              rows={2}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Input Customization */}
+            <Collapsible className="border rounded-lg p-4 space-y-4">
+              <CollapsibleTrigger className="flex items-center justify-between w-full">
+                <div>
+                  <h3 className="font-medium">Input Customization (Optional)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Customize the chat input field
+                  </p>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <FormField
+                  control={form.control}
+                  name="inputPlaceholder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Input Placeholder</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Type your message..."
+                          {...field}
+                          className="bg-background"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Submit Button */}
             <div className="flex justify-end gap-3 pt-4">

@@ -32,6 +32,48 @@ export const trackAnalyticsEvent = async (event: AnalyticsEvent) => {
 };
 
 /**
+ * Build enhanced webhook payload with metadata
+ */
+export const buildWebhookPayload = (
+  message: string,
+  sessionId: string,
+  chatInstance: { id: string; slug: string | null },
+  metadataConfig: {
+    includeReferrer: boolean;
+    includeUserAgent: boolean;
+    customFields: Record<string, string>;
+  }
+) => {
+  const basePayload = {
+    action: "sendMessage",
+    sessionId: sessionId,
+    chatInput: message,
+  };
+
+  const enhancedMetadata: Record<string, any> = {};
+
+  if (metadataConfig.includeReferrer) {
+    enhancedMetadata.referrer = document.referrer || "direct";
+  }
+
+  if (metadataConfig.includeUserAgent) {
+    enhancedMetadata.userAgent = navigator.userAgent;
+  }
+
+  // Add custom fields
+  Object.assign(enhancedMetadata, metadataConfig.customFields);
+
+  // Add chat context
+  enhancedMetadata.chatSlug = chatInstance.slug;
+  enhancedMetadata.chatId = chatInstance.id;
+
+  return {
+    ...basePayload,
+    metadata: enhancedMetadata,
+  };
+};
+
+/**
  * Get analytics summary for a chat instance
  */
 export const getChatAnalytics = async (chatInstanceId: string) => {

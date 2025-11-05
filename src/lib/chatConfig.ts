@@ -1,0 +1,79 @@
+/**
+ * Model Layer: Chat Configuration Utilities
+ * Provides type-safe access to chat branding configuration with fallbacks
+ */
+
+export interface QuickStartPrompt {
+  id: string;
+  text: string;
+  enabled: boolean;
+}
+
+export interface WelcomeScreenConfig {
+  enabled: boolean;
+  subtitle?: string;
+  disclaimer?: string;
+}
+
+export interface MetadataConfig {
+  includeReferrer: boolean;
+  includeUserAgent: boolean;
+  customFields: Record<string, string>;
+}
+
+export interface InputConfig {
+  placeholder: string;
+  submitLabel: string;
+}
+
+export interface ChatBranding {
+  primaryColor: string;
+  accentColor: string;
+  avatarUrl: string | null;
+  welcomeMessage: string;
+  chatTitle: string;
+  quickStartPrompts?: QuickStartPrompt[];
+  welcomeScreen?: WelcomeScreenConfig;
+  inputPlaceholder?: string;
+  inputSubmitLabel?: string;
+  metadata?: MetadataConfig;
+}
+
+/**
+ * Get quick start prompts with fallback to empty array
+ */
+export const getQuickStartPrompts = (branding: any): QuickStartPrompt[] => {
+  return branding?.quickStartPrompts?.filter((p: QuickStartPrompt) => p.enabled) || [];
+};
+
+/**
+ * Get welcome screen configuration with fallback defaults
+ */
+export const getWelcomeScreen = (branding: any): WelcomeScreenConfig => {
+  return {
+    enabled: branding?.welcomeScreen?.enabled ?? false,
+    subtitle: branding?.welcomeScreen?.subtitle,
+    disclaimer: branding?.welcomeScreen?.disclaimer,
+  };
+};
+
+/**
+ * Get input configuration with fallback defaults
+ */
+export const getInputConfig = (branding: any): InputConfig => {
+  return {
+    placeholder: branding?.inputPlaceholder || "Type your message...",
+    submitLabel: branding?.inputSubmitLabel || "Send",
+  };
+};
+
+/**
+ * Get metadata configuration with fallback defaults
+ */
+export const getMetadataConfig = (branding: any): MetadataConfig => {
+  return {
+    includeReferrer: branding?.metadata?.includeReferrer ?? true,
+    includeUserAgent: branding?.metadata?.includeUserAgent ?? true,
+    customFields: branding?.metadata?.customFields || {},
+  };
+};
