@@ -35,9 +35,9 @@ export function ChatLandingPage({
   autoSend,
 }: ChatLandingPageProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 animate-fade-in">
       {/* Title at top-center */}
-      <div className="w-full max-w-2xl mb-12 text-center">
+      <div className="w-full max-w-2xl mb-12 text-center animate-scale-in">
         <h1 className="text-4xl font-semibold mb-2" style={{ color: primaryColor }}>
           {chatTitle}
         </h1>
@@ -45,7 +45,7 @@ export function ChatLandingPage({
       </div>
 
       {/* Centered Input */}
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl animate-scale-in" style={{ animationDelay: '0.1s' }}>
         <div className="flex gap-2 mb-6">
           <Input
             value={input}

@@ -393,14 +393,14 @@ const Chat = () => {
   // Full chat interface with header
   return (
     <div
-      className="min-h-screen bg-gradient-subtle"
+      className="min-h-screen bg-gradient-subtle animate-fade-in"
       style={{
         "--chat-primary": chatInstance.custom_branding.primaryColor,
         "--chat-accent": chatInstance.custom_branding.accentColor,
       } as React.CSSProperties}
     >
       {/* Header */}
-      <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -453,12 +453,12 @@ const Chat = () => {
       ) : (
         <>
           {/* Chat Messages */}
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
             <div className="space-y-6 mb-32">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${
+                  className={`flex animate-scale-in ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
