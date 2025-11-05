@@ -29,6 +29,8 @@ import { QuickStartPrompts } from "@/components/QuickStartPrompts";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { ChatSidebar } from "@/components/ChatSidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 interface ChatInstance {
   id: string;
@@ -650,6 +652,23 @@ const Chat = () => {
     });
   };
 
+  const handleSessionSelect = (newSessionId: string) => {
+    // Update the session ID
+    const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
+    localStorage.setItem(`chat_session_${canonicalKey}`, newSessionId);
+    setSessionId(newSessionId);
+    
+    // Messages will be reloaded by the useEffect that watches sessionId
+    toast({
+      title: "Session switched",
+      description: "Loaded previous conversation",
+    });
+  };
+
+  const handleNewSession = () => {
+    handleResetSession();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
@@ -701,58 +720,74 @@ const Chat = () => {
 
   // Full chat interface with header
   return (
-    <div
-      className="min-h-screen bg-gradient-subtle animate-fade-in"
-      style={{
-        "--chat-primary": chatInstance.custom_branding.primaryColor,
-        "--chat-accent": chatInstance.custom_branding.accentColor,
-      } as React.CSSProperties}
-    >
-      {/* Header */}
-      <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {/* Only show back button if viewing by UUID (owner) */}
-              {isOwner && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-              )}
-              <h1 className="text-xl font-semibold">
-                {chatInstance.custom_branding.chatTitle}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResetSession}
-                title="Reset conversation"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-              {/* Show branding badge if accessed via slug */}
-              {!isOwner && (
-                <a
-                  href="/"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                >
-                  Powered by <span className="font-semibold">FlowChat</span>
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+    <SidebarProvider defaultOpen={isOwner}>
+      <div className="flex min-h-screen w-full">
+        {/* Sidebar - only show for owners */}
+        {isOwner && (
+          <ChatSidebar
+            chatInstanceId={chatInstance.id}
+            currentSessionId={sessionId}
+            onSessionSelect={handleSessionSelect}
+            onNewSession={handleNewSession}
+          />
+        )}
 
-      {/* Main Content */}
-      {chatMode === 'welcome' ? (
+        {/* Main content */}
+        <div
+          className="flex-1 min-h-screen bg-gradient-subtle animate-fade-in"
+          style={{
+            "--chat-primary": chatInstance.custom_branding.primaryColor,
+            "--chat-accent": chatInstance.custom_branding.accentColor,
+          } as React.CSSProperties}
+        >
+          {/* Header */}
+          <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {/* Sidebar trigger for owners */}
+                  {isOwner && <SidebarTrigger />}
+                  
+                  {/* Only show back button if viewing by UUID (owner) and no sidebar */}
+                  {isOwner && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate("/dashboard")}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </Button>
+                  )}
+                  <h1 className="text-xl font-semibold">
+                    {chatInstance.custom_branding.chatTitle}
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetSession}
+                    title="Reset conversation"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                  {/* Show branding badge if accessed via slug */}
+                  {!isOwner && (
+                    <a
+                      href="/"
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    >
+                      Powered by <span className="font-semibold">FlowChat</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          {chatMode === 'welcome' ? (
         <WelcomeScreen
           config={welcomeScreenConfig}
           chatTitle={branding.chatTitle}
@@ -936,9 +971,11 @@ const Chat = () => {
               </div>
             </div>
           </div>
-        </>
-      )}
-    </div>
+          </>
+        )}
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
