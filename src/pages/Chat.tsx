@@ -496,36 +496,28 @@ const Chat = () => {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex animate-scale-in group ${
+                  className={`flex animate-scale-in group mb-6 ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="relative">
-                    <Card
-                      className={`max-w-[80%] ${
+                  <div className="relative max-w-[80%]">
+                    <div
+                      className={`py-3 px-4 ${
                         message.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-card"
+                          ? "bg-muted/30 rounded-2xl"
+                          : "border-l-4 border-accent pl-4"
                       }`}
                     >
-                      <div className="p-4">
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <p
-                          className={`text-xs mt-2 ${
-                            message.role === "user"
-                              ? "text-primary-foreground/70"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </Card>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      <p className="text-xs mt-2 text-muted-foreground">
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCopyMessage(message.id, message.content)}
-                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                      className="absolute top-1 -right-10 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
                       title="Copy message"
                     >
                       {copiedMessageId === message.id ? (
