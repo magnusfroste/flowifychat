@@ -139,23 +139,6 @@ const Chat = () => {
           });
           setViewTracked(true);
         }
-        
-        // Add welcome message (smart behavior: skip if landing page mode is enabled)
-        const branding = data.custom_branding as unknown as ChatInstance["custom_branding"];
-        const uxConfig = getUXConfig(branding);
-        
-        if (!uxConfig.useLandingPageMode) {
-          setMessages([
-            {
-              id: "welcome",
-              role: "assistant",
-              content: branding.welcomeMessage,
-              timestamp: new Date(),
-            },
-          ]);
-        } else {
-          setMessages([]);
-        }
       } catch (error: any) {
         console.error("Error loading chat instance:", error);
         toast({
@@ -171,6 +154,61 @@ const Chat = () => {
 
     loadChatInstance();
   }, [id, navigate, toast, sessionId, viewTracked]);
+
+  // Load messages from database for this session
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!chatInstance) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("chat_messages")
+          .select("*")
+          .eq("chat_instance_id", chatInstance.id)
+          .eq("session_id", sessionId)
+          .order("created_at", { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          // Load existing messages from database
+          const loadedMessages: Message[] = data.map((msg) => ({
+            id: msg.id,
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+            timestamp: new Date(msg.created_at),
+          }));
+          setMessages(loadedMessages);
+        } else {
+          // No existing messages, show welcome message if not in landing mode
+          const branding = chatInstance.custom_branding as any;
+          const uxConfig = getUXConfig(branding);
+          
+          if (!uxConfig.useLandingPageMode) {
+            const welcomeMessage: Message = {
+              id: "welcome",
+              role: "assistant",
+              content: branding?.welcomeMessage || "Hi! How can I help you today?",
+              timestamp: new Date(),
+            };
+            setMessages([welcomeMessage]);
+            
+            // Save welcome message to DB
+            await supabase.from("chat_messages").insert({
+              chat_instance_id: chatInstance.id,
+              session_id: sessionId,
+              role: "assistant",
+              content: welcomeMessage.content,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading messages:", error);
+      }
+    };
+
+    loadMessages();
+  }, [chatInstance, sessionId]);
 
   // Determine chat mode based on configuration and message count
   useEffect(() => {
@@ -239,6 +277,18 @@ const Chat = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setSending(true);
+
+    // Save user message to database
+    try {
+      await supabase.from("chat_messages").insert({
+        chat_instance_id: chatInstance.id,
+        session_id: sessionId,
+        role: "user",
+        content: userMessage.content,
+      });
+    } catch (error) {
+      console.error("Error saving user message:", error);
+    }
 
     // Transition to chat mode after first message
     if (chatMode === 'landing' || chatMode === 'welcome') {
@@ -332,6 +382,18 @@ const Chat = () => {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      
+      // Save assistant message to database
+      try {
+        await supabase.from("chat_messages").insert({
+          chat_instance_id: chatInstance.id,
+          session_id: sessionId,
+          role: "assistant",
+          content: assistantMessage.content,
+        });
+      } catch (error) {
+        console.error("Error saving assistant message:", error);
+      }
       
       // Track message received event
       await trackAnalyticsEvent({
@@ -480,6 +542,39 @@ const Chat = () => {
         }
       }
 
+      // Delete the old assistant message from database
+      if (messages[lastAssistantIndex]?.id) {
+        try {
+          await supabase
+            .from("chat_messages")
+            .delete()
+            .eq("id", messages[lastAssistantIndex].id);
+        } catch (error) {
+          console.error("Error deleting old assistant message:", error);
+        }
+      }
+
+      // Save new assistant message to database
+      try {
+        const { data: savedMessage } = await supabase
+          .from("chat_messages")
+          .insert({
+            chat_instance_id: chatInstance.id,
+            session_id: sessionId,
+            role: "assistant",
+            content: assistantContent,
+          })
+          .select()
+          .single();
+
+        // Update the message ID with the database ID
+        if (savedMessage) {
+          newAssistantMessage.id = savedMessage.id;
+        }
+      } catch (error) {
+        console.error("Error saving regenerated message:", error);
+      }
+
       await trackAnalyticsEvent({
         chat_instance_id: chatInstance.id,
         session_id: sessionId,
@@ -500,7 +595,9 @@ const Chat = () => {
     }
   };
 
-  const handleResetSession = () => {
+  const handleResetSession = async () => {
+    if (!chatInstance) return;
+    
     const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
     clearSessionId(canonicalKey);
     const newSessionId = getOrCreateSessionId(canonicalKey);
@@ -512,14 +609,25 @@ const Chat = () => {
     const uxConfig = getUXConfig(branding);
     
     if (!uxConfig.useLandingPageMode) {
-      setMessages([
-        {
-          id: "welcome",
+      const welcomeMessage: Message = {
+        id: "welcome",
+        role: "assistant",
+        content: branding?.welcomeMessage || "Hi! How can I help you today?",
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+      
+      // Save welcome message to new session
+      try {
+        await supabase.from("chat_messages").insert({
+          chat_instance_id: chatInstance.id,
+          session_id: newSessionId,
           role: "assistant",
-          content: branding?.welcomeMessage || "Hi! How can I help you today?",
-          timestamp: new Date(),
-        },
-      ]);
+          content: welcomeMessage.content,
+        });
+      } catch (error) {
+        console.error("Error saving welcome message:", error);
+      }
     } else {
       setMessages([]);
     }

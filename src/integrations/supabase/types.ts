@@ -85,6 +85,41 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          chat_instance_id: string
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          chat_instance_id: string
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+        }
+        Update: {
+          chat_instance_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       chat_analytics_summary: {
