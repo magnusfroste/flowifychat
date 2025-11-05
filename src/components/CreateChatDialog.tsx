@@ -80,6 +80,7 @@ const chatSchema = z.object({
     )
     .max(5)
     .optional(),
+  quickStartPromptsAutoSend: z.boolean().optional(),
   welcomeScreenEnabled: z.boolean().optional(),
   welcomeSubtitle: z.string().max(200).optional(),
   welcomeDisclaimer: z.string().max(300).optional(),
@@ -112,6 +113,7 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
       primaryColor: "#3b82f6",
       accentColor: "#8b5cf6",
       quickStartPrompts: [],
+      quickStartPromptsAutoSend: true,
       welcomeScreenEnabled: false,
       welcomeSubtitle: "",
       welcomeDisclaimer: "",
@@ -185,6 +187,7 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
             welcomeMessage: values.welcomeMessage,
             chatTitle: values.chatTitle,
             quickStartPrompts: values.quickStartPrompts || [],
+            quickStartPromptsAutoSend: values.quickStartPromptsAutoSend ?? true,
             welcomeScreen: values.welcomeScreenEnabled
               ? {
                   enabled: true,
@@ -455,7 +458,27 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
                   </p>
                 </div>
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="space-y-4 pt-4">
+                <FormField
+                  control={form.control}
+                  name="quickStartPromptsAutoSend"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                      <div className="space-y-0.5">
+                        <FormLabel>Auto-send on Click</FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Send prompts immediately when clicked (otherwise just populates input)
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="quickStartPrompts"

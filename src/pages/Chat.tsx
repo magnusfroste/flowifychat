@@ -14,7 +14,7 @@ import {
   migrateSessionId,
 } from "@/lib/session";
 import {
-  getQuickStartPrompts,
+  getQuickStartPromptsConfig,
   getWelcomeScreen,
   getInputConfig,
   getMetadataConfig,
@@ -317,7 +317,7 @@ const Chat = () => {
   if (!chatInstance) return null;
 
   const branding = chatInstance.custom_branding as any;
-  const quickStartPrompts = getQuickStartPrompts(branding);
+  const quickStartConfig = getQuickStartPromptsConfig(branding);
   const welcomeScreenConfig = getWelcomeScreen(branding);
   const inputConfig = getInputConfig(branding);
   const isOwner = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
@@ -428,14 +428,19 @@ const Chat = () => {
             </div>
 
             {/* Quick Start Prompts - Show only when there's just the welcome message */}
-            {messages.length === 1 && quickStartPrompts.length > 0 && (
+            {messages.length === 1 && quickStartConfig.prompts.length > 0 && (
               <div className="mb-32">
                 <QuickStartPrompts
-                  prompts={quickStartPrompts}
+                  prompts={quickStartConfig.prompts}
                   onPromptClick={(text) => {
-                    setInput(text);
-                    // Auto-send the prompt
-                    setTimeout(() => handleSend(), 0);
+                    if (quickStartConfig.autoSend) {
+                      // Auto-send the prompt
+                      setInput(text);
+                      setTimeout(() => handleSend(), 0);
+                    } else {
+                      // Just populate the input field
+                      setInput(text);
+                    }
                   }}
                   disabled={sending}
                   primaryColor={branding.primaryColor}

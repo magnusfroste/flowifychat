@@ -26,6 +26,11 @@ export interface InputConfig {
   submitLabel: string;
 }
 
+export interface QuickStartPromptsConfig {
+  prompts: QuickStartPrompt[];
+  autoSend: boolean;
+}
+
 export interface ChatBranding {
   primaryColor: string;
   accentColor: string;
@@ -40,10 +45,13 @@ export interface ChatBranding {
 }
 
 /**
- * Get quick start prompts with fallback to empty array
+ * Get quick start prompts configuration with fallback
  */
-export const getQuickStartPrompts = (branding: any): QuickStartPrompt[] => {
-  return branding?.quickStartPrompts?.filter((p: QuickStartPrompt) => p.enabled) || [];
+export const getQuickStartPromptsConfig = (branding: any): QuickStartPromptsConfig => {
+  return {
+    prompts: branding?.quickStartPrompts?.filter((p: QuickStartPrompt) => p.enabled) || [],
+    autoSend: branding?.quickStartPromptsAutoSend ?? true, // Default to auto-send
+  };
 };
 
 /**
