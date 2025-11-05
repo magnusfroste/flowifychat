@@ -65,6 +65,7 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [chatMode, setChatMode] = useState<'landing' | 'welcome' | 'chat'>('landing');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [copiedCodeBlock, setCopiedCodeBlock] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [sessionId, setSessionId] = useState(() => {
@@ -371,6 +372,24 @@ const Chat = () => {
     }
   };
 
+  const handleCopyCode = async (code: string, blockId: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCodeBlock(blockId);
+      toast({
+        title: "Copied to clipboard",
+        description: "Code copied successfully",
+      });
+      setTimeout(() => setCopiedCodeBlock(null), 2000);
+    } catch (error) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy code to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleResetSession = () => {
     const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
     clearSessionId(canonicalKey);
@@ -548,15 +567,33 @@ const Chat = () => {
                           components={{
                             code({ node, inline, className, children, ...props }: any) {
                               const match = /language-(\w+)/.exec(className || "");
+                              const codeContent = String(children).replace(/\n$/, "");
+                              const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
+                              
                               return !inline && match ? (
-                                <SyntaxHighlighter
-                                  style={theme === "dark" ? oneDark : oneLight}
-                                  language={match[1]}
-                                  PreTag="div"
-                                  {...props}
-                                >
-                                  {String(children).replace(/\n$/, "")}
-                                </SyntaxHighlighter>
+                                <div className="relative group/code">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleCopyCode(codeContent, blockId)}
+                                    className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 z-10"
+                                    title="Copy code"
+                                  >
+                                    {copiedCodeBlock === blockId ? (
+                                      <Check className="h-4 w-4" />
+                                    ) : (
+                                      <Copy className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                  <SyntaxHighlighter
+                                    style={theme === "dark" ? oneDark : oneLight}
+                                    language={match[1]}
+                                    PreTag="div"
+                                    {...props}
+                                  >
+                                    {codeContent}
+                                  </SyntaxHighlighter>
+                                </div>
                               ) : (
                                 <code className={className} {...props}>
                                   {children}
