@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check, ArrowDown } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -390,6 +390,116 @@ const Chat = () => {
     }
   };
 
+  const handleRegenerate = async () => {
+    if (!chatInstance || messages.length < 2) return;
+    
+    // Find the last assistant message (reverse iteration)
+    let lastAssistantIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        lastAssistantIndex = i;
+        break;
+      }
+    }
+    
+    if (lastAssistantIndex === -1) return;
+    
+    // Find the user message before it
+    const userMessage = messages
+      .slice(0, lastAssistantIndex)
+      .reverse()
+      .find(m => m.role === "user");
+    
+    if (!userMessage) return;
+    
+    // Remove the last assistant message
+    const messagesWithoutLastAssistant = messages.slice(0, lastAssistantIndex);
+    setMessages(messagesWithoutLastAssistant);
+    
+    // Resend the user message
+    setSending(true);
+    const branding = chatInstance.custom_branding as any;
+    const metadata = branding?.metadata || {};
+
+    try {
+      const webhookPayload = buildWebhookPayload(
+        userMessage.content,
+        sessionId,
+        { id: chatInstance.id, slug: chatInstance.slug },
+        metadata
+      );
+
+      const response = await fetch(chatInstance.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(webhookPayload),
+      });
+
+      if (!response.ok) throw new Error("Webhook request failed");
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = "";
+
+      const newAssistantMessage: Message = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+      };
+
+      setMessages([...messagesWithoutLastAssistant, newAssistantMessage]);
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.content) {
+                  assistantContent += data.content;
+                  setMessages([
+                    ...messagesWithoutLastAssistant,
+                    {
+                      ...newAssistantMessage,
+                      content: assistantContent,
+                    },
+                  ]);
+                }
+              } catch (e) {
+                console.error("Error parsing SSE data:", e);
+              }
+            }
+          }
+        }
+      }
+
+      await trackAnalyticsEvent({
+        chat_instance_id: chatInstance.id,
+        session_id: sessionId,
+        event_type: "message_sent",
+        metadata: { regenerated: true }
+      });
+    } catch (error: any) {
+      console.error("Error regenerating message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to regenerate response. Please try again.",
+        variant: "destructive",
+      });
+      // Restore the original assistant message on error
+      setMessages(messages);
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleResetSession = () => {
     const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
     clearSessionId(canonicalKey);
@@ -546,7 +656,12 @@ const Chat = () => {
           {/* Chat Messages */}
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
             <div className="space-y-6 mb-32">
-              {messages.map((message) => (
+              {messages.map((message, index) => {
+                const isLastAssistantMessage = 
+                  message.role === "assistant" && 
+                  index === messages.length - 1;
+                
+                return (
                 <div
                   key={message.id}
                   className={`flex animate-scale-in group mb-6 ${
@@ -622,9 +737,21 @@ const Chat = () => {
                         <Copy className="h-4 w-4" />
                       )}
                     </Button>
+                    {isLastAssistantMessage && !sending && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRegenerate}
+                        className="absolute top-10 -right-10 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                        title="Regenerate response"
+                      >
+                        <RotateCw className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
-              ))}
+              );
+              })}
               {sending && (
                 <div className="flex justify-start animate-fade-in">
                   <Card className="bg-card">
