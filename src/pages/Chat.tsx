@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check } from "lucide-react";
+import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check, ArrowDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -65,6 +65,8 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [chatMode, setChatMode] = useState<'landing' | 'welcome' | 'chat'>('landing');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [sessionId, setSessionId] = useState(() => {
     // Check if ?new=1 param forces a new session
     const forceNew = searchParams.get("new") === "1";
@@ -196,6 +198,32 @@ const Chat = () => {
       setChatMode('chat');
     }
   }, [chatInstance, messages.length]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (!showScrollButton) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, showScrollButton]);
+
+  // Detect scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
+      setShowScrollButton(!isNearBottom);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Check initial position
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleSend = async () => {
     if (!input.trim() || !chatInstance) return;
@@ -569,6 +597,7 @@ const Chat = () => {
                   </Card>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Start Prompts - Show only when there's just the welcome message */}
@@ -590,6 +619,18 @@ const Chat = () => {
                   primaryColor={branding.primaryColor}
                 />
               </div>
+            )}
+
+            {/* Scroll to Bottom Button */}
+            {showScrollButton && (
+              <Button
+                onClick={scrollToBottom}
+                className="fixed bottom-24 right-8 rounded-full h-12 w-12 shadow-lg animate-fade-in z-50"
+                size="icon"
+                variant="secondary"
+              >
+                <ArrowDown className="h-5 w-5" />
+              </Button>
             )}
 
             {/* Input Area - Fixed at bottom */}
