@@ -129,16 +129,22 @@ const Chat = () => {
           setViewTracked(true);
         }
         
-        // Add welcome message
+        // Add welcome message (smart behavior: skip if landing page mode is enabled)
         const branding = data.custom_branding as unknown as ChatInstance["custom_branding"];
-        setMessages([
-          {
-            id: "welcome",
-            role: "assistant",
-            content: branding.welcomeMessage,
-            timestamp: new Date(),
-          },
-        ]);
+        const uxConfig = getUXConfig(branding);
+        
+        if (!uxConfig.useLandingPageMode) {
+          setMessages([
+            {
+              id: "welcome",
+              role: "assistant",
+              content: branding.welcomeMessage,
+              timestamp: new Date(),
+            },
+          ]);
+        } else {
+          setMessages([]);
+        }
       } catch (error: any) {
         console.error("Error loading chat instance:", error);
         toast({
@@ -163,11 +169,17 @@ const Chat = () => {
     const uxConfig = getUXConfig(branding);
     const welcomeScreenConfig = getWelcomeScreen(branding);
 
-    // Only show landing/welcome if we just have the initial welcome message
-    if (messages.length <= 1) {
-      if (uxConfig.useLandingPageMode) {
+    // Determine initial mode based on message count and configuration
+    // In landing page mode: show landing until first user message (messages.length === 0)
+    // In other modes: show landing/welcome if we just have the initial welcome message
+    if (uxConfig.useLandingPageMode) {
+      if (messages.length === 0) {
         setChatMode('landing');
-      } else if (welcomeScreenConfig.enabled) {
+      } else {
+        setChatMode('chat');
+      }
+    } else if (messages.length <= 1) {
+      if (welcomeScreenConfig.enabled) {
         setChatMode('welcome');
       } else {
         setChatMode('chat');
@@ -312,19 +324,25 @@ const Chat = () => {
     setSessionId(newSessionId);
     setViewTracked(false);
     
-    // Reset messages to welcome message
+    // Reset messages to welcome message (smart behavior: skip if landing page mode is enabled)
     const branding = chatInstance?.custom_branding as any;
-    setMessages([
-      {
-        id: "welcome",
-        role: "assistant",
-        content: branding?.welcomeMessage || "Hi! How can I help you today?",
-        timestamp: new Date(),
-      },
-    ]);
+    const uxConfig = getUXConfig(branding);
+    
+    if (!uxConfig.useLandingPageMode) {
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: branding?.welcomeMessage || "Hi! How can I help you today?",
+          timestamp: new Date(),
+        },
+      ]);
+    } else {
+      setMessages([]);
+    }
+
 
     // Reset to initial mode based on configuration
-    const uxConfig = getUXConfig(branding);
     const welcomeScreenConfig = getWelcomeScreen(branding);
     
     if (uxConfig.useLandingPageMode) {
