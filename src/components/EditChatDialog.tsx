@@ -260,7 +260,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Chat Instance</DialogTitle>
           <DialogDescription>
@@ -573,7 +573,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
                 </CollapsibleContent>
               </Collapsible>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-4 pb-2 sticky bottom-0 bg-background border-t mt-6 -mx-6 px-6 py-4">
                 <Button
                   type="button"
                   variant="outline"

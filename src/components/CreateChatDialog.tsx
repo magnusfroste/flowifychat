@@ -597,7 +597,7 @@ export const CreateChatDialog = ({ children, onChatCreated }: CreateChatDialogPr
             </Collapsible>
 
             {/* Submit Button */}
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-background border-t mt-6 -mx-6 px-6 py-4">
               <Button
                 type="button"
                 variant="secondary"
