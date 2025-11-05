@@ -434,6 +434,8 @@ const Chat = () => {
                   prompts={quickStartPrompts}
                   onPromptClick={(text) => {
                     setInput(text);
+                    // Auto-send the prompt
+                    setTimeout(() => handleSend(), 0);
                   }}
                   disabled={sending}
                   primaryColor={branding.primaryColor}
