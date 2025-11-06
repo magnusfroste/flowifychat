@@ -1,15 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <header className="absolute top-0 right-0 z-20 p-4">
-        <ThemeToggle />
-      </header>
+    <div className="light min-h-screen bg-gradient-subtle">
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
