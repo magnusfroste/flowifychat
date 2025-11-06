@@ -958,7 +958,7 @@ const Chat = () => {
                     onClick={handleSend}
                     disabled={!input.trim() || sending}
                     style={{ backgroundColor: branding.primaryColor }}
-                    className={`text-white ${input.trim() && !sending ? 'animate-pulse' : ''}`}
+                    className={`text-primary-foreground ${input.trim() && !sending ? 'animate-pulse' : ''}`}
                   >
                     {sending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

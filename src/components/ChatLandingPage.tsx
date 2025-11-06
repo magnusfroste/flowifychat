@@ -66,7 +66,7 @@ export function ChatLandingPage({
             onClick={onSend}
             disabled={!input.trim() || sending}
             style={{ backgroundColor: primaryColor }}
-            className={`text-white h-14 px-8 shadow-lg ${input.trim() && !sending ? 'animate-pulse' : ''}`}
+            className={`text-primary-foreground h-14 px-8 shadow-lg ${input.trim() && !sending ? 'animate-pulse' : ''}`}
             size="lg"
           >
             {sending ? (

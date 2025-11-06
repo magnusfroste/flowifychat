@@ -74,7 +74,7 @@ const Auth = () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
             <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <MessageSquare className="h-6 w-6 text-white" />
+              <MessageSquare className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold">ChatFlow</span>
           </div>

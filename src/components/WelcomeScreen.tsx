@@ -34,7 +34,7 @@ export function WelcomeScreen({
             onClick={onStart}
             size="lg"
             style={{ backgroundColor: primaryColor }}
-            className="text-white"
+            className="text-primary-foreground"
           >
             Start Chat
           </Button>
