@@ -502,48 +502,58 @@ const Chat = () => {
 
       if (!response.ok) throw new Error("Webhook request failed");
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantContent = "";
+      // Read response as text first (works for both streaming and non-streaming)
+      const text = await response.text();
+      let assistantContent = '';
+
+      // Try parsing as regular JSON first (non-streaming)
+      try {
+        const data = JSON.parse(text);
+        
+        // Handle error responses
+        if (data.type === "error") {
+          throw new Error(data.content || "Error from webhook");
+        }
+        
+        // Handle single JSON response (non-streaming)
+        assistantContent = data.output || data.content || data.response || '';
+        
+      } catch (e) {
+        // If single JSON parse fails, try NDJSON (streaming format)
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line);
+            
+            // Handle streaming error
+            if (parsed.type === 'error') {
+              throw new Error(parsed.content || 'Error from webhook');
+            }
+            
+            // Handle streaming items (n8n streaming format)
+            if (parsed.type === 'item' && parsed.content) {
+              assistantContent += parsed.content;
+            }
+            // Handle non-streaming single-line format (fallback for NDJSON without 'type')
+            else if (!parsed.type && (parsed.output || parsed.content || parsed.response)) {
+              assistantContent += parsed.output || parsed.content || parsed.response;
+            }
+          } catch (lineError) {
+            // Skip invalid JSON lines
+            console.warn('Skipping invalid JSON line:', line);
+          }
+        }
+      }
 
       const newAssistantMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: "",
+        content: assistantContent || "I received your message!",
         timestamp: new Date(),
       };
 
       setMessages([...messagesWithoutLastAssistant, newAssistantMessage]);
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.content) {
-                  assistantContent += data.content;
-                  setMessages([
-                    ...messagesWithoutLastAssistant,
-                    {
-                      ...newAssistantMessage,
-                      content: assistantContent,
-                    },
-                  ]);
-                }
-              } catch (e) {
-                console.error("Error parsing SSE data:", e);
-              }
-            }
-          }
-        }
-      }
 
       // Delete the old assistant message from database
       if (messages[lastAssistantIndex]?.id) {
@@ -910,7 +920,7 @@ const Chat = () => {
             </div>
 
             {/* Quick Start Prompts - Show only when there's just the welcome message */}
-            {messages.length === 1 && quickStartConfig.prompts.length > 0 && (
+            {messages.length === 1 && !sending && quickStartConfig.prompts.length > 0 && (
               <div className="mb-32">
                 <QuickStartPrompts
                   prompts={quickStartConfig.prompts}
