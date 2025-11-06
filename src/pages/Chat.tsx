@@ -11,6 +11,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "next-themes";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackAnalyticsEvent, buildWebhookPayload } from "@/lib/analytics";
 import {
   getOrCreateSessionId,
@@ -764,6 +765,7 @@ const Chat = () => {
                   </h1>
                 </div>
                 <div className="flex items-center gap-2">
+                  <ThemeToggle />
                   <Button
                     variant="ghost"
                     size="sm"
