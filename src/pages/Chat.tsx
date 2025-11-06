@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { ChatSkeleton } from "@/components/ChatSkeleton";
 import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -681,11 +682,7 @@ const Chat = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <ChatSkeleton />;
   }
 
   if (!chatInstance) return null;
