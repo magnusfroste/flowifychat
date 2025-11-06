@@ -74,10 +74,16 @@ export async function isSlugAvailable(slug: string, excludeId?: string): Promise
     query = query.neq('id', excludeId);
   }
   
-  const { data, error } = await query.single();
+  const { data, error } = await query.maybeSingle();
+  
+  // If error occurred, assume slug is not available (safer approach)
+  if (error) {
+    console.error('Error checking slug availability:', error);
+    return false;
+  }
   
   // If no data found, slug is available
-  return !data && !error;
+  return !data;
 }
 
 /**
