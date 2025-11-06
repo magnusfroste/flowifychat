@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CreateChatDialog } from "@/components/CreateChatDialog";
 import { EditChatDialog } from "@/components/EditChatDialog";
 import { formatDistanceToNow } from "date-fns";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface ChatInstance {
   id: string;
@@ -228,10 +229,13 @@ const Dashboard = () => {
               </div>
               <span className="text-xl font-bold">ChatFlow</span>
             </div>
-            <Button variant="ghost" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button variant="ghost" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
