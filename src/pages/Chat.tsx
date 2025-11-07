@@ -71,7 +71,9 @@ const Chat = () => {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [copiedCodeBlock, setCopiedCodeBlock] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isTypingPrompt, setIsTypingPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [sessionId, setSessionId] = useState(() => {
     // Check if ?new=1 param forces a new session
     const forceNew = searchParams.get("new") === "1";
@@ -266,6 +268,37 @@ const Chat = () => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Cleanup typing animation on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Type out text gradually and then send
+  const typeAndSend = async (text: string) => {
+    setIsTypingPrompt(true);
+    setInput("");
+    
+    // Type out character by character
+    for (let i = 0; i <= text.length; i++) {
+      await new Promise(resolve => {
+        typingTimeoutRef.current = setTimeout(resolve, 30); // 30ms per character
+      });
+      setInput(text.slice(0, i));
+    }
+    
+    // Small pause before sending
+    await new Promise(resolve => {
+      typingTimeoutRef.current = setTimeout(resolve, 200);
+    });
+    
+    setIsTypingPrompt(false);
+    handleSend(text);
   };
 
   const handleSend = async (messageText?: string) => {
@@ -713,13 +746,14 @@ const Chat = () => {
           onSend={handleSend}
           onPromptClick={(text) => {
             if (quickStartConfig.autoSend) {
-              handleSend(text);
+              typeAndSend(text);
             } else {
               setInput(text);
             }
           }}
           sending={sending}
           autoSend={quickStartConfig.autoSend}
+          isTypingPrompt={isTypingPrompt}
         />
       </div>
     );
@@ -954,14 +988,14 @@ const Chat = () => {
                   prompts={quickStartConfig.prompts}
                   onPromptClick={(text) => {
                     if (quickStartConfig.autoSend) {
-                      // Auto-send the prompt
-                      handleSend(text);
+                      // Auto-send the prompt with typing animation
+                      typeAndSend(text);
                     } else {
                       // Just populate the input field
                       setInput(text);
                     }
                   }}
-                  disabled={sending}
+                  disabled={sending || isTypingPrompt}
                   primaryColor={branding.primaryColor}
                 />
               </div>
@@ -990,18 +1024,18 @@ const Chat = () => {
                     placeholder={inputConfig.placeholder}
                     style={{ borderRadius: `${borderRadius}px` }}
                     className="bg-background"
-                    disabled={sending}
+                    disabled={sending || isTypingPrompt}
                   />
                   <Button
                     onClick={() => handleSend()}
-                    disabled={!input.trim() || sending}
+                    disabled={!input.trim() || sending || isTypingPrompt}
                     style={{ 
                       backgroundColor: branding.primaryColor,
                       borderRadius: `${borderRadius}px`
                     }}
-                    className={`text-primary-foreground ${input.trim() && !sending ? 'animate-pulse' : ''}`}
+                    className={`text-primary-foreground ${input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''}`}
                   >
-                    {sending ? (
+                    {sending || isTypingPrompt ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>

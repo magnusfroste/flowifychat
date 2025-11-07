@@ -19,6 +19,7 @@ interface ChatLandingPageProps {
   onPromptClick: (text: string) => void;
   sending: boolean;
   autoSend: boolean;
+  isTypingPrompt?: boolean;
 }
 
 export function ChatLandingPage({
@@ -31,6 +32,7 @@ export function ChatLandingPage({
   onPromptClick,
   sending,
   autoSend,
+  isTypingPrompt = false,
 }: ChatLandingPageProps) {
   const fontFamily = branding.fontFamily || 'Inter';
   const bgStyle = branding.backgroundStyle === 'gradient' 
@@ -67,20 +69,20 @@ export function ChatLandingPage({
             placeholder={inputPlaceholder}
             className="h-14 text-base bg-background shadow-lg border-2"
             style={{ borderColor: `${branding.primaryColor}20` }}
-            disabled={sending}
+            disabled={sending || isTypingPrompt}
             autoFocus
           />
           <Button
             onClick={onSend}
-            disabled={!input.trim() || sending}
+            disabled={!input.trim() || sending || isTypingPrompt}
             style={{ 
               backgroundColor: branding.primaryColor,
               borderRadius: `${branding.borderRadius || 8}px`
             }}
-            className={`text-primary-foreground h-14 px-8 shadow-lg ${input.trim() && !sending ? 'animate-pulse' : ''}`}
+            className={`text-primary-foreground h-14 px-8 shadow-lg ${input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''}`}
             size="lg"
           >
-            {sending ? (
+            {sending || isTypingPrompt ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <Send className="h-5 w-5" />
@@ -97,7 +99,7 @@ export function ChatLandingPage({
                 variant="outline"
                 size="sm"
                 onClick={() => onPromptClick(prompt.text)}
-                disabled={sending}
+                disabled={sending || isTypingPrompt}
                 className="text-sm hover:shadow-md transition-all"
                 style={{ borderColor: branding.primaryColor }}
               >
