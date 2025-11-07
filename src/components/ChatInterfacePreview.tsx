@@ -45,6 +45,9 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     inputPosition = 'sticky-bottom',
     headerStyle = 'standard',
     chatTitle = 'Chat Preview',
+    inputStyle = 'outline',
+    buttonStyle = 'filled',
+    colorMode = 'light',
   } = branding;
 
   // Avatar size classes
@@ -94,11 +97,49 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     ? { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` }
     : { backgroundColor };
 
+  // Determine text color based on background brightness
+  const getTextColor = (bgColor: string) => {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
+
+  const isDark = colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor) === '#ffffff');
+  const headerBg = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.7)';
+  const headerTextColor = isDark ? '#ffffff' : '#000000';
+  const inputAreaBg = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.7)';
+
+  // Input style classes
+  const getInputStyleClasses = () => {
+    if (inputStyle === 'filled') {
+      return isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-black/5 border-black/10';
+    } else if (inputStyle === 'underline') {
+      return 'border-0 border-b rounded-none';
+    }
+    return ''; // outline is default
+  };
+
+  // Button style based on buttonStyle prop
+  const getButtonClasses = () => {
+    if (buttonStyle === 'ghost') {
+      return 'bg-transparent hover:bg-white/10 text-white border-0';
+    } else if (buttonStyle === 'outline') {
+      return 'bg-transparent hover:bg-white/10 border';
+    }
+    return ''; // filled is handled by inline styles
+  };
+
   return (
     <div className="h-full flex flex-col" style={backgroundStyles}>
       {/* Header */}
       {headerStyle !== 'minimal' && (
-        <div className="border-b bg-background/95 backdrop-blur px-4 py-3 flex items-center gap-3">
+        <div 
+          className="border-b backdrop-blur px-4 py-3 flex items-center gap-3"
+          style={{ backgroundColor: headerBg, color: headerTextColor, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+        >
           {avatarUrl && (
             <Avatar className="h-8 w-8">
               <AvatarImage src={avatarUrl} />
@@ -152,7 +193,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   }`}
                   style={{ 
                     backgroundColor: messageColor,
-                    color: isUser ? '#ffffff' : '#000000',
+                    color: getTextColor(messageColor),
                   }}
                 >
                   {message.content}
@@ -171,9 +212,12 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             )}
             <div
               className={`${densityClasses[messageDensity]} ${bubbleStyleClasses[messageBubbleStyle]}`}
-              style={{ backgroundColor: botMessageColor }}
+              style={{ 
+                backgroundColor: botMessageColor,
+                color: getTextColor(botMessageColor),
+              }}
             >
-              <TypingIndicator />
+              <TypingIndicator dotColor={getTextColor(botMessageColor)} />
             </div>
           </div>
         </div>
@@ -181,14 +225,18 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
 
       {/* Input Area */}
       <div 
-        className={`border-t bg-background/95 backdrop-blur p-4 ${
+        className={`border-t backdrop-blur p-4 ${
           inputPosition === 'floating' ? 'mx-4 mb-4 rounded-lg border shadow-lg' : ''
         }`}
+        style={{ 
+          backgroundColor: inputAreaBg, 
+          borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' 
+        }}
       >
         <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
           <Input
             placeholder={inputPlaceholder}
-            className={`${inputSizeClasses[inputSize]} ${
+            className={`${inputSizeClasses[inputSize]} ${getInputStyleClasses()} ${
               inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
             }`}
             style={{ borderRadius: `${borderRadius}px` }}
@@ -196,11 +244,16 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
           />
           <Button
             size="icon"
-            style={{ 
+            style={buttonStyle === 'filled' ? { 
               backgroundColor: primaryColor,
               borderRadius: `${borderRadius}px`,
+              color: getTextColor(primaryColor),
+            } : {
+              borderRadius: `${borderRadius}px`,
+              borderColor: primaryColor,
+              color: primaryColor,
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+            className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${getButtonClasses()}`}
             disabled
           >
             {sendButtonStyle === 'icon' && <Send className="h-4 w-4" />}
