@@ -44,6 +44,29 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
     inputStyle: formValues.inputStyle || 'outline',
     borderRadius: formValues.borderRadius ?? 8,
     colorMode: formValues.colorMode || 'light',
+    
+    // Layout Controls
+    messageAlignment: formValues.messageAlignment || 'left',
+    maxMessageWidth: formValues.maxMessageWidth || 800,
+    showAvatars: formValues.showAvatars ?? true,
+    avatarSize: formValues.avatarSize || 'medium',
+    avatarPosition: formValues.avatarPosition || 'top',
+    showSidebar: formValues.showSidebar ?? false,
+    headerStyle: formValues.headerStyle || 'standard',
+    
+    // Input Controls
+    inputPosition: formValues.inputPosition || 'sticky-bottom',
+    inputSize: formValues.inputSize || 'comfortable',
+    sendButtonStyle: formValues.sendButtonStyle || 'icon',
+    
+    // Message Behavior
+    messageSpacing: formValues.messageSpacing || 'normal',
+    animationSpeed: formValues.animationSpeed || 'normal',
+    
+    // Interactive Elements
+    messageActions: formValues.messageActions || 'inline',
+    showCopyButton: formValues.showCopyButton ?? true,
+    showRegenerateButton: formValues.showRegenerateButton ?? true,
   };
 
   const quickStartPrompts: QuickStartPrompt[] = formValues.quickStartPrompts || [];
