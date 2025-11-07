@@ -65,6 +65,7 @@ const Chat = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
   
+  const [user, setUser] = useState<any>(null);
   const [chatInstance, setChatInstance] = useState<ChatInstance | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -91,6 +92,13 @@ const Chat = () => {
   const [viewTracked, setViewTracked] = useState(false);
 
   useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
     const loadChatInstance = async () => {
       if (!id) {
         navigate("/dashboard");
@@ -108,14 +116,15 @@ const Chat = () => {
 
         if (isUUID) {
           // Load by UUID (owner view - requires authentication)
-          const { data: { user } } = await supabase.auth.getUser();
+          const { data: { session } } = await supabase.auth.getSession();
           
-          if (!user) {
+          if (!session) {
             navigate("/auth");
             return;
           }
 
-          query = query.eq("id", id).eq("user_id", user.id);
+          setUser(session.user);
+          query = query.eq("id", id).eq("user_id", session.user.id);
         } else {
           // Load by slug (public view - no authentication required)
           query = query.eq("slug", id);
@@ -162,6 +171,8 @@ const Chat = () => {
     };
 
     loadChatInstance();
+
+    return () => subscription.unsubscribe();
   }, [id, navigate, toast, sessionId, viewTracked]);
 
   // Load messages from database for this session
