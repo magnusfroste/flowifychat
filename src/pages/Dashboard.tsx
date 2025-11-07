@@ -21,11 +21,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users } from "lucide-react";
+import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
-import { CreateChatDialog } from "@/components/CreateChatDialog";
-import { EditChatDialog } from "@/components/EditChatDialog";
 import { formatDistanceToNow } from "date-fns";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
@@ -56,8 +54,6 @@ const Dashboard = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -155,11 +151,6 @@ const Dashboard = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleEditClick = (id: string) => {
-    setEditingId(id);
-    setEditDialogOpen(true);
-  };
-
   const handleCopyLink = (slug: string, chatId: string) => {
     navigator.clipboard.writeText(getShareableUrl(slug));
     setCopiedId(chatId);
@@ -249,11 +240,19 @@ const Dashboard = () => {
         </div>
 
         {/* Create New Button */}
-        <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors">
-          <CardContent className="flex items-center justify-center py-12">
-            <CreateChatDialog onChatCreated={loadChatInstances} />
-          </CardContent>
-        </Card>
+        <Link to="/chat/new">
+          <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
+            <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Plus className="h-8 w-8 text-primary" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-2">Create New Chat Interface</h3>
+                <p className="text-muted-foreground text-sm">Configure a beautiful chat experience for your workflow</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Chat Instances Grid */}
         {chatInstances.length > 0 ? (
@@ -295,12 +294,14 @@ const Dashboard = () => {
                               Open Chat
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => handleEditClick(chat.id)}
-                          >
-                             <Eye className="mr-2 h-4 w-4" />
-                            Edit
+                          <DropdownMenuItem asChild>
+                            <Link
+                              to={`/chat/${chat.id}/edit`}
+                              className="cursor-pointer"
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive cursor-pointer"
@@ -441,16 +442,6 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
-        )}
-
-        {/* Edit Chat Dialog */}
-        {editingId && (
-          <EditChatDialog
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            chatId={editingId}
-            onChatCreated={loadChatInstances}
-          />
         )}
 
         {/* Delete Confirmation Dialog */}
