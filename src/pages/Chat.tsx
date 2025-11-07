@@ -26,6 +26,9 @@ import {
   getInputConfig,
   getMetadataConfig,
   getUXConfig,
+  getLayoutConfig,
+  getMessageBehaviorConfig,
+  getInteractiveConfig,
 } from "@/lib/chatConfig";
 import { QuickStartPrompts } from "@/components/QuickStartPrompts";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
@@ -725,6 +728,9 @@ const Chat = () => {
   const quickStartConfig = getQuickStartPromptsConfig(branding);
   const welcomeScreenConfig = getWelcomeScreen(branding);
   const inputConfig = getInputConfig(branding);
+  const layoutConfig = getLayoutConfig(branding);
+  const behaviorConfig = getMessageBehaviorConfig(branding);
+  const interactiveConfig = getInteractiveConfig(branding);
   const isOwner = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
   // Landing page mode - no header, just centered input
@@ -763,7 +769,7 @@ const Chat = () => {
   const fontFamily = branding?.fontFamily || 'Inter';
   const messageBubbleStyle = branding?.messageBubbleStyle || 'rounded';
   const messageDensity = branding?.messageDensity || 'comfortable';
-  const showTimestamps = branding?.showTimestamps ?? true;
+  const showTimestamps = branding?.showTimestamps || 'hover';
   const borderRadius = branding?.borderRadius || 8;
   const userMessageColor = branding?.userMessageColor;
   const botMessageColor = branding?.botMessageColor;
@@ -779,12 +785,48 @@ const Chat = () => {
     if (messageDensity === 'spacious') return 'py-4 px-5';
     return 'py-3 px-4';
   };
+
+  const getMessageSpacing = () => {
+    if (behaviorConfig.messageSpacing === 'tight') return 'mb-4';
+    if (behaviorConfig.messageSpacing === 'relaxed') return 'mb-8';
+    return 'mb-6';
+  };
+
+  const getAnimationClass = () => {
+    if (behaviorConfig.animationSpeed === 'fast') return 'animate-fade-in duration-150';
+    if (behaviorConfig.animationSpeed === 'slow') return 'animate-fade-in duration-500';
+    return 'animate-fade-in';
+  };
+
+  const getHeaderClass = () => {
+    if (layoutConfig.headerStyle === 'minimal') return 'py-2';
+    if (layoutConfig.headerStyle === 'prominent') return 'py-6 shadow-md';
+    return 'py-4';
+  };
+
+  const getMessageAlignment = () => {
+    if (layoutConfig.messageAlignment === 'center') return 'mx-auto';
+    if (layoutConfig.messageAlignment === 'full-width') return 'max-w-full';
+    return '';
+  };
+
+  const getAvatarSize = () => {
+    if (layoutConfig.avatarSize === 'small') return 'h-6 w-6';
+    if (layoutConfig.avatarSize === 'large') return 'h-12 w-12';
+    return 'h-8 w-8';
+  };
+
+  const getInputSize = () => {
+    if (behaviorConfig.inputSize === 'compact') return 'h-10';
+    if (behaviorConfig.inputSize === 'large') return 'h-14 text-base';
+    return 'h-12';
+  };
   
   return (
     <SidebarProvider defaultOpen={isOwner}>
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
-        {/* Sidebar - only show for owners */}
-        {isOwner && (
+        {/* Sidebar - only show for owners and if enabled */}
+        {isOwner && layoutConfig.showSidebar && (
           <ChatSidebar
             chatInstanceId={chatInstance.id}
             currentSessionId={sessionId}
@@ -795,22 +837,22 @@ const Chat = () => {
 
         {/* Main content */}
         <div
-          className="flex-1 min-h-screen bg-gradient-subtle animate-fade-in"
+          className={`flex-1 min-h-screen bg-gradient-subtle ${getAnimationClass()}`}
           style={{
             "--chat-primary": chatInstance.custom_branding.primaryColor,
             "--chat-accent": chatInstance.custom_branding.accentColor,
           } as React.CSSProperties}
         >
           {/* Header */}
-          <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <header className={`border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 ${getHeaderClass()}`}>
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {/* Sidebar trigger for owners */}
-                  {isOwner && <SidebarTrigger />}
+                  {isOwner && layoutConfig.showSidebar && <SidebarTrigger />}
                   
                   {/* Only show back button if viewing by UUID (owner) and no sidebar */}
-                  {isOwner && (
+                  {isOwner && !layoutConfig.showSidebar && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -820,9 +862,11 @@ const Chat = () => {
                       Back
                     </Button>
                   )}
-                  <h1 className="text-xl font-semibold">
-                    {chatInstance.custom_branding.chatTitle}
-                  </h1>
+                  {layoutConfig.headerStyle !== 'minimal' && (
+                    <h1 className={`font-semibold ${layoutConfig.headerStyle === 'prominent' ? 'text-2xl' : 'text-xl'}`}>
+                      {chatInstance.custom_branding.chatTitle}
+                    </h1>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
@@ -860,8 +904,11 @@ const Chat = () => {
       ) : (
         <>
           {/* Chat Messages */}
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-            <div className="space-y-6 mb-32">
+          <div 
+            className="mx-auto px-4 sm:px-6 lg:px-8 py-8"
+            style={{ maxWidth: `${layoutConfig.maxMessageWidth}px` }}
+          >
+            <div className={`space-y-6 mb-32 ${getMessageAlignment()}`}>
               {messages.map((message, index) => {
                 const isLastAssistantMessage = 
                   message.role === "assistant" && 
@@ -870,13 +917,24 @@ const Chat = () => {
                 return (
                 <div
                   key={message.id}
-                  className={`flex animate-scale-in group ${
-                    messageDensity === 'compact' ? 'mb-4' : messageDensity === 'spacious' ? 'mb-8' : 'mb-6'
-                  } ${
-                    message.role === "user" ? "justify-end" : "justify-start"
+                  className={`flex animate-scale-in group ${getMessageSpacing()} ${
+                    layoutConfig.messageAlignment === 'full-width' 
+                      ? 'w-full' 
+                      : message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="relative max-w-[80%]">
+                  {/* Avatar for bot messages */}
+                  {message.role === "assistant" && layoutConfig.showAvatars && branding.avatarUrl && (
+                    <div className={`${getAvatarSize()} rounded-full overflow-hidden mr-3 flex-shrink-0 ${layoutConfig.avatarPosition === 'top' ? 'mt-1' : 'self-center'}`}>
+                      <img 
+                        src={branding.avatarUrl} 
+                        alt="Bot"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
                     <div
                       className={`${getDensityPadding()} ${
                         message.role === "user"
@@ -941,25 +999,36 @@ const Chat = () => {
                         </p>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopyMessage(message.id, message.content)}
-                      className="absolute top-1 -right-10 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                      title="Copy message"
-                    >
-                      {copiedMessageId === message.id ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                    {isLastAssistantMessage && !sending && (
+                    {/* Action buttons */}
+                    {interactiveConfig.showCopyButton && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyMessage(message.id, message.content)}
+                        className={`absolute top-1 -right-10 h-8 w-8 p-0 ${
+                          interactiveConfig.messageActions === 'inline' 
+                            ? 'opacity-100' 
+                            : 'opacity-0 group-hover:opacity-100'
+                        } transition-opacity`}
+                        title="Copy message"
+                      >
+                        {copiedMessageId === message.id ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                    {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleRegenerate}
-                        className="absolute top-10 -right-10 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                        className={`absolute top-10 -right-10 h-8 w-8 p-0 ${
+                          interactiveConfig.messageActions === 'inline' 
+                            ? 'opacity-100' 
+                            : 'opacity-0 group-hover:opacity-100'
+                        } transition-opacity`}
                         title="Regenerate response"
                       >
                         <RotateCw className="h-4 w-4" />
@@ -1013,9 +1082,16 @@ const Chat = () => {
               </Button>
             )}
 
-            {/* Input Area - Fixed at bottom */}
-            <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm">
-              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            {/* Input Area */}
+            <div className={`left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm ${
+              behaviorConfig.inputPosition === 'floating' 
+                ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
+                : 'fixed bottom-0'
+            }`}>
+              <div 
+                className="mx-auto px-4 sm:px-6 lg:px-8 py-4"
+                style={{ maxWidth: behaviorConfig.inputPosition === 'floating' ? '100%' : `${layoutConfig.maxMessageWidth}px` }}
+              >
                 <div className="flex gap-2">
                   <Input
                     value={input}
@@ -1023,7 +1099,7 @@ const Chat = () => {
                     onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     placeholder={inputConfig.placeholder}
                     style={{ borderRadius: `${borderRadius}px` }}
-                    className="bg-background"
+                    className={`bg-background ${getInputSize()}`}
                     disabled={sending || isTypingPrompt}
                   />
                   <Button
@@ -1033,14 +1109,20 @@ const Chat = () => {
                       backgroundColor: branding.primaryColor,
                       borderRadius: `${borderRadius}px`
                     }}
-                    className={`text-primary-foreground ${input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''}`}
+                    className={`text-primary-foreground ${input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''} ${
+                      behaviorConfig.inputSize === 'large' ? 'px-6' : 'px-4'
+                    }`}
                   >
                     {sending || isTypingPrompt ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        <Send className="h-4 w-4 mr-2" />
-                        {inputConfig.submitLabel}
+                        {behaviorConfig.sendButtonStyle !== 'text' && <Send className="h-4 w-4" />}
+                        {behaviorConfig.sendButtonStyle !== 'icon' && (
+                          <span className={behaviorConfig.sendButtonStyle === 'icon-text' ? 'ml-2' : ''}>
+                            {inputConfig.submitLabel}
+                          </span>
+                        )}
                       </>
                     )}
                   </Button>
