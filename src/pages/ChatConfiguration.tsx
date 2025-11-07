@@ -25,7 +25,10 @@ const RESERVED_SLUGS = ['auth', 'dashboard', 'chat', 'api', 'admin', 'new', 'edi
 const formSchema = z.object({
   name: z.string().min(1, "Chat name is required"),
   slug: z.string().min(1, "Slug is required"),
-  webhookUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  webhookUrl: z.string().optional().refine(
+    (val) => !val || val === '' || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL or leave empty" }
+  ),
   welcomeMessage: z.string().optional(),
   chatTitle: z.string().min(1, "Chat title is required"),
   primaryColor: z.string(),
@@ -56,6 +59,21 @@ const formSchema = z.object({
   userMessageColor: z.string().optional(),
   botMessageColor: z.string().optional(),
   colorMode: z.enum(['light', 'dark', 'auto']).optional(),
+  messageAlignment: z.enum(['left', 'center', 'full-width']).optional(),
+  maxMessageWidth: z.number().optional(),
+  showAvatars: z.boolean().optional(),
+  avatarSize: z.enum(['small', 'medium', 'large']).optional(),
+  avatarPosition: z.enum(['top', 'center']).optional(),
+  showSidebar: z.boolean().optional(),
+  headerStyle: z.enum(['standard', 'minimal', 'prominent']).optional(),
+  inputPosition: z.enum(['sticky-bottom', 'floating']).optional(),
+  inputSize: z.enum(['compact', 'comfortable', 'large']).optional(),
+  sendButtonStyle: z.enum(['icon', 'text', 'icon-text']).optional(),
+  messageSpacing: z.enum(['tight', 'normal', 'relaxed']).optional(),
+  animationSpeed: z.enum(['slow', 'normal', 'fast']).optional(),
+  messageActions: z.enum(['inline', 'hover', 'menu']).optional(),
+  showCopyButton: z.boolean().optional(),
+  showRegenerateButton: z.boolean().optional(),
 });
 
 interface ChatConfigurationProps {
@@ -285,9 +303,12 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   };
 
   const onSubmit = async (values: ChatFormValues) => {
+    console.log("Form submission started", values);
+    
     // Final slug check
     const slugAvailable = await checkSlugAvailability(values.slug);
     if (!slugAvailable) {
+      console.error("Slug not available:", values.slug);
       toast({
         title: "Invalid slug",
         description: slugError || "Please choose a different slug",
@@ -457,7 +478,18 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
-                <Button type="submit" disabled={saving || checkingSlug}>
+                <Button 
+                  type="submit" 
+                  disabled={saving || checkingSlug}
+                  onClick={(e) => {
+                    console.log("Save button clicked", {
+                      saving,
+                      checkingSlug,
+                      formValues: form.getValues(),
+                      formErrors: form.formState.errors
+                    });
+                  }}
+                >
                   {saving ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
