@@ -185,30 +185,27 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
           inputPosition === 'floating' ? 'mx-4 mb-4 rounded-lg border shadow-lg' : ''
         }`}
       >
-        <div className="flex gap-2 items-end" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
+        <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
           <Input
             placeholder={inputPlaceholder}
-            className={inputSizeClasses[inputSize]}
+            className={`${inputSizeClasses[inputSize]} ${
+              inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
+            }`}
             style={{ borderRadius: `${borderRadius}px` }}
             disabled
           />
           <Button
-            size={inputSize === 'compact' ? 'sm' : inputSize === 'large' ? 'lg' : 'default'}
+            size="icon"
             style={{ 
               backgroundColor: primaryColor,
               borderRadius: `${borderRadius}px`,
             }}
-            className="shrink-0"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
             disabled
           >
-            {sendButtonStyle === 'text' && 'Send'}
             {sendButtonStyle === 'icon' && <Send className="h-4 w-4" />}
-            {sendButtonStyle === 'icon-text' && (
-              <>
-                <Send className="h-4 w-4" />
-                Send
-              </>
-            )}
+            {sendButtonStyle === 'text' && <Send className="h-4 w-4" />}
+            {sendButtonStyle === 'icon-text' && <Send className="h-4 w-4" />}
           </Button>
         </div>
       </div>
