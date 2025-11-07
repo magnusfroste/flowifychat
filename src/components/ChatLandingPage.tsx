@@ -41,6 +41,47 @@ export function ChatLandingPage({
     ? { backgroundColor: branding.backgroundColor }
     : {};
   
+  const borderRadius = branding.borderRadius || 8;
+  const inputSize = branding.inputSize || 'comfortable';
+  const inputStyle = branding.inputStyle || 'outline';
+  const buttonStyle = branding.buttonStyle || 'filled';
+  const colorMode = branding.colorMode || 'light';
+  
+  const getTextColor = (bgColor: string) => {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
+  
+  const isDark = colorMode === 'dark' || (branding.backgroundColor && getTextColor(branding.backgroundColor) === '#ffffff');
+  
+  const getInputStyleClasses = () => {
+    if (inputStyle === 'filled') {
+      return isDark ? 'bg-white/10 border-white/20' : 'bg-black/5 border-black/10';
+    } else if (inputStyle === 'underline') {
+      return 'border-0 border-b rounded-none';
+    }
+    return 'bg-background';
+  };
+
+  const getButtonClasses = () => {
+    if (buttonStyle === 'ghost') {
+      return 'bg-transparent hover:bg-white/10 border-0';
+    } else if (buttonStyle === 'outline') {
+      return 'bg-transparent hover:bg-white/10 border';
+    }
+    return '';
+  };
+
+  const getInputHeight = () => {
+    if (inputSize === 'compact') return 'h-10';
+    if (inputSize === 'large') return 'h-14 text-base';
+    return 'h-12';
+  };
+  
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 animate-fade-in" style={{ ...bgStyle, fontFamily }}>
       {branding.logoUrl && (
@@ -56,7 +97,7 @@ export function ChatLandingPage({
 
       {/* Centered Input */}
       <div className="w-full max-w-2xl animate-scale-in" style={{ animationDelay: '0.1s' }}>
-        <div className="flex gap-2 mb-6">
+        <div className="relative mb-6">
           <Input
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
@@ -67,25 +108,39 @@ export function ChatLandingPage({
               }
             }}
             placeholder={inputPlaceholder}
-            className="h-14 text-base bg-background shadow-lg border-2"
-            style={{ borderColor: `${branding.primaryColor}20` }}
+            className={`${getInputHeight()} ${getInputStyleClasses()} shadow-lg border-2 ${
+              inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-16' : 'pr-14'
+            }`}
+            style={{ 
+              borderColor: `${branding.primaryColor}20`,
+              borderRadius: `${borderRadius}px`,
+            }}
             disabled={sending || isTypingPrompt}
             autoFocus
           />
           <Button
             onClick={onSend}
             disabled={!input.trim() || sending || isTypingPrompt}
-            style={{ 
+            size="icon"
+            style={buttonStyle === 'filled' ? { 
               backgroundColor: branding.primaryColor,
-              borderRadius: `${branding.borderRadius || 8}px`
+              borderRadius: `${borderRadius}px`,
+              color: getTextColor(branding.primaryColor),
+            } : {
+              borderRadius: `${borderRadius}px`,
+              borderColor: branding.primaryColor,
+              color: branding.primaryColor,
             }}
-            className={`text-primary-foreground h-14 px-8 shadow-lg ${input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''}`}
-            size="lg"
+            className={`absolute ${
+              inputSize === 'large' ? 'right-3 top-1/2 -translate-y-1/2 h-10 w-10' : 'right-2 top-1/2 -translate-y-1/2 h-8 w-8'
+            } shadow-lg ${getButtonClasses()} ${
+              input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''
+            }`}
           >
             {sending || isTypingPrompt ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className={inputSize === 'large' ? 'h-5 w-5' : 'h-4 w-4'} />
             ) : (
-              <Send className="h-5 w-5" />
+              <Send className={inputSize === 'large' ? 'h-5 w-5' : 'h-4 w-4'} />
             )}
           </Button>
         </div>

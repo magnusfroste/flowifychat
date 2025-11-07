@@ -718,6 +718,16 @@ const Chat = () => {
     handleResetSession();
   };
 
+  // Utility: Calculate text color based on background brightness
+  const getTextColor = (bgColor: string) => {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
+
   if (loading) {
     return <ChatSkeleton />;
   }
@@ -735,13 +745,18 @@ const Chat = () => {
 
   // Landing page mode - no header, just centered input
   if (chatMode === 'landing') {
+    const bgStyles = branding?.backgroundStyle === 'gradient' && branding?.backgroundGradientStart && branding?.backgroundGradientEnd
+      ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
+      : branding?.backgroundColor ? { backgroundColor: branding.backgroundColor } : {};
+      
     return (
       <div
-        className="min-h-screen bg-gradient-subtle"
+        className="min-h-screen"
         style={{
-          "--chat-primary": chatInstance.custom_branding.primaryColor,
-          "--chat-accent": chatInstance.custom_branding.accentColor,
-        } as React.CSSProperties}
+          ...bgStyles,
+          ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
+          ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
+        }}
       >
         <ChatLandingPage
           branding={branding}
@@ -773,6 +788,18 @@ const Chat = () => {
   const borderRadius = branding?.borderRadius || 8;
   const userMessageColor = branding?.userMessageColor;
   const botMessageColor = branding?.botMessageColor;
+  const backgroundColor = branding?.backgroundColor;
+  const backgroundStyle = branding?.backgroundStyle || 'solid';
+  const backgroundGradientStart = branding?.backgroundGradientStart;
+  const backgroundGradientEnd = branding?.backgroundGradientEnd;
+  const inputStyle = branding?.inputStyle || 'outline';
+  const buttonStyle = branding?.buttonStyle || 'filled';
+  const colorMode = branding?.colorMode || 'light';
+  
+  const isDark = colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor) === '#ffffff');
+  const bgStyles = backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd
+    ? { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` }
+    : backgroundColor ? { backgroundColor } : {};
   
   const getBubbleRadius = () => {
     if (messageBubbleStyle === 'sharp') return '4px';
@@ -821,6 +848,24 @@ const Chat = () => {
     if (behaviorConfig.inputSize === 'large') return 'h-14 text-base';
     return 'h-12';
   };
+
+  const getInputStyleClasses = () => {
+    if (inputStyle === 'filled') {
+      return isDark ? 'bg-white/10 border-white/20' : 'bg-black/5 border-black/10';
+    } else if (inputStyle === 'underline') {
+      return 'border-0 border-b rounded-none';
+    }
+    return '';
+  };
+
+  const getButtonClasses = () => {
+    if (buttonStyle === 'ghost') {
+      return 'bg-transparent hover:bg-white/10 border-0';
+    } else if (buttonStyle === 'outline') {
+      return 'bg-transparent hover:bg-white/10 border';
+    }
+    return '';
+  };
   
   return (
     <SidebarProvider defaultOpen={isOwner}>
@@ -837,14 +882,22 @@ const Chat = () => {
 
         {/* Main content */}
         <div
-          className={`flex-1 min-h-screen bg-gradient-subtle ${getAnimationClass()}`}
+          className={`flex-1 min-h-screen ${getAnimationClass()}`}
           style={{
-            "--chat-primary": chatInstance.custom_branding.primaryColor,
-            "--chat-accent": chatInstance.custom_branding.accentColor,
-          } as React.CSSProperties}
+            ...bgStyles,
+            ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
+            ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
+          }}
         >
           {/* Header */}
-          <header className={`border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 ${getHeaderClass()}`}>
+          <header 
+            className={`border-b backdrop-blur-sm sticky top-0 z-10 ${getHeaderClass()}`}
+            style={{
+              backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.7)',
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              color: isDark ? '#ffffff' : '#000000',
+            }}
+          >
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -946,6 +999,11 @@ const Chat = () => {
                         backgroundColor: message.role === "user" 
                           ? userMessageColor || 'hsl(var(--muted) / 0.3)'
                           : botMessageColor || 'transparent',
+                        color: message.role === "user" && userMessageColor 
+                          ? getTextColor(userMessageColor)
+                          : message.role === "assistant" && botMessageColor 
+                          ? getTextColor(botMessageColor)
+                          : undefined,
                         paddingLeft: message.role === "assistant" ? '1rem' : undefined,
                       }}
                     >
@@ -1040,9 +1098,9 @@ const Chat = () => {
               })}
               {sending && (
                 <div className="flex justify-start animate-fade-in">
-                  <Card className="bg-card">
+                  <Card style={{ backgroundColor: botMessageColor || 'transparent' }}>
                     <div className="p-4">
-                      <TypingIndicator />
+                      <TypingIndicator dotColor={botMessageColor ? getTextColor(botMessageColor) : undefined} />
                     </div>
                   </Card>
                 </div>
@@ -1083,47 +1141,54 @@ const Chat = () => {
             )}
 
             {/* Input Area */}
-            <div className={`left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm ${
-              behaviorConfig.inputPosition === 'floating' 
-                ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
-                : 'fixed bottom-0'
-            }`}>
+            <div 
+              className={`left-0 right-0 border-t backdrop-blur-sm ${
+                behaviorConfig.inputPosition === 'floating' 
+                  ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
+                  : 'fixed bottom-0'
+              }`}
+              style={{
+                backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.7)',
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              }}
+            >
               <div 
                 className="mx-auto px-4 sm:px-6 lg:px-8 py-4"
                 style={{ maxWidth: behaviorConfig.inputPosition === 'floating' ? '100%' : `${layoutConfig.maxMessageWidth}px` }}
               >
-                <div className="flex gap-2">
+                <div className="relative">
                   <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     placeholder={inputConfig.placeholder}
                     style={{ borderRadius: `${borderRadius}px` }}
-                    className={`bg-background ${getInputSize()}`}
+                    className={`${getInputSize()} ${getInputStyleClasses()} ${
+                      behaviorConfig.inputSize === 'compact' ? 'pr-10' : behaviorConfig.inputSize === 'large' ? 'pr-14' : 'pr-12'
+                    }`}
                     disabled={sending || isTypingPrompt}
                   />
                   <Button
                     onClick={() => handleSend()}
                     disabled={!input.trim() || sending || isTypingPrompt}
-                    style={{ 
+                    size="icon"
+                    style={buttonStyle === 'filled' ? { 
                       backgroundColor: branding.primaryColor,
-                      borderRadius: `${borderRadius}px`
+                      borderRadius: `${borderRadius}px`,
+                      color: getTextColor(branding.primaryColor),
+                    } : {
+                      borderRadius: `${borderRadius}px`,
+                      borderColor: branding.primaryColor,
+                      color: branding.primaryColor,
                     }}
-                    className={`text-primary-foreground ${input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''} ${
-                      behaviorConfig.inputSize === 'large' ? 'px-6' : 'px-4'
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${getButtonClasses()} ${
+                      input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''
                     }`}
                   >
                     {sending || isTypingPrompt ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <>
-                        {behaviorConfig.sendButtonStyle !== 'text' && <Send className="h-4 w-4" />}
-                        {behaviorConfig.sendButtonStyle !== 'icon' && (
-                          <span className={behaviorConfig.sendButtonStyle === 'icon-text' ? 'ml-2' : ''}>
-                            {inputConfig.submitLabel}
-                          </span>
-                        )}
-                      </>
+                      <Send className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
