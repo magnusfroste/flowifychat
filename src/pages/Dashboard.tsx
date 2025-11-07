@@ -68,7 +68,7 @@ const Dashboard = () => {
       }
       
       setUser(session.user);
-      await loadChatInstances();
+      await loadChatInstances(session.user.id);
       setLoading(false);
     };
 
@@ -100,7 +100,9 @@ const Dashboard = () => {
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          loadChatInstances();
+          if (user?.id) {
+            loadChatInstances(user.id);
+          }
         }
       )
       .subscribe();
@@ -110,12 +112,12 @@ const Dashboard = () => {
     };
   }, [user]);
 
-  const loadChatInstances = async () => {
+  const loadChatInstances = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("chat_instances")
         .select("*")
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

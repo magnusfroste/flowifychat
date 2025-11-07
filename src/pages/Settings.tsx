@@ -64,12 +64,26 @@ const Settings = () => {
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
-      setProfile(data);
-      setDisplayName(data.display_name || "");
+      if (!data) {
+        // Create profile if it doesn't exist
+        const { data: newProfile, error: insertError } = await supabase
+          .from("profiles")
+          .insert({ id: userId, display_name: user?.email?.split('@')[0] || "" })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        
+        setProfile(newProfile);
+        setDisplayName(newProfile.display_name || "");
+      } else {
+        setProfile(data);
+        setDisplayName(data.display_name || "");
+      }
     } catch (error: any) {
       console.error("Error loading profile:", error);
     }
