@@ -36,6 +36,7 @@ import { Loader2, Link as LinkIcon, Copy, Check } from "lucide-react";
 import { generateSlug, isSlugAvailable, isReservedSlug, getShareableUrl } from "@/lib/slugUtils";
 import { QuickStartPromptsEditor } from "@/components/QuickStartPromptsEditor";
 import { ImageUpload } from "@/components/ImageUpload";
+import { BrandingTemplates, type BrandingTemplate } from "@/components/BrandingTemplates";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -115,6 +116,16 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
   const [checkingSlug, setCheckingSlug] = useState(false);
   const [slugError, setSlugError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const handleApplyTemplate = (template: BrandingTemplate) => {
+    Object.entries(template.values).forEach(([key, value]) => {
+      form.setValue(key as any, value);
+    });
+    toast({
+      title: "Template Applied",
+      description: `${template.name} branding has been applied`,
+    });
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -397,6 +408,10 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <BrandingTemplates onApplyTemplate={handleApplyTemplate} />
+              
+              <div className="border-t my-4" />
+
               <FormField
                 control={form.control}
                 name="name"
