@@ -291,22 +291,6 @@ export function ChatConfigurationTabs({
           )}
         />
 
-        {/* Landing Tagline */}
-        <FormField
-          control={form.control}
-          name="landingTagline"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Landing Tagline</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ready when you are." />
-              </FormControl>
-              <FormDescription>Subtitle on the landing page</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Background Style */}
         <FormField
           control={form.control}
@@ -796,6 +780,24 @@ export function ChatConfigurationTabs({
             </FormItem>
           )}
         />
+
+        {/* Landing Tagline - Only visible when Landing Page Mode is enabled */}
+        {form.watch("useLandingPageMode") && (
+          <FormField
+            control={form.control}
+            name="landingTagline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Landing Tagline</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Ready when you are." />
+                </FormControl>
+                <FormDescription>Subtitle displayed on the landing page</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
       </TabsContent>
     </Tabs>
   );
