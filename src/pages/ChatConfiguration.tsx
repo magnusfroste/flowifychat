@@ -253,9 +253,31 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   };
 
   const handleTemplateApply = (template: BrandingTemplate) => {
+    // Apply all template values
     Object.entries(template.values).forEach(([key, value]) => {
       form.setValue(key as any, value);
     });
+    
+    // Auto-fill name and chatTitle with template name if empty (create mode only)
+    if (mode === 'create') {
+      const currentName = form.getValues("name");
+      if (!currentName) {
+        const templateName = `${template.name} Chat`;
+        form.setValue("name", templateName);
+        
+        // Generate slug from the template name
+        const newSlug = generateSlug(templateName);
+        form.setValue("slug", newSlug);
+        handleSlugChange(newSlug);
+      }
+      
+      // Also set chatTitle if not already set
+      const currentChatTitle = form.getValues("chatTitle");
+      if (!currentChatTitle) {
+        form.setValue("chatTitle", template.name);
+      }
+    }
+    
     toast({
       title: "Template applied",
       description: `${template.name} template has been applied`,
