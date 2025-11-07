@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit } from "lucide-react";
+import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Settings as SettingsIcon } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -222,6 +222,12 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <Link to="/settings">
+                <Button variant="ghost">
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  Settings
+                </Button>
+              </Link>
               <Button variant="ghost" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
