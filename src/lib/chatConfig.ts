@@ -159,7 +159,7 @@ export const getLayoutConfig = (branding: any) => {
     showAvatars: branding?.showAvatars ?? true,
     avatarSize: branding?.avatarSize || 'medium',
     avatarPosition: branding?.avatarPosition || 'center',
-    showSidebar: branding?.showSidebar ?? false,
+    showSidebar: branding?.showSidebar ?? true,
     headerStyle: branding?.headerStyle || 'standard',
   };
 };
