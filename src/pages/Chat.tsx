@@ -704,8 +704,7 @@ const Chat = () => {
         } as React.CSSProperties}
       >
         <ChatLandingPage
-          chatTitle={branding.chatTitle}
-          primaryColor={branding.primaryColor}
+          branding={branding}
           quickStartPrompts={quickStartConfig.prompts}
           inputPlaceholder={inputConfig.placeholder}
           input={input}

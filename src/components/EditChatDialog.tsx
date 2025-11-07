@@ -15,19 +15,30 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Loader2, Link as LinkIcon, Copy, Check } from "lucide-react";
 import { generateSlug, isSlugAvailable, isReservedSlug, getShareableUrl } from "@/lib/slugUtils";
 import { QuickStartPromptsEditor } from "@/components/QuickStartPromptsEditor";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { QuickStartPrompt } from "@/lib/chatConfig";
 
 const formSchema = z.object({
@@ -59,6 +70,33 @@ const formSchema = z.object({
   welcomeDisclaimer: z.string().max(300).optional(),
   inputPlaceholder: z.string().max(100).optional(),
   useLandingPageMode: z.boolean().optional(),
+  
+  // Landing Page Branding
+  logoUrl: z.string().optional(),
+  avatarUrl: z.string().optional(),
+  landingTagline: z.string().max(200).optional(),
+  backgroundStyle: z.enum(['solid', 'gradient', 'pattern']).optional(),
+  backgroundGradientStart: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
+  backgroundGradientEnd: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
+  backgroundColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
+  layoutStyle: z.enum(['centered', 'left-visual', 'compact']).optional(),
+  fontFamily: z.string().optional(),
+  
+  // Message Appearance
+  messageBubbleStyle: z.enum(['rounded', 'sharp', 'pill']).optional(),
+  messageDensity: z.enum(['compact', 'comfortable', 'spacious']).optional(),
+  showTimestamps: z.boolean().optional(),
+  
+  // Button & Input Styling
+  buttonStyle: z.enum(['filled', 'outline', 'ghost']).optional(),
+  inputStyle: z.enum(['outline', 'filled', 'underline']).optional(),
+  borderRadius: z.number().min(0).max(20).optional(),
+  
+  // Advanced Colors
+  secondaryColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
+  userMessageColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
+  botMessageColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
+  colorMode: z.enum(['light', 'dark', 'auto']).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -95,6 +133,33 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
       welcomeDisclaimer: "",
       inputPlaceholder: "",
       useLandingPageMode: true,
+      
+      // Landing Page Branding
+      logoUrl: "",
+      avatarUrl: "",
+      landingTagline: "",
+      backgroundStyle: "solid",
+      backgroundGradientStart: "#3b82f6",
+      backgroundGradientEnd: "#8b5cf6",
+      backgroundColor: "#ffffff",
+      layoutStyle: "centered",
+      fontFamily: "Inter",
+      
+      // Message Appearance
+      messageBubbleStyle: "rounded",
+      messageDensity: "comfortable",
+      showTimestamps: false,
+      
+      // Button & Input Styling
+      buttonStyle: "filled",
+      inputStyle: "outline",
+      borderRadius: 8,
+      
+      // Advanced Colors
+      secondaryColor: "#10b981",
+      userMessageColor: "#3b82f6",
+      botMessageColor: "#f3f4f6",
+      colorMode: "light",
     },
   });
 
@@ -163,6 +228,33 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
           welcomeDisclaimer: branding.welcomeScreen?.disclaimer || "",
           inputPlaceholder: branding.inputPlaceholder || "",
           useLandingPageMode: branding.useLandingPageMode ?? true,
+          
+          // Landing Page Branding
+          logoUrl: branding.logoUrl || "",
+          avatarUrl: branding.avatarUrl || "",
+          landingTagline: branding.landingTagline || "",
+          backgroundStyle: branding.backgroundStyle || "solid",
+          backgroundGradientStart: branding.backgroundGradientStart || "#3b82f6",
+          backgroundGradientEnd: branding.backgroundGradientEnd || "#8b5cf6",
+          backgroundColor: branding.backgroundColor || "#ffffff",
+          layoutStyle: branding.layoutStyle || "centered",
+          fontFamily: branding.fontFamily || "Inter",
+          
+          // Message Appearance
+          messageBubbleStyle: branding.messageBubbleStyle || "rounded",
+          messageDensity: branding.messageDensity || "comfortable",
+          showTimestamps: branding.showTimestamps || false,
+          
+          // Button & Input Styling
+          buttonStyle: branding.buttonStyle || "filled",
+          inputStyle: branding.inputStyle || "outline",
+          borderRadius: branding.borderRadius ?? 8,
+          
+          // Advanced Colors
+          secondaryColor: branding.secondaryColor || "#10b981",
+          userMessageColor: branding.userMessageColor || "#3b82f6",
+          botMessageColor: branding.botMessageColor || "#f3f4f6",
+          colorMode: branding.colorMode || "light",
         });
       } catch (error: any) {
         console.error("Error fetching chat instance:", error);
@@ -214,7 +306,7 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
           custom_branding: {
             primaryColor: values.primaryColor,
             accentColor: values.accentColor,
-            avatarUrl: null,
+            avatarUrl: values.avatarUrl || null,
             welcomeMessage: values.welcomeMessage,
             chatTitle: values.chatTitle,
             quickStartPrompts: values.quickStartPrompts || [],
@@ -234,6 +326,32 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
               includeUserAgent: true,
               customFields: {},
             },
+            
+            // Landing Page Branding
+            logoUrl: values.logoUrl || "",
+            landingTagline: values.landingTagline || "",
+            backgroundStyle: values.backgroundStyle || "solid",
+            backgroundGradientStart: values.backgroundGradientStart,
+            backgroundGradientEnd: values.backgroundGradientEnd,
+            backgroundColor: values.backgroundColor,
+            layoutStyle: values.layoutStyle || "centered",
+            fontFamily: values.fontFamily || "Inter",
+            
+            // Message Appearance
+            messageBubbleStyle: values.messageBubbleStyle || "rounded",
+            messageDensity: values.messageDensity || "comfortable",
+            showTimestamps: values.showTimestamps || false,
+            
+            // Button & Input Styling
+            buttonStyle: values.buttonStyle || "filled",
+            inputStyle: values.inputStyle || "outline",
+            borderRadius: values.borderRadius ?? 8,
+            
+            // Advanced Colors
+            secondaryColor: values.secondaryColor,
+            userMessageColor: values.userMessageColor,
+            botMessageColor: values.botMessageColor,
+            colorMode: values.colorMode || "light",
           },
         })
         .eq("id", chatId)
@@ -608,6 +726,564 @@ export function EditChatDialog({ open, onOpenChange, chatId, onChatCreated }: Ed
                             {...field}
                             className="bg-background"
                           />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Landing Page Branding */}
+              <Collapsible className="border rounded-lg p-4 space-y-4" defaultOpen>
+                <CollapsibleTrigger className="flex items-center justify-between w-full">
+                  <div>
+                    <h3 className="font-medium">🎨 Landing Page Branding</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Customize your chat's landing page appearance
+                    </p>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <FormField
+                    control={form.control}
+                    name="logoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ImageUpload
+                            bucket="chat-logos"
+                            currentImageUrl={field.value}
+                            onImageUploaded={field.onChange}
+                            label="Logo"
+                            maxSizeMB={5}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="avatarUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ImageUpload
+                            bucket="chat-avatars"
+                            currentImageUrl={field.value}
+                            onImageUploaded={field.onChange}
+                            label="Bot Avatar"
+                            maxSizeMB={2}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="landingTagline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Landing Page Tagline</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ready when you are"
+                            {...field}
+                            className="bg-background"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Appears below the title on the landing page
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="backgroundStyle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Background Style</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-background">
+                              <SelectValue placeholder="Select background style" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="solid">Solid Color</SelectItem>
+                            <SelectItem value="gradient">Gradient</SelectItem>
+                            <SelectItem value="pattern">Subtle Pattern</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("backgroundStyle") === "solid" && (
+                    <FormField
+                      control={form.control}
+                      name="backgroundColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Background Color</FormLabel>
+                          <FormControl>
+                            <div className="flex gap-2">
+                              <Input type="color" className="w-12 h-10 p-1" {...field} />
+                              <Input type="text" placeholder="#ffffff" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {form.watch("backgroundStyle") === "gradient" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="backgroundGradientStart"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gradient Start</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input type="color" className="w-12 h-10 p-1" {...field} />
+                                <Input type="text" placeholder="#3b82f6" {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="backgroundGradientEnd"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gradient End</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <Input type="color" className="w-12 h-10 p-1" {...field} />
+                                <Input type="text" placeholder="#8b5cf6" {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  <FormField
+                    control={form.control}
+                    name="layoutStyle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Layout Style</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-background">
+                              <SelectValue placeholder="Select layout" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="centered">Centered</SelectItem>
+                            <SelectItem value="left-visual">Left-Aligned with Visual</SelectItem>
+                            <SelectItem value="compact">Compact</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="fontFamily"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Font Family</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-background">
+                              <SelectValue placeholder="Select font" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Inter">Inter</SelectItem>
+                            <SelectItem value="Roboto">Roboto</SelectItem>
+                            <SelectItem value="Open Sans">Open Sans</SelectItem>
+                            <SelectItem value="Poppins">Poppins</SelectItem>
+                            <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Message Appearance */}
+              <Collapsible className="border rounded-lg p-4 space-y-4">
+                <CollapsibleTrigger className="flex items-center justify-between w-full">
+                  <div>
+                    <h3 className="font-medium">💬 Message Appearance</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Customize how messages look
+                    </p>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <FormField
+                    control={form.control}
+                    name="messageBubbleStyle"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Message Bubble Style</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="rounded" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Rounded (Default)
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="sharp" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Sharp Corners
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="pill" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Pill-shaped
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="messageDensity"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Message Density</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="compact" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Compact
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="comfortable" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Comfortable (Default)
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="spacious" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Spacious
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="showTimestamps"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                        <div className="space-y-0.5">
+                          <FormLabel>Show Timestamps</FormLabel>
+                          <FormDescription className="text-xs">
+                            Display time for each message
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Button & Input Styling */}
+              <Collapsible className="border rounded-lg p-4 space-y-4">
+                <CollapsibleTrigger className="flex items-center justify-between w-full">
+                  <div>
+                    <h3 className="font-medium">🎯 Button & Input Styling</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Customize buttons and input fields
+                    </p>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <FormField
+                    control={form.control}
+                    name="buttonStyle"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Button Style</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="filled" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Filled (Default)
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="outline" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Outline
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="ghost" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Ghost
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="inputStyle"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Input Field Style</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="outline" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Outline (Default)
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="filled" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Filled
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="underline" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Underline Only
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="borderRadius"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Border Radius: {field.value}px</FormLabel>
+                        <FormControl>
+                          <Slider
+                            min={0}
+                            max={20}
+                            step={1}
+                            value={[field.value || 8]}
+                            onValueChange={(vals) => field.onChange(vals[0])}
+                            className="py-4"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Controls roundness of buttons, inputs, and message bubbles
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Advanced Colors */}
+              <Collapsible className="border rounded-lg p-4 space-y-4">
+                <CollapsibleTrigger className="flex items-center justify-between w-full">
+                  <div>
+                    <h3 className="font-medium">🌈 Advanced Colors</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Fine-tune your color scheme
+                    </p>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <FormField
+                    control={form.control}
+                    name="secondaryColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Secondary Color</FormLabel>
+                        <FormControl>
+                          <div className="flex gap-2">
+                            <Input type="color" className="w-12 h-10 p-1" {...field} />
+                            <Input type="text" placeholder="#10b981" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Used for success states and highlights
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="userMessageColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>User Message Color</FormLabel>
+                        <FormControl>
+                          <div className="flex gap-2">
+                            <Input type="color" className="w-12 h-10 p-1" {...field} />
+                            <Input type="text" placeholder="#3b82f6" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Background color for user messages
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="botMessageColor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bot Message Color</FormLabel>
+                        <FormControl>
+                          <div className="flex gap-2">
+                            <Input type="color" className="w-12 h-10 p-1" {...field} />
+                            <Input type="text" placeholder="#f3f4f6" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Background color for bot messages
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="colorMode"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Color Mode</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="light" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Light Mode
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="dark" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Dark Mode
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="auto" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Auto (Match System)
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

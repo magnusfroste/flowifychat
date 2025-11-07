@@ -47,6 +47,32 @@ export interface ChatBranding {
   inputSubmitLabel?: string;
   metadata?: MetadataConfig;
   useLandingPageMode?: boolean;
+  
+  // Landing Page Branding
+  logoUrl?: string;
+  landingTagline?: string;
+  backgroundStyle?: 'solid' | 'gradient' | 'pattern';
+  backgroundGradientStart?: string;
+  backgroundGradientEnd?: string;
+  backgroundColor?: string;
+  layoutStyle?: 'centered' | 'left-visual' | 'compact';
+  fontFamily?: string;
+  
+  // Message Appearance
+  messageBubbleStyle?: 'rounded' | 'sharp' | 'pill';
+  messageDensity?: 'compact' | 'comfortable' | 'spacious';
+  showTimestamps?: boolean;
+  
+  // Button & Input Styling
+  buttonStyle?: 'filled' | 'outline' | 'ghost';
+  inputStyle?: 'outline' | 'filled' | 'underline';
+  borderRadius?: number;
+  
+  // Advanced Colors
+  secondaryColor?: string;
+  userMessageColor?: string;
+  botMessageColor?: string;
+  colorMode?: 'light' | 'dark' | 'auto';
 }
 
 /**

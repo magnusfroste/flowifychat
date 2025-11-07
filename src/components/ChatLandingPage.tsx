@@ -7,11 +7,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2 } from "lucide-react";
-import type { QuickStartPrompt } from "@/lib/chatConfig";
+import type { QuickStartPrompt, ChatBranding } from "@/lib/chatConfig";
 
 interface ChatLandingPageProps {
-  chatTitle: string;
-  primaryColor: string;
+  branding: ChatBranding;
   quickStartPrompts: QuickStartPrompt[];
   inputPlaceholder: string;
   input: string;
@@ -23,8 +22,7 @@ interface ChatLandingPageProps {
 }
 
 export function ChatLandingPage({
-  chatTitle,
-  primaryColor,
+  branding,
   quickStartPrompts,
   inputPlaceholder,
   input,
@@ -34,14 +32,24 @@ export function ChatLandingPage({
   sending,
   autoSend,
 }: ChatLandingPageProps) {
+  const fontFamily = branding.fontFamily || 'Inter';
+  const bgStyle = branding.backgroundStyle === 'gradient' 
+    ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
+    : branding.backgroundStyle === 'solid'
+    ? { backgroundColor: branding.backgroundColor }
+    : {};
+  
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 animate-fade-in">
-      {/* Title at top-center */}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 animate-fade-in" style={{ ...bgStyle, fontFamily }}>
+      {branding.logoUrl && (
+        <img src={branding.logoUrl} alt="Logo" className="h-16 mb-6 animate-scale-in" />
+      )}
+      
       <div className="w-full max-w-2xl mb-12 text-center animate-scale-in">
-        <h1 className="text-4xl font-semibold mb-2" style={{ color: primaryColor }}>
-          {chatTitle}
+        <h1 className="text-4xl font-semibold mb-2" style={{ color: branding.primaryColor }}>
+          {branding.chatTitle}
         </h1>
-        <p className="text-muted-foreground text-lg">Ready when you are.</p>
+        <p className="text-muted-foreground text-lg">{branding.landingTagline || 'Ready when you are.'}</p>
       </div>
 
       {/* Centered Input */}
@@ -58,14 +66,17 @@ export function ChatLandingPage({
             }}
             placeholder={inputPlaceholder}
             className="h-14 text-base bg-background shadow-lg border-2"
-            style={{ borderColor: `${primaryColor}20` }}
+            style={{ borderColor: `${branding.primaryColor}20` }}
             disabled={sending}
             autoFocus
           />
           <Button
             onClick={onSend}
             disabled={!input.trim() || sending}
-            style={{ backgroundColor: primaryColor }}
+            style={{ 
+              backgroundColor: branding.primaryColor,
+              borderRadius: `${branding.borderRadius || 8}px`
+            }}
             className={`text-primary-foreground h-14 px-8 shadow-lg ${input.trim() && !sending ? 'animate-pulse' : ''}`}
             size="lg"
           >
@@ -88,7 +99,7 @@ export function ChatLandingPage({
                 onClick={() => onPromptClick(prompt.text)}
                 disabled={sending}
                 className="text-sm hover:shadow-md transition-all"
-                style={{ borderColor: primaryColor }}
+                style={{ borderColor: branding.primaryColor }}
               >
                 {prompt.text}
               </Button>
