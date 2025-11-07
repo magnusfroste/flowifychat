@@ -726,9 +726,29 @@ const Chat = () => {
   }
 
   // Full chat interface with header
+  const fontFamily = branding?.fontFamily || 'Inter';
+  const messageBubbleStyle = branding?.messageBubbleStyle || 'rounded';
+  const messageDensity = branding?.messageDensity || 'comfortable';
+  const showTimestamps = branding?.showTimestamps ?? true;
+  const borderRadius = branding?.borderRadius || 8;
+  const userMessageColor = branding?.userMessageColor;
+  const botMessageColor = branding?.botMessageColor;
+  
+  const getBubbleRadius = () => {
+    if (messageBubbleStyle === 'sharp') return '4px';
+    if (messageBubbleStyle === 'pill') return '24px';
+    return `${borderRadius}px`;
+  };
+  
+  const getDensityPadding = () => {
+    if (messageDensity === 'compact') return 'py-2 px-3';
+    if (messageDensity === 'spacious') return 'py-4 px-5';
+    return 'py-3 px-4';
+  };
+  
   return (
     <SidebarProvider defaultOpen={isOwner}>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full" style={{ fontFamily }}>
         {/* Sidebar - only show for owners */}
         {isOwner && (
           <ChatSidebar
@@ -800,6 +820,7 @@ const Chat = () => {
           config={welcomeScreenConfig}
           chatTitle={branding.chatTitle}
           primaryColor={branding.primaryColor}
+          branding={branding}
           onStart={() => setChatMode('chat')}
         />
       ) : (
@@ -815,17 +836,26 @@ const Chat = () => {
                 return (
                 <div
                   key={message.id}
-                  className={`flex animate-scale-in group mb-6 ${
+                  className={`flex animate-scale-in group ${
+                    messageDensity === 'compact' ? 'mb-4' : messageDensity === 'spacious' ? 'mb-8' : 'mb-6'
+                  } ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div className="relative max-w-[80%]">
                     <div
-                      className={`py-3 px-4 ${
+                      className={`${getDensityPadding()} ${
                         message.role === "user"
-                          ? "bg-muted/30 rounded-2xl"
-                          : "border-l-4 border-accent pl-4"
+                          ? ""
+                          : "border-l-4 border-accent"
                       }`}
+                      style={{
+                        borderRadius: getBubbleRadius(),
+                        backgroundColor: message.role === "user" 
+                          ? userMessageColor || 'hsl(var(--muted) / 0.3)'
+                          : botMessageColor || 'transparent',
+                        paddingLeft: message.role === "assistant" ? '1rem' : undefined,
+                      }}
                     >
                       <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']">
                         <ReactMarkdown
@@ -871,9 +901,11 @@ const Chat = () => {
                           {message.content}
                         </ReactMarkdown>
                       </div>
-                      <p className="text-xs mt-2 text-muted-foreground">
-                        {message.timestamp.toLocaleTimeString()}
-                      </p>
+                      {showTimestamps && (
+                        <p className="text-xs mt-2 text-muted-foreground">
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
@@ -957,13 +989,17 @@ const Chat = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     placeholder={inputConfig.placeholder}
+                    style={{ borderRadius: `${borderRadius}px` }}
                     className="bg-background"
                     disabled={sending}
                   />
                   <Button
                     onClick={handleSend}
                     disabled={!input.trim() || sending}
-                    style={{ backgroundColor: branding.primaryColor }}
+                    style={{ 
+                      backgroundColor: branding.primaryColor,
+                      borderRadius: `${borderRadius}px`
+                    }}
                     className={`text-primary-foreground ${input.trim() && !sending ? 'animate-pulse' : ''}`}
                   >
                     {sending ? (

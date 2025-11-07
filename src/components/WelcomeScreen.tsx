@@ -19,13 +19,21 @@ export function WelcomeScreen({
   chatTitle,
   primaryColor,
   onStart,
-}: WelcomeScreenProps) {
+  branding,
+}: WelcomeScreenProps & { branding?: any }) {
   if (!config.enabled) return null;
 
+  const fontFamily = branding?.fontFamily || 'Inter';
+  const borderRadius = branding?.borderRadius || 8;
+  const logoUrl = branding?.logoUrl;
+
   return (
-    <div className="flex items-center justify-center min-h-[60vh] p-4">
-      <Card className="max-w-md w-full text-center">
+    <div className="flex items-center justify-center min-h-[60vh] p-4" style={{ fontFamily }}>
+      <Card className="max-w-md w-full text-center" style={{ borderRadius: `${borderRadius}px` }}>
         <div className="p-8 space-y-4">
+          {logoUrl && (
+            <img src={logoUrl} alt="Logo" className="h-16 mx-auto mb-4" />
+          )}
           <h2 className="text-2xl font-bold">{chatTitle}</h2>
           {config.subtitle && (
             <p className="text-muted-foreground">{config.subtitle}</p>
@@ -33,7 +41,10 @@ export function WelcomeScreen({
           <Button
             onClick={onStart}
             size="lg"
-            style={{ backgroundColor: primaryColor }}
+            style={{ 
+              backgroundColor: primaryColor,
+              borderRadius: `${borderRadius}px`
+            }}
             className="text-primary-foreground"
           >
             Start Chat
