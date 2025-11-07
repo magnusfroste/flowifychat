@@ -901,9 +901,6 @@ const Chat = () => {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  {/* Sidebar trigger for owners */}
-                  {isOwner && layoutConfig.showSidebar && <SidebarTrigger />}
-                  
                   {/* Only show back button if viewing by UUID (owner) and no sidebar */}
                   {isOwner && !layoutConfig.showSidebar && (
                     <Button
