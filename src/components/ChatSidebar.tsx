@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Plus } from "lucide-react";
+import { MessageSquare, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
@@ -15,6 +15,17 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface Session {
   session_id: string;
@@ -39,6 +50,9 @@ export function ChatSidebar({
   const { open: sidebarOpen } = useSidebar();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -106,6 +120,44 @@ export function ChatSidebar({
     });
   };
 
+  const handleDeleteClick = (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSessionToDelete(sessionId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!sessionToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("chat_messages")
+        .delete()
+        .eq("session_id", sessionToDelete)
+        .eq("chat_instance_id", chatInstanceId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setSessions(sessions.filter(s => s.session_id !== sessionToDelete));
+      
+      // If deleted current session, start new one
+      if (sessionToDelete === currentSessionId) {
+        onNewSession();
+      }
+
+      toast.success("Conversation deleted");
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      toast.error("Failed to delete conversation");
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setSessionToDelete(null);
+    }
+  };
+
   return (
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
       <div className="flex items-center justify-between p-2 border-b">
@@ -147,25 +199,36 @@ export function ChatSidebar({
               ) : (
                 sessions.map((session) => (
                   <SidebarMenuItem key={session.session_id}>
-                    <SidebarMenuButton
-                      onClick={() => onSessionSelect(session.session_id)}
-                      isActive={session.session_id === currentSessionId}
-                      className="w-full"
-                      title={sidebarOpen ? undefined : session.preview}
-                    >
-                      <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                      {sidebarOpen && (
-                        <div className="flex flex-col items-start flex-1 min-w-0">
-                          <span className="text-xs font-medium truncate w-full">
-                            {session.preview}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatTimestamp(session.first_message_time)} •{" "}
-                            {session.message_count} messages
-                          </span>
-                        </div>
-                      )}
-                    </SidebarMenuButton>
+                    <div className="relative group">
+                      <SidebarMenuButton
+                        onClick={() => onSessionSelect(session.session_id)}
+                        isActive={session.session_id === currentSessionId}
+                        className="w-full pr-8"
+                        title={sidebarOpen ? undefined : session.preview}
+                      >
+                        <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                        {sidebarOpen && (
+                          <div className="flex flex-col items-start flex-1 min-w-0">
+                            <span className="text-xs font-medium truncate w-full">
+                              {session.preview}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatTimestamp(session.first_message_time)} •{" "}
+                              {session.message_count} messages
+                            </span>
+                          </div>
+                        )}
+                      </SidebarMenuButton>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => handleDeleteClick(session.session_id, e)}
+                        title="Delete conversation"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </SidebarMenuItem>
                 ))
               )}
@@ -173,6 +236,27 @@ export function ChatSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all messages in this conversation. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sidebar>
   );
 }
