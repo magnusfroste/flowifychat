@@ -227,7 +227,7 @@ const Dashboard = () => {
               <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center">
                 <MessageSquare className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">ChatFlow</span>
+              <span className="text-xl font-bold">Flowify</span>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />

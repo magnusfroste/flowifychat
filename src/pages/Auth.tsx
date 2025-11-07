@@ -76,7 +76,7 @@ const Auth = () => {
             <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center">
               <MessageSquare className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold">ChatFlow</span>
+            <span className="text-2xl font-bold">Flowify</span>
           </div>
           <p className="text-muted-foreground">
             Deploy beautiful chat interfaces for your n8n workflows

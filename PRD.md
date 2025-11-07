@@ -1,4 +1,4 @@
-# ChatFlow - Product Requirements Document
+# Flowify - Product Requirements Document
 
 ## Document Control
 - **Last Updated**: 2025-11-05
@@ -10,7 +10,7 @@
 ## 1. Product Overview
 
 ### 1.1 Vision
-ChatFlow enables anyone to create embeddable AI chat interfaces powered by their own n8n workflows, with full control over branding, conversation history, and analytics.
+Flowify enables anyone to create embeddable AI chat interfaces powered by their own n8n workflows, with full control over branding, conversation history, and analytics.
 
 ### 1.2 Problem Statement
 - Developers need custom AI chat interfaces integrated with their automation workflows
