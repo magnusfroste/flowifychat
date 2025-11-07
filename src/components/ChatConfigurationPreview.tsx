@@ -4,10 +4,11 @@
  */
 
 import { useState } from "react";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, Sparkles, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChatInterfacePreview } from "@/components/ChatInterfacePreview";
+import { ChatLandingPagePreview } from "@/components/ChatLandingPagePreview";
 import type { ChatFormValues } from "@/components/ChatConfigurationForm";
 import type { ChatBranding } from "@/lib/chatConfig";
 
@@ -17,6 +18,7 @@ interface ChatConfigurationPreviewProps {
 
 export function ChatConfigurationPreview({ formValues }: ChatConfigurationPreviewProps) {
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [viewMode, setViewMode] = useState<'landing' | 'chat'>('landing');
 
   // Convert form values to ChatBranding format
   const branding: ChatBranding = {
@@ -79,26 +81,55 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
           <p className="text-xs text-muted-foreground">See your changes in real-time</p>
         </div>
         
-        {/* Device Toggle */}
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant={device === 'desktop' ? 'default' : 'outline'}
-            onClick={() => setDevice('desktop')}
-            className="h-8 w-8"
-          >
-            <Monitor className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant={device === 'mobile' ? 'default' : 'outline'}
-            onClick={() => setDevice('mobile')}
-            className="h-8 w-8"
-          >
-            <Smartphone className="h-4 w-4" />
-          </Button>
+        {/* View and Device Toggles */}
+        <div className="flex gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="icon"
+              variant={viewMode === 'landing' ? 'default' : 'outline'}
+              onClick={() => setViewMode('landing')}
+              className="h-8 w-8"
+              title="Landing View"
+            >
+              <Sparkles className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant={viewMode === 'chat' ? 'default' : 'outline'}
+              onClick={() => setViewMode('chat')}
+              className="h-8 w-8"
+              title="Chat View"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Device Toggle */}
+          <div className="flex gap-2 border-l pl-3">
+            <Button
+              type="button"
+              size="icon"
+              variant={device === 'desktop' ? 'default' : 'outline'}
+              onClick={() => setDevice('desktop')}
+              className="h-8 w-8"
+              title="Desktop View"
+            >
+              <Monitor className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant={device === 'mobile' ? 'default' : 'outline'}
+              onClick={() => setDevice('mobile')}
+              className="h-8 w-8"
+              title="Mobile View"
+            >
+              <Smartphone className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -118,10 +149,17 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
 
           {/* Preview Content */}
           <div className={`h-full ${device === 'mobile' ? '-mt-6' : ''}`}>
-            <ChatInterfacePreview
-              branding={branding}
-              inputPlaceholder={inputPlaceholder}
-            />
+            {viewMode === 'landing' ? (
+              <ChatLandingPagePreview
+                branding={branding}
+                inputPlaceholder={inputPlaceholder}
+              />
+            ) : (
+              <ChatInterfacePreview
+                branding={branding}
+                inputPlaceholder={inputPlaceholder}
+              />
+            )}
           </div>
         </div>
       </div>
