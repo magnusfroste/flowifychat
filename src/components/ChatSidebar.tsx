@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Plus, Trash2 } from "lucide-react";
+import { MessageSquare, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
@@ -47,6 +48,7 @@ export function ChatSidebar({
   onSessionSelect,
   onNewSession,
 }: ChatSidebarProps) {
+  const navigate = useNavigate();
   const { open: sidebarOpen } = useSidebar();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,6 +162,19 @@ export function ChatSidebar({
 
   return (
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
+      {sidebarOpen && (
+        <div className="p-2 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            className="w-full justify-start"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
+      )}
       <div className="flex items-center justify-between p-2 border-b">
         <SidebarTrigger />
         {sidebarOpen && (
