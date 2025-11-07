@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -73,9 +74,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <MessageSquare className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img src={flowifyLogo} alt="Flowify" className="h-12 w-12" />
             <span className="text-2xl font-bold">Flowify</span>
           </div>
           <p className="text-muted-foreground">

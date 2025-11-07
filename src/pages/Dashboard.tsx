@@ -21,13 +21,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, MessageSquare, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users } from "lucide-react";
+import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { CreateChatDialog } from "@/components/CreateChatDialog";
 import { EditChatDialog } from "@/components/EditChatDialog";
 import { formatDistanceToNow } from "date-fns";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 interface ChatInstance {
   id: string;
@@ -224,9 +225,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <MessageSquare className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
               <span className="text-xl font-bold">Flowify</span>
             </div>
             <div className="flex items-center gap-2">
@@ -300,7 +299,7 @@ const Dashboard = () => {
                             className="cursor-pointer"
                             onClick={() => handleEditClick(chat.id)}
                           >
-                            <MessageSquare className="mr-2 h-4 w-4" />
+                             <Eye className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -367,7 +366,7 @@ const Dashboard = () => {
                                 {chat.analytics.total_messages}
                               </div>
                               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                <MessageSquare className="h-3 w-3" />
+                                <Activity className="h-3 w-3" />
                                 Messages
                               </div>
                             </div>
@@ -415,7 +414,7 @@ const Dashboard = () => {
                           className="w-full bg-primary hover:bg-primary-glow"
                         >
                           <Link to={`/chat/${chat.id}`}>
-                            <MessageSquare className="mr-2 h-4 w-4" />
+                            <ExternalLink className="mr-2 h-4 w-4" />
                             Open Chat
                           </Link>
                         </Button>
@@ -429,7 +428,7 @@ const Dashboard = () => {
         ) : (
           <div className="text-center py-16">
             <div className="inline-flex h-16 w-16 rounded-full bg-primary/10 items-center justify-center mb-4">
-              <MessageSquare className="h-8 w-8 text-primary" />
+              <img src={flowifyLogo} alt="Flowify" className="h-10 w-10" />
             </div>
             <h3 className="text-xl font-semibold mb-2">No chat interfaces yet</h3>
             <p className="text-muted-foreground mb-6">

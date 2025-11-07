@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight } from "lucide-react";
+import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 const Landing = () => {
   return (
@@ -115,9 +116,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <MessageSquare className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
               <span className="text-lg font-bold">Flowify</span>
             </div>
             <p className="text-sm text-muted-foreground">
