@@ -1003,11 +1003,20 @@ const Chat = () => {
                           ? getTextColor(userMessageColor)
                           : message.role === "assistant" && botMessageColor 
                           ? getTextColor(botMessageColor)
-                          : undefined,
+                          : isDark ? '#ffffff' : undefined,
                         paddingLeft: message.role === "assistant" ? '1rem' : undefined,
                       }}
                     >
-                      <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']">
+                      <div 
+                        className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
+                        style={{
+                          color: message.role === "user" && userMessageColor 
+                            ? getTextColor(userMessageColor)
+                            : message.role === "assistant" && botMessageColor 
+                            ? getTextColor(botMessageColor)
+                            : isDark ? '#ffffff' : '#000000'
+                        }}
+                      >
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -1052,7 +1061,16 @@ const Chat = () => {
                         </ReactMarkdown>
                       </div>
                       {showTimestamps && (
-                        <p className="text-xs mt-2 text-muted-foreground">
+                        <p 
+                          className="text-xs mt-2 opacity-70"
+                          style={{
+                            color: message.role === "user" && userMessageColor 
+                              ? getTextColor(userMessageColor)
+                              : message.role === "assistant" && botMessageColor 
+                              ? getTextColor(botMessageColor)
+                              : isDark ? '#ffffff' : '#666666'
+                          }}
+                        >
                           {message.timestamp.toLocaleTimeString()}
                         </p>
                       )}
@@ -1162,10 +1180,13 @@ const Chat = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     placeholder={inputConfig.placeholder}
-                    style={{ borderRadius: `${borderRadius}px` }}
+                    style={{ 
+                      borderRadius: `${borderRadius}px`,
+                      color: isDark && inputStyle === 'filled' ? '#ffffff' : undefined,
+                    }}
                     className={`${getInputSize()} ${getInputStyleClasses()} ${
                       behaviorConfig.inputSize === 'compact' ? 'pr-10' : behaviorConfig.inputSize === 'large' ? 'pr-14' : 'pr-12'
-                    }`}
+                    } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/50' : ''}`}
                     disabled={sending || isTypingPrompt}
                   />
                   <Button

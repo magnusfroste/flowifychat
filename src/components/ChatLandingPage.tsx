@@ -92,7 +92,9 @@ export function ChatLandingPage({
         <h1 className="text-4xl font-semibold mb-2" style={{ color: branding.primaryColor }}>
           {branding.chatTitle}
         </h1>
-        <p className="text-muted-foreground text-lg">{branding.landingTagline || 'Ready when you are.'}</p>
+        <p className="text-lg opacity-70" style={{ color: isDark ? '#ffffff' : '#666666' }}>
+          {branding.landingTagline || 'Ready when you are.'}
+        </p>
       </div>
 
       {/* Centered Input */}
@@ -110,10 +112,11 @@ export function ChatLandingPage({
             placeholder={inputPlaceholder}
             className={`${getInputHeight()} ${getInputStyleClasses()} shadow-lg border-2 ${
               inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-16' : 'pr-14'
-            }`}
+            } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/50' : ''}`}
             style={{ 
               borderColor: `${branding.primaryColor}20`,
               borderRadius: `${borderRadius}px`,
+              color: isDark && inputStyle === 'filled' ? '#ffffff' : undefined,
             }}
             disabled={sending || isTypingPrompt}
             autoFocus
