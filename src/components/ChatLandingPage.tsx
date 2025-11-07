@@ -122,7 +122,7 @@ export function ChatLandingPage({
             autoFocus
           />
           <Button
-            onClick={onSend}
+            onClick={() => onSend()}
             disabled={!input.trim() || sending || isTypingPrompt}
             size="icon"
             style={buttonStyle === 'filled' ? { 
