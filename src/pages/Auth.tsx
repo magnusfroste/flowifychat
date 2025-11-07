@@ -133,6 +133,35 @@ const Auth = () => {
               </Button>
             </form>
 
+            {isLogin && (
+              <div className="mt-4">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => {
+                    setEmail("demo@flowify.chat");
+                    setPassword("12345678");
+                    toast({
+                      title: "Demo credentials loaded",
+                      description: "Click 'Sign In' to continue with the demo account",
+                    });
+                  }}
+                >
+                  Use Demo Account
+                </Button>
+              </div>
+            )}
+
             <div className="mt-4 text-center text-sm">
               <button
                 type="button"
