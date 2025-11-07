@@ -268,13 +268,14 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || !chatInstance) return;
+  const handleSend = async (messageText?: string) => {
+    const textToSend = messageText || input;
+    if (!textToSend.trim() || !chatInstance) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: textToSend.trim(),
       timestamp: new Date(),
     };
 
@@ -712,8 +713,7 @@ const Chat = () => {
           onSend={handleSend}
           onPromptClick={(text) => {
             if (quickStartConfig.autoSend) {
-              setInput(text);
-              setTimeout(() => handleSend(), 0);
+              handleSend(text);
             } else {
               setInput(text);
             }
@@ -955,8 +955,7 @@ const Chat = () => {
                   onPromptClick={(text) => {
                     if (quickStartConfig.autoSend) {
                       // Auto-send the prompt
-                      setInput(text);
-                      setTimeout(() => handleSend(), 0);
+                      handleSend(text);
                     } else {
                       // Just populate the input field
                       setInput(text);
@@ -994,7 +993,7 @@ const Chat = () => {
                     disabled={sending}
                   />
                   <Button
-                    onClick={handleSend}
+                    onClick={() => handleSend()}
                     disabled={!input.trim() || sending}
                     style={{ 
                       backgroundColor: branding.primaryColor,
