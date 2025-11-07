@@ -74,6 +74,7 @@ const formSchema = z.object({
   messageActions: z.enum(['inline', 'hover', 'menu']).optional(),
   showCopyButton: z.boolean().optional(),
   showRegenerateButton: z.boolean().optional(),
+  hideBrandingBadge: z.boolean().optional(),
 });
 
 interface ChatConfigurationProps {
@@ -133,6 +134,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
       messageActions: 'inline',
       showCopyButton: true,
       showRegenerateButton: true,
+      hideBrandingBadge: false,
     },
   });
 

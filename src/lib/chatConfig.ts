@@ -96,6 +96,9 @@ export interface ChatBranding {
   messageActions?: 'inline' | 'hover' | 'menu';
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
+  
+  // Branding Badge Control
+  hideBrandingBadge?: boolean;
 }
 
 /**

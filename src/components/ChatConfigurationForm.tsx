@@ -102,6 +102,7 @@ export interface ChatFormValues {
   messageActions?: 'inline' | 'hover' | 'menu';
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
+  hideBrandingBadge?: boolean;
 }
 
 interface ChatConfigurationFormProps {
@@ -1330,6 +1331,24 @@ export function ChatConfigurationForm({
                     <FormLabel>Use Landing Page Mode</FormLabel>
                     <p className="text-xs text-muted-foreground">
                       Show landing page before chat interface
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="hideBrandingBadge"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                  <div className="space-y-0.5">
+                    <FormLabel>Hide Branding Badge</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Remove "Powered by FlowChat" from public chat pages
                     </p>
                   </div>
                   <FormControl>

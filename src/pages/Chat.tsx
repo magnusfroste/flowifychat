@@ -940,7 +940,7 @@ const Chat = () => {
                     <RotateCcw className="h-4 w-4" />
                   </Button>
                   {/* Show branding badge if accessed via slug */}
-                  {!isOwner && (
+                  {!isOwner && !branding?.hideBrandingBadge && (
                     <a
                       href="/"
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
