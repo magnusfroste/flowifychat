@@ -7,9 +7,9 @@ import { useState } from "react";
 import { Monitor, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChatLandingPage } from "@/components/ChatLandingPage";
+import { ChatInterfacePreview } from "@/components/ChatInterfacePreview";
 import type { ChatFormValues } from "@/components/ChatConfigurationForm";
-import type { ChatBranding, QuickStartPrompt } from "@/lib/chatConfig";
+import type { ChatBranding } from "@/lib/chatConfig";
 
 interface ChatConfigurationPreviewProps {
   formValues: ChatFormValues;
@@ -17,7 +17,6 @@ interface ChatConfigurationPreviewProps {
 
 export function ChatConfigurationPreview({ formValues }: ChatConfigurationPreviewProps) {
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
-  const [previewInput, setPreviewInput] = useState("");
 
   // Convert form values to ChatBranding format
   const branding: ChatBranding = {
@@ -69,18 +68,7 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
     showRegenerateButton: formValues.showRegenerateButton ?? true,
   };
 
-  const quickStartPrompts: QuickStartPrompt[] = formValues.quickStartPrompts || [];
   const inputPlaceholder = formValues.inputPlaceholder || "Type your message...";
-  const autoSend = formValues.quickStartPromptsAutoSend || false;
-
-  const handlePromptClick = (text: string) => {
-    setPreviewInput(text);
-  };
-
-  const handleSend = () => {
-    // Preview only - do nothing
-    console.log("Preview send:", previewInput);
-  };
 
   return (
     <Card className="h-full overflow-hidden flex flex-col">
@@ -129,17 +117,10 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
           )}
 
           {/* Preview Content */}
-          <div className={`h-full overflow-y-auto ${device === 'mobile' ? '-mt-6' : ''}`}>
-            <ChatLandingPage
+          <div className={`h-full ${device === 'mobile' ? '-mt-6' : ''}`}>
+            <ChatInterfacePreview
               branding={branding}
-              quickStartPrompts={quickStartPrompts}
               inputPlaceholder={inputPlaceholder}
-              input={previewInput}
-              onInputChange={setPreviewInput}
-              onSend={handleSend}
-              onPromptClick={handlePromptClick}
-              sending={false}
-              autoSend={autoSend}
             />
           </div>
         </div>
