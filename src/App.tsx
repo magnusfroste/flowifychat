@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
+import ChatConfiguration from "./pages/ChatConfiguration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,8 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/chat/new" element={<ChatConfiguration mode="create" />} />
+            <Route path="/chat/:id/edit" element={<ChatConfiguration mode="edit" />} />
             <Route path="/chat/:id" element={<Chat />} />
             {/* Public slug route - must come last before catch-all */}
             <Route path="/:id" element={<Chat />} />

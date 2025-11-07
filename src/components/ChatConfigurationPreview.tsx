@@ -1,0 +1,133 @@
+/**
+ * Component: Chat Configuration Preview
+ * Live preview of chat interface with current form settings
+ */
+
+import { useState } from "react";
+import { Monitor, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ChatLandingPage } from "@/components/ChatLandingPage";
+import type { ChatFormValues } from "@/components/ChatConfigurationForm";
+import type { ChatBranding, QuickStartPrompt } from "@/lib/chatConfig";
+
+interface ChatConfigurationPreviewProps {
+  formValues: ChatFormValues;
+}
+
+export function ChatConfigurationPreview({ formValues }: ChatConfigurationPreviewProps) {
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [previewInput, setPreviewInput] = useState("");
+
+  // Convert form values to ChatBranding format
+  const branding: ChatBranding = {
+    chatTitle: formValues.chatTitle || "Chat Preview",
+    welcomeMessage: formValues.welcomeMessage || "",
+    primaryColor: formValues.primaryColor || "#6366f1",
+    accentColor: formValues.accentColor || "#8b5cf6",
+    secondaryColor: formValues.secondaryColor || "#64748b",
+    userMessageColor: formValues.userMessageColor || "#6366f1",
+    botMessageColor: formValues.botMessageColor || "#f1f5f9",
+    backgroundColor: formValues.backgroundColor || "#ffffff",
+    backgroundStyle: formValues.backgroundStyle || 'solid',
+    backgroundGradientStart: formValues.backgroundGradientStart,
+    backgroundGradientEnd: formValues.backgroundGradientEnd,
+    logoUrl: formValues.logoUrl,
+    avatarUrl: formValues.avatarUrl,
+    landingTagline: formValues.landingTagline,
+    layoutStyle: formValues.layoutStyle || 'centered',
+    fontFamily: formValues.fontFamily || 'Inter',
+    messageBubbleStyle: formValues.messageBubbleStyle || 'rounded',
+    messageDensity: formValues.messageDensity || 'comfortable',
+    showTimestamps: formValues.showTimestamps || false,
+    buttonStyle: formValues.buttonStyle || 'filled',
+    inputStyle: formValues.inputStyle || 'outline',
+    borderRadius: formValues.borderRadius ?? 8,
+    colorMode: formValues.colorMode || 'light',
+  };
+
+  const quickStartPrompts: QuickStartPrompt[] = formValues.quickStartPrompts || [];
+  const inputPlaceholder = formValues.inputPlaceholder || "Type your message...";
+  const autoSend = formValues.quickStartPromptsAutoSend || false;
+
+  const handlePromptClick = (text: string) => {
+    setPreviewInput(text);
+  };
+
+  const handleSend = () => {
+    // Preview only - do nothing
+    console.log("Preview send:", previewInput);
+  };
+
+  return (
+    <Card className="h-full overflow-hidden flex flex-col">
+      {/* Preview Header */}
+      <div className="border-b bg-muted/30 p-4 flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-sm">Live Preview</h3>
+          <p className="text-xs text-muted-foreground">See your changes in real-time</p>
+        </div>
+        
+        {/* Device Toggle */}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            size="icon"
+            variant={device === 'desktop' ? 'default' : 'outline'}
+            onClick={() => setDevice('desktop')}
+            className="h-8 w-8"
+          >
+            <Monitor className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={device === 'mobile' ? 'default' : 'outline'}
+            onClick={() => setDevice('mobile')}
+            className="h-8 w-8"
+          >
+            <Smartphone className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Preview Container */}
+      <div className="flex-1 overflow-hidden bg-muted/20 flex items-center justify-center p-4">
+        <div
+          className={`h-full bg-background border shadow-2xl overflow-hidden transition-all duration-300 ${
+            device === 'desktop' 
+              ? 'w-full rounded-lg' 
+              : 'max-w-[375px] rounded-[2.5rem] border-[14px] border-gray-800'
+          }`}
+        >
+          {/* Mobile Notch */}
+          {device === 'mobile' && (
+            <div className="h-6 bg-gray-800 rounded-b-2xl mx-auto w-40 relative -top-[14px]" />
+          )}
+
+          {/* Preview Content */}
+          <div className={`h-full overflow-y-auto ${device === 'mobile' ? '-mt-6' : ''}`}>
+            <ChatLandingPage
+              branding={branding}
+              quickStartPrompts={quickStartPrompts}
+              inputPlaceholder={inputPlaceholder}
+              input={previewInput}
+              onInputChange={setPreviewInput}
+              onSend={handleSend}
+              onPromptClick={handlePromptClick}
+              sending={false}
+              autoSend={autoSend}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Preview Footer Note */}
+      <div className="border-t bg-muted/30 p-3 text-center">
+        <p className="text-xs text-muted-foreground">
+          This is a preview. No messages will be sent.
+        </p>
+      </div>
+    </Card>
+  );
+}
