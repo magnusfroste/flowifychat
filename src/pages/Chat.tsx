@@ -989,11 +989,7 @@ const Chat = () => {
 
                   <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
                     <div
-                      className={`${getDensityPadding()} ${
-                        message.role === "user"
-                          ? ""
-                          : "border-l-4 border-accent"
-                      }`}
+                      className={getDensityPadding()}
                       style={{
                         borderRadius: getBubbleRadius(),
                         backgroundColor: message.role === "user" 
@@ -1004,7 +1000,6 @@ const Chat = () => {
                           : message.role === "assistant" && botMessageColor 
                           ? getTextColor(botMessageColor)
                           : isDark ? '#ffffff' : undefined,
-                        paddingLeft: message.role === "assistant" ? '1rem' : undefined,
                       }}
                     >
                       <div 
