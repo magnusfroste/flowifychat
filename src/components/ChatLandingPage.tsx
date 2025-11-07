@@ -60,7 +60,7 @@ export function ChatLandingPage({
   
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return isDark ? 'bg-white/10 border-white/20' : 'bg-black/5 border-black/10';
+      return isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -110,11 +110,11 @@ export function ChatLandingPage({
               }
             }}
             placeholder={inputPlaceholder}
-            className={`${getInputHeight()} ${getInputStyleClasses()} shadow-lg border-2 ${
-              inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-16' : 'pr-14'
-            } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/50' : ''}`}
+            className={`${getInputHeight()} ${getInputStyleClasses()} shadow-lg border ${
+              inputSize === 'compact' ? 'pr-10 pl-4' : inputSize === 'large' ? 'pr-16 pl-6' : 'pr-14 pl-5'
+            } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/40' : ''}`}
             style={{ 
-              borderColor: `${branding.primaryColor}20`,
+              borderColor: inputStyle === 'filled' ? 'transparent' : `${branding.primaryColor}20`,
               borderRadius: `${borderRadius}px`,
               color: isDark && inputStyle === 'filled' ? '#ffffff' : undefined,
             }}
@@ -127,15 +127,15 @@ export function ChatLandingPage({
             size="icon"
             style={buttonStyle === 'filled' ? { 
               backgroundColor: branding.primaryColor,
-              borderRadius: `${borderRadius}px`,
+              borderRadius: `${Math.min(borderRadius, 20)}px`,
               color: getTextColor(branding.primaryColor),
             } : {
-              borderRadius: `${borderRadius}px`,
+              borderRadius: `${Math.min(borderRadius, 20)}px`,
               borderColor: branding.primaryColor,
               color: branding.primaryColor,
             }}
             className={`absolute ${
-              inputSize === 'large' ? 'right-3 top-1/2 -translate-y-1/2 h-10 w-10' : 'right-2 top-1/2 -translate-y-1/2 h-8 w-8'
+              inputSize === 'large' ? 'right-2 top-1/2 -translate-y-1/2 h-10 w-10' : 'right-2 top-1/2 -translate-y-1/2 h-9 w-9'
             } shadow-lg ${getButtonClasses()} ${
               input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''
             }`}

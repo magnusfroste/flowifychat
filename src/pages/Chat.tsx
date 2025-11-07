@@ -851,7 +851,7 @@ const Chat = () => {
 
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return isDark ? 'bg-white/10 border-white/20' : 'bg-black/5 border-black/10';
+      return isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -1185,8 +1185,8 @@ const Chat = () => {
                       color: isDark && inputStyle === 'filled' ? '#ffffff' : undefined,
                     }}
                     className={`${getInputSize()} ${getInputStyleClasses()} ${
-                      behaviorConfig.inputSize === 'compact' ? 'pr-10' : behaviorConfig.inputSize === 'large' ? 'pr-14' : 'pr-12'
-                    } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/50' : ''}`}
+                      behaviorConfig.inputSize === 'compact' ? 'pr-10 pl-4' : behaviorConfig.inputSize === 'large' ? 'pr-16 pl-6' : 'pr-14 pl-5'
+                    } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/40' : ''}`}
                     disabled={sending || isTypingPrompt}
                   />
                   <Button
@@ -1195,16 +1195,20 @@ const Chat = () => {
                     size="icon"
                     style={buttonStyle === 'filled' ? { 
                       backgroundColor: branding.primaryColor,
-                      borderRadius: `${borderRadius}px`,
+                      borderRadius: `${Math.min(borderRadius, 20)}px`,
                       color: getTextColor(branding.primaryColor),
                     } : {
-                      borderRadius: `${borderRadius}px`,
+                      borderRadius: `${Math.min(borderRadius, 20)}px`,
                       borderColor: branding.primaryColor,
                       color: branding.primaryColor,
                     }}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${getButtonClasses()} ${
+                    className={`absolute ${
+                      behaviorConfig.inputSize === 'large' 
+                        ? 'right-2 top-1/2 -translate-y-1/2 h-10 w-10' 
+                        : 'right-2 top-1/2 -translate-y-1/2 h-8 w-8'
+                    } ${getButtonClasses()} ${
                       input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''
-                    }`}
+                    } shadow-lg`}
                   >
                     {sending || isTypingPrompt ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
