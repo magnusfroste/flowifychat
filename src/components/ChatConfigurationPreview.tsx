@@ -39,7 +39,7 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
     fontFamily: formValues.fontFamily || 'Inter',
     messageBubbleStyle: formValues.messageBubbleStyle || 'rounded',
     messageDensity: formValues.messageDensity || 'comfortable',
-    showTimestamps: formValues.showTimestamps || false,
+    showTimestamps: formValues.showTimestamps || 'hover',
     buttonStyle: formValues.buttonStyle || 'filled',
     inputStyle: formValues.inputStyle || 'outline',
     borderRadius: formValues.borderRadius ?? 8,

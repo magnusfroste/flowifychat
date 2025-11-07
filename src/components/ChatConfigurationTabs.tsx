@@ -505,14 +505,21 @@ export function ChatConfigurationTabs({
           control={form.control}
           name="showTimestamps"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Show Timestamps</FormLabel>
-                <FormDescription>Display message times</FormDescription>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
+            <FormItem>
+              <FormLabel>Show Timestamps</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="always">Always</SelectItem>
+                  <SelectItem value="hover">On Hover</SelectItem>
+                  <SelectItem value="never">Never</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>When to display message timestamps</FormDescription>
             </FormItem>
           )}
         />

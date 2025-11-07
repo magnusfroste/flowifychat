@@ -61,7 +61,7 @@ export interface ChatBranding {
   // Message Appearance
   messageBubbleStyle?: 'rounded' | 'sharp' | 'pill';
   messageDensity?: 'compact' | 'comfortable' | 'spacious';
-  showTimestamps?: boolean;
+  showTimestamps?: 'always' | 'hover' | 'never';
   
   // Button & Input Styling
   buttonStyle?: 'filled' | 'outline' | 'ghost';
@@ -73,6 +73,29 @@ export interface ChatBranding {
   userMessageColor?: string;
   botMessageColor?: string;
   colorMode?: 'light' | 'dark' | 'auto';
+  
+  // Layout Controls
+  messageAlignment?: 'left' | 'center' | 'full-width';
+  maxMessageWidth?: number;
+  showAvatars?: boolean;
+  avatarSize?: 'small' | 'medium' | 'large';
+  avatarPosition?: 'top' | 'center';
+  showSidebar?: boolean;
+  headerStyle?: 'minimal' | 'standard' | 'prominent';
+  
+  // Input Controls
+  inputPosition?: 'floating' | 'sticky-bottom';
+  inputSize?: 'compact' | 'comfortable' | 'large';
+  sendButtonStyle?: 'icon' | 'text' | 'icon-text';
+  
+  // Message Behavior
+  messageSpacing?: 'tight' | 'normal' | 'relaxed';
+  animationSpeed?: 'fast' | 'normal' | 'slow';
+  
+  // Interactive Elements
+  messageActions?: 'inline' | 'hover' | 'menu';
+  showCopyButton?: boolean;
+  showRegenerateButton?: boolean;
 }
 
 /**
@@ -123,5 +146,44 @@ export const getMetadataConfig = (branding: any): MetadataConfig => {
 export const getUXConfig = (branding: any): ChatUXConfig => {
   return {
     useLandingPageMode: branding?.useLandingPageMode ?? true, // Default to landing page mode
+  };
+};
+
+/**
+ * Get layout configuration with fallback defaults
+ */
+export const getLayoutConfig = (branding: any) => {
+  return {
+    messageAlignment: branding?.messageAlignment || 'left',
+    maxMessageWidth: branding?.maxMessageWidth || 800,
+    showAvatars: branding?.showAvatars ?? true,
+    avatarSize: branding?.avatarSize || 'medium',
+    avatarPosition: branding?.avatarPosition || 'center',
+    showSidebar: branding?.showSidebar ?? false,
+    headerStyle: branding?.headerStyle || 'standard',
+  };
+};
+
+/**
+ * Get message behavior configuration with fallback defaults
+ */
+export const getMessageBehaviorConfig = (branding: any) => {
+  return {
+    messageSpacing: branding?.messageSpacing || 'normal',
+    animationSpeed: branding?.animationSpeed || 'normal',
+    inputPosition: branding?.inputPosition || 'sticky-bottom',
+    inputSize: branding?.inputSize || 'comfortable',
+    sendButtonStyle: branding?.sendButtonStyle || 'icon',
+  };
+};
+
+/**
+ * Get interactive elements configuration with fallback defaults
+ */
+export const getInteractiveConfig = (branding: any) => {
+  return {
+    messageActions: branding?.messageActions || 'inline',
+    showCopyButton: branding?.showCopyButton ?? true,
+    showRegenerateButton: branding?.showRegenerateButton ?? true,
   };
 };

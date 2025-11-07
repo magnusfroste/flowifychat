@@ -29,10 +29,118 @@ export interface BrandingTemplate {
     buttonStyle: 'filled' | 'outline' | 'ghost';
     inputStyle: 'outline' | 'filled' | 'underline';
     colorMode: 'light' | 'dark' | 'auto';
+    
+    // Layout Controls
+    messageAlignment: 'left' | 'center' | 'full-width';
+    maxMessageWidth: number;
+    showAvatars: boolean;
+    avatarSize: 'small' | 'medium' | 'large';
+    avatarPosition: 'top' | 'center';
+    showSidebar: boolean;
+    headerStyle: 'minimal' | 'standard' | 'prominent';
+    
+    // Input Controls
+    inputPosition: 'floating' | 'sticky-bottom';
+    inputSize: 'compact' | 'comfortable' | 'large';
+    sendButtonStyle: 'icon' | 'text' | 'icon-text';
+    
+    // Message Behavior
+    messageSpacing: 'tight' | 'normal' | 'relaxed';
+    animationSpeed: 'fast' | 'normal' | 'slow';
+    showTimestamps: 'always' | 'hover' | 'never';
+    
+    // Interactive Elements
+    messageActions: 'inline' | 'hover' | 'menu';
+    showCopyButton: boolean;
+    showRegenerateButton: boolean;
   };
 }
 
 export const templates: BrandingTemplate[] = [
+  {
+    name: "OpenAI Style",
+    description: "ChatGPT-inspired interface",
+    icon: Zap,
+    values: {
+      primaryColor: "#10a37f",
+      accentColor: "#1a7f64",
+      secondaryColor: "#8e8ea0",
+      userMessageColor: "#f7f7f8",
+      botMessageColor: "#ffffff",
+      backgroundColor: "#ffffff",
+      backgroundStyle: 'solid',
+      layoutStyle: 'centered',
+      fontFamily: 'Inter',
+      messageBubbleStyle: 'rounded',
+      messageDensity: 'comfortable',
+      borderRadius: 8,
+      buttonStyle: 'filled',
+      inputStyle: 'outline',
+      colorMode: 'light',
+      
+      messageAlignment: 'full-width',
+      maxMessageWidth: 900,
+      showAvatars: true,
+      avatarSize: 'small',
+      avatarPosition: 'top',
+      showSidebar: true,
+      headerStyle: 'minimal',
+      
+      inputPosition: 'sticky-bottom',
+      inputSize: 'large',
+      sendButtonStyle: 'icon',
+      
+      messageSpacing: 'normal',
+      animationSpeed: 'normal',
+      showTimestamps: 'hover',
+      
+      messageActions: 'inline',
+      showCopyButton: true,
+      showRegenerateButton: true,
+    },
+  },
+  {
+    name: "Claude Style",
+    description: "Anthropic-inspired clean design",
+    icon: Minimize2,
+    values: {
+      primaryColor: "#d97757",
+      accentColor: "#cc6b47",
+      secondaryColor: "#6b6b6b",
+      userMessageColor: "#f5f5f5",
+      botMessageColor: "#ffffff",
+      backgroundColor: "#ffffff",
+      backgroundStyle: 'solid',
+      layoutStyle: 'centered',
+      fontFamily: 'Inter',
+      messageBubbleStyle: 'rounded',
+      messageDensity: 'spacious',
+      borderRadius: 12,
+      buttonStyle: 'ghost',
+      inputStyle: 'outline',
+      colorMode: 'light',
+      
+      messageAlignment: 'center',
+      maxMessageWidth: 700,
+      showAvatars: false,
+      avatarSize: 'medium',
+      avatarPosition: 'top',
+      showSidebar: false,
+      headerStyle: 'minimal',
+      
+      inputPosition: 'floating',
+      inputSize: 'large',
+      sendButtonStyle: 'icon-text',
+      
+      messageSpacing: 'relaxed',
+      animationSpeed: 'slow',
+      showTimestamps: 'never',
+      
+      messageActions: 'hover',
+      showCopyButton: true,
+      showRegenerateButton: true,
+    },
+  },
   {
     name: "Professional",
     description: "Clean and corporate",
@@ -53,6 +161,26 @@ export const templates: BrandingTemplate[] = [
       buttonStyle: 'filled',
       inputStyle: 'outline',
       colorMode: 'light',
+      
+      messageAlignment: 'left',
+      maxMessageWidth: 800,
+      showAvatars: true,
+      avatarSize: 'medium',
+      avatarPosition: 'center',
+      showSidebar: false,
+      headerStyle: 'standard',
+      
+      inputPosition: 'sticky-bottom',
+      inputSize: 'comfortable',
+      sendButtonStyle: 'icon',
+      
+      messageSpacing: 'normal',
+      animationSpeed: 'normal',
+      showTimestamps: 'hover',
+      
+      messageActions: 'inline',
+      showCopyButton: true,
+      showRegenerateButton: true,
     },
   },
   {
@@ -77,52 +205,26 @@ export const templates: BrandingTemplate[] = [
       buttonStyle: 'filled',
       inputStyle: 'filled',
       colorMode: 'light',
-    },
-  },
-  {
-    name: "Minimalist",
-    description: "Simple and elegant",
-    icon: Minimize2,
-    values: {
-      primaryColor: "#000000",
-      accentColor: "#404040",
-      secondaryColor: "#737373",
-      userMessageColor: "#000000",
-      botMessageColor: "#f5f5f5",
-      backgroundColor: "#ffffff",
-      backgroundStyle: 'solid',
-      layoutStyle: 'compact',
-      fontFamily: 'Inter',
-      messageBubbleStyle: 'sharp',
-      messageDensity: 'compact',
-      borderRadius: 0,
-      buttonStyle: 'outline',
-      inputStyle: 'underline',
-      colorMode: 'light',
-    },
-  },
-  {
-    name: "Bold",
-    description: "High contrast and modern",
-    icon: Zap,
-    values: {
-      primaryColor: "#7c3aed",
-      accentColor: "#db2777",
-      secondaryColor: "#059669",
-      userMessageColor: "#7c3aed",
-      botMessageColor: "#1f2937",
-      backgroundColor: "#0f172a",
-      backgroundStyle: 'gradient',
-      backgroundGradientStart: "#0f172a",
-      backgroundGradientEnd: "#1e293b",
-      layoutStyle: 'left-visual',
-      fontFamily: 'Roboto',
-      messageBubbleStyle: 'rounded',
-      messageDensity: 'comfortable',
-      borderRadius: 12,
-      buttonStyle: 'filled',
-      inputStyle: 'filled',
-      colorMode: 'dark',
+      
+      messageAlignment: 'left',
+      maxMessageWidth: 750,
+      showAvatars: true,
+      avatarSize: 'large',
+      avatarPosition: 'top',
+      showSidebar: false,
+      headerStyle: 'prominent',
+      
+      inputPosition: 'sticky-bottom',
+      inputSize: 'large',
+      sendButtonStyle: 'icon-text',
+      
+      messageSpacing: 'relaxed',
+      animationSpeed: 'fast',
+      showTimestamps: 'always',
+      
+      messageActions: 'inline',
+      showCopyButton: true,
+      showRegenerateButton: true,
     },
   },
 ];

@@ -67,7 +67,7 @@ export interface ChatFormValues {
   // Message Appearance
   messageBubbleStyle?: 'rounded' | 'sharp' | 'pill';
   messageDensity?: 'compact' | 'comfortable' | 'spacious';
-  showTimestamps?: boolean;
+  showTimestamps?: 'always' | 'hover' | 'never';
   
   // Button & Input Styling
   buttonStyle?: 'filled' | 'outline' | 'ghost';
@@ -79,6 +79,29 @@ export interface ChatFormValues {
   userMessageColor?: string;
   botMessageColor?: string;
   colorMode?: 'light' | 'dark' | 'auto';
+  
+  // Layout Controls
+  messageAlignment?: 'left' | 'center' | 'full-width';
+  maxMessageWidth?: number;
+  showAvatars?: boolean;
+  avatarSize?: 'small' | 'medium' | 'large';
+  avatarPosition?: 'top' | 'center';
+  showSidebar?: boolean;
+  headerStyle?: 'minimal' | 'standard' | 'prominent';
+  
+  // Input Controls
+  inputPosition?: 'floating' | 'sticky-bottom';
+  inputSize?: 'compact' | 'comfortable' | 'large';
+  sendButtonStyle?: 'icon' | 'text' | 'icon-text';
+  
+  // Message Behavior
+  messageSpacing?: 'tight' | 'normal' | 'relaxed';
+  animationSpeed?: 'fast' | 'normal' | 'slow';
+  
+  // Interactive Elements
+  messageActions?: 'inline' | 'hover' | 'menu';
+  showCopyButton?: boolean;
+  showRegenerateButton?: boolean;
 }
 
 interface ChatConfigurationFormProps {
@@ -108,6 +131,9 @@ export function ChatConfigurationForm({
   const [copied, setCopied] = useState(false);
   const [landingBrandingOpen, setLandingBrandingOpen] = useState(mode === 'edit');
   const [messagesAppearanceOpen, setMessagesAppearanceOpen] = useState(false);
+  const [layoutStructureOpen, setLayoutStructureOpen] = useState(false);
+  const [messageBehaviorOpen, setMessageBehaviorOpen] = useState(false);
+  const [interactiveElementsOpen, setInteractiveElementsOpen] = useState(false);
   const [quickStartOpen, setQuickStartOpen] = useState(false);
   const [buttonInputOpen, setButtonInputOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -610,16 +636,24 @@ export function ChatConfigurationForm({
               control={form.control}
               name="showTimestamps"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
-                  <div className="space-y-0.5">
-                    <FormLabel>Show Timestamps</FormLabel>
-                    <p className="text-xs text-muted-foreground">
-                      Display message timestamps
-                    </p>
-                  </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
+                <FormItem>
+                  <FormLabel>Show Timestamps</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="always">Always</SelectItem>
+                      <SelectItem value="hover">On Hover</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    When to display message timestamps
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -863,6 +897,366 @@ export function ChatConfigurationForm({
                     </div>
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Collapsible Section: Layout & Structure */}
+        <Collapsible open={layoutStructureOpen} onOpenChange={setLayoutStructureOpen} className="border rounded-lg">
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors">
+            <div className="text-left">
+              <h3 className="font-medium flex items-center gap-2">
+                📐 Layout & Structure
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Message alignment, width, and component visibility
+              </p>
+            </div>
+            <ChevronDown className={`h-5 w-5 transition-transform ${layoutStructureOpen ? 'rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-4 pt-0 space-y-4">
+            <FormField
+              control={form.control}
+              name="messageAlignment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Message Alignment</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="left">Left Aligned</SelectItem>
+                      <SelectItem value="center">Center Aligned</SelectItem>
+                      <SelectItem value="full-width">Full Width</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="maxMessageWidth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Message Width: {field.value || 800}px</FormLabel>
+                  <FormControl>
+                    <Slider
+                      min={500}
+                      max={1200}
+                      step={50}
+                      value={[field.value || 800]}
+                      onValueChange={(value) => field.onChange(value[0])}
+                      className="py-4"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="showAvatars"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                  <div className="space-y-0.5">
+                    <FormLabel>Show Avatars</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Display user and bot avatars
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {form.watch("showAvatars") && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="avatarSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Avatar Size</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="small">Small</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="large">Large</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="avatarPosition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Avatar Position</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="top">Top</SelectItem>
+                          <SelectItem value="center">Center</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            <FormField
+              control={form.control}
+              name="headerStyle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Header Style</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="minimal">Minimal</SelectItem>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="prominent">Prominent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Collapsible Section: Message Behavior */}
+        <Collapsible open={messageBehaviorOpen} onOpenChange={setMessageBehaviorOpen} className="border rounded-lg">
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors">
+            <div className="text-left">
+              <h3 className="font-medium flex items-center gap-2">
+                ⚡ Message Behavior
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Spacing, animations, and input controls
+              </p>
+            </div>
+            <ChevronDown className={`h-5 w-5 transition-transform ${messageBehaviorOpen ? 'rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-4 pt-0 space-y-4">
+            <FormField
+              control={form.control}
+              name="messageSpacing"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Message Spacing</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="tight">Tight</SelectItem>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="relaxed">Relaxed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="animationSpeed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Animation Speed</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="fast">Fast</SelectItem>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="slow">Slow</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="inputPosition"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Input Position</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="floating">Floating</SelectItem>
+                        <SelectItem value="sticky-bottom">Sticky Bottom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="inputSize"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Input Size</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="compact">Compact</SelectItem>
+                        <SelectItem value="comfortable">Comfortable</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="sendButtonStyle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Send Button Style</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="icon">Icon Only</SelectItem>
+                      <SelectItem value="text">Text Only</SelectItem>
+                      <SelectItem value="icon-text">Icon + Text</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Collapsible Section: Interactive Elements */}
+        <Collapsible open={interactiveElementsOpen} onOpenChange={setInteractiveElementsOpen} className="border rounded-lg">
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors">
+            <div className="text-left">
+              <h3 className="font-medium flex items-center gap-2">
+                🎮 Interactive Elements
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Action buttons and user interactions
+              </p>
+            </div>
+            <ChevronDown className={`h-5 w-5 transition-transform ${interactiveElementsOpen ? 'rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-4 pt-0 space-y-4">
+            <FormField
+              control={form.control}
+              name="messageActions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Message Actions Style</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="inline">Always Visible</SelectItem>
+                      <SelectItem value="hover">Show on Hover</SelectItem>
+                      <SelectItem value="menu">Dropdown Menu</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    How action buttons appear on messages
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="showCopyButton"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                  <div className="space-y-0.5">
+                    <FormLabel>Show Copy Button</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Allow copying message content
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="showRegenerateButton"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                  <div className="space-y-0.5">
+                    <FormLabel>Show Regenerate Button</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Allow regenerating AI responses
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
                 </FormItem>
               )}
             />
