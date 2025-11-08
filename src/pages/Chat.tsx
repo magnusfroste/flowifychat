@@ -869,31 +869,66 @@ const Chat = () => {
             
             {/* Main content area with landing page */}
             <main 
-              className="flex-1 transition-all duration-200"
+              className="flex-1 flex flex-col transition-all duration-200"
               style={{
                 ...bgStyles,
                 ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
                 ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
               }}
             >
-              <ChatLandingPage
-                branding={branding}
-                quickStartPrompts={quickStartConfig.prompts}
-                inputPlaceholder={inputConfig.placeholder}
-                input={input}
-                onInputChange={setInput}
-                onSend={handleSend}
-                onPromptClick={(text) => {
-                  if (quickStartConfig.autoSend) {
-                    typeAndSend(text);
-                  } else {
-                    setInput(text);
-                  }
+              {/* Header with breadcrumbs and theme toggle */}
+              <header 
+                className="border-b backdrop-blur-sm sticky top-0 z-10"
+                style={{
+                  backgroundColor: bgStyles.backgroundColor ? `${bgStyles.backgroundColor}cc` : 'hsl(var(--background) / 0.8)',
+                  borderColor: 'hsl(var(--border))',
                 }}
-                sending={sending}
-                autoSend={quickStartConfig.autoSend}
-                isTypingPrompt={isTypingPrompt}
-              />
+              >
+                <div className="max-w-4xl mx-auto px-4 py-4">
+                  <div className="flex items-center justify-between">
+                    <Breadcrumb>
+                      <BreadcrumbList>
+                        <BreadcrumbItem>
+                          <BreadcrumbLink 
+                            href="/dashboard"
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            <Home className="h-4 w-4" />
+                            <span className="hidden sm:inline">Dashboard</span>
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                          <BreadcrumbPage>{chatInstance.name}</BreadcrumbPage>
+                        </BreadcrumbItem>
+                      </BreadcrumbList>
+                    </Breadcrumb>
+                    <ThemeToggle />
+                  </div>
+                </div>
+              </header>
+              
+              {/* Landing Page Content */}
+              <div className="flex-1">
+                <ChatLandingPage
+                  branding={branding}
+                  quickStartPrompts={quickStartConfig.prompts}
+                  inputPlaceholder={inputConfig.placeholder}
+                  input={input}
+                  onInputChange={setInput}
+                  onSend={handleSend}
+                  onPromptClick={(text) => {
+                    if (quickStartConfig.autoSend) {
+                      typeAndSend(text);
+                    } else {
+                      setInput(text);
+                    }
+                  }}
+                  sending={sending}
+                  autoSend={quickStartConfig.autoSend}
+                  isTypingPrompt={isTypingPrompt}
+                />
+              </div>
             </main>
           </div>
         </SidebarProvider>
@@ -915,31 +950,56 @@ const Chat = () => {
           
           {/* Main content area with landing page */}
           <main 
-            className="flex-1 transition-all duration-200"
+            className="flex-1 flex flex-col transition-all duration-200"
             style={{
               ...bgStyles,
               ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
               ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
             }}
           >
-            <ChatLandingPage
-              branding={branding}
-              quickStartPrompts={quickStartConfig.prompts}
-              inputPlaceholder={inputConfig.placeholder}
-              input={input}
-              onInputChange={setInput}
-              onSend={handleSend}
-              onPromptClick={(text) => {
-                if (quickStartConfig.autoSend) {
-                  typeAndSend(text);
-                } else {
-                  setInput(text);
-                }
+            {/* Header with theme toggle */}
+            <header 
+              className="border-b backdrop-blur-sm sticky top-0 z-10"
+              style={{
+                backgroundColor: bgStyles.backgroundColor ? `${bgStyles.backgroundColor}cc` : 'hsl(var(--background) / 0.8)',
+                borderColor: 'hsl(var(--border))',
               }}
-              sending={sending}
-              autoSend={quickStartConfig.autoSend}
-              isTypingPrompt={isTypingPrompt}
-            />
+            >
+              <div className="max-w-4xl mx-auto px-4 py-4">
+                <div className="flex items-center justify-between">
+                  {layoutConfig.headerStyle !== 'minimal' && (
+                    <h1 className="font-semibold text-xl">
+                      {chatInstance.custom_branding.chatTitle}
+                    </h1>
+                  )}
+                  <div className={layoutConfig.headerStyle === 'minimal' ? 'ml-auto' : ''}>
+                    <ThemeToggle />
+                  </div>
+                </div>
+              </div>
+            </header>
+            
+            {/* Landing Page Content */}
+            <div className="flex-1">
+              <ChatLandingPage
+                branding={branding}
+                quickStartPrompts={quickStartConfig.prompts}
+                inputPlaceholder={inputConfig.placeholder}
+                input={input}
+                onInputChange={setInput}
+                onSend={handleSend}
+                onPromptClick={(text) => {
+                  if (quickStartConfig.autoSend) {
+                    typeAndSend(text);
+                  } else {
+                    setInput(text);
+                  }
+                }}
+                sending={sending}
+                autoSend={quickStartConfig.autoSend}
+                isTypingPrompt={isTypingPrompt}
+              />
+            </div>
           </main>
         </div>
       </SidebarProvider>
