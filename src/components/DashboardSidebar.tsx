@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, useSidebar } from "@/components/ui/sidebar";
 import { DashboardSidebarHeader } from "./DashboardSidebarHeader";
 import { DashboardSidebarChatList } from "./DashboardSidebarChatList";
 import { DashboardSidebarFooter } from "./DashboardSidebarFooter";
@@ -50,8 +50,10 @@ export function DashboardSidebar({
   canCreateMore,
   currentChatId,
 }: DashboardSidebarProps) {
+  const { open: sidebarOpen } = useSidebar();
+  
   return (
-    <Sidebar className="border-r border-border">
+    <Sidebar collapsible="icon" className="border-r border-border">
       <DashboardSidebarHeader />
 
       <SidebarContent className="flex flex-col">
@@ -61,9 +63,10 @@ export function DashboardSidebar({
             onClick={canCreateMore ? onCreateNew : onUpgrade}
             className="w-full justify-start"
             variant={canCreateMore ? "default" : "outline"}
+            size={sidebarOpen ? "default" : "icon"}
           >
-            <Plus className="mr-2 h-4 w-4" />
-            {canCreateMore ? "New Chat" : "Upgrade to Create"}
+            <Plus className={sidebarOpen ? "mr-2 h-4 w-4" : "h-4 w-4"} />
+            {sidebarOpen && (canCreateMore ? "New Chat" : "Upgrade to Create")}
           </Button>
         </div>
 

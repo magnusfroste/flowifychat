@@ -245,7 +245,7 @@ const Dashboard = () => {
     : null;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gradient-subtle">
         {/* Sidebar */}
         <DashboardSidebar
