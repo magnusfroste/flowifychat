@@ -1,16 +1,16 @@
 /**
  * Page: Chat Configuration (Create/Edit)
- * Full-page editor with split view: Tabs (left) + Live Preview (right)
+ * Full-page editor with persistent sidebar, tabs, and live preview
  */
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft, Save, X } from "lucide-react";
+import { Loader2, Save, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ChatConfigurationTabs } from "@/components/ChatConfigurationTabs";
@@ -18,6 +18,10 @@ import { ChatConfigurationPreview } from "@/components/ChatConfigurationPreview"
 import { BrandingTemplate } from "@/components/BrandingTemplates";
 import { generateSlug } from "@/lib/slugUtils";
 import type { ChatFormValues } from "@/components/ChatConfigurationForm";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { createCheckoutSession } from "@/lib/stripe";
 
 // Reserved slugs
 const RESERVED_SLUGS = ['auth', 'dashboard', 'chat', 'api', 'admin', 'new', 'edit'];
@@ -89,6 +93,9 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   const [saving, setSaving] = useState(false);
   const [checkingSlug, setCheckingSlug] = useState(false);
   const [slugError, setSlugError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [chatInstances, setChatInstances] = useState<any[]>([]);
+  const { plan } = useUserPlan();
 
   const form = useForm<ChatFormValues>({
     resolver: zodResolver(formSchema),
@@ -138,16 +145,34 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
     },
   });
 
-  // Check authentication
+  // Check authentication and load chat instances
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
+        return;
       }
+      setUser(session.user);
+      loadChatInstances(session.user.id);
     };
     checkAuth();
   }, [navigate]);
+
+  const loadChatInstances = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("chat_instances")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setChatInstances(data || []);
+    } catch (error) {
+      console.error("Error loading chat instances:", error);
+    }
+  };
 
   // Fetch existing chat data in edit mode
   useEffect(() => {
@@ -289,25 +314,21 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   };
 
   const handleTemplateApply = (template: BrandingTemplate) => {
-    // Apply all template values
     Object.entries(template.values).forEach(([key, value]) => {
       form.setValue(key as any, value);
     });
     
-    // Auto-fill name and chatTitle with template name if empty (create mode only)
     if (mode === 'create') {
       const currentName = form.getValues("name");
       if (!currentName) {
         const templateName = `${template.name} Chat`;
         form.setValue("name", templateName);
         
-        // Generate slug from the template name
         const newSlug = generateSlug(templateName);
         form.setValue("slug", newSlug);
         handleSlugChange(newSlug);
       }
       
-      // Also set chatTitle if not already set
       const currentChatTitle = form.getValues("chatTitle");
       if (!currentChatTitle) {
         form.setValue("chatTitle", template.name);
@@ -321,12 +342,8 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   };
 
   const onSubmit = async (values: ChatFormValues) => {
-    console.log("Form submission started", values);
-    
-    // Final slug check
     const slugAvailable = await checkSlugAvailability(values.slug);
     if (!slugAvailable) {
-      console.error("Slug not available:", values.slug);
       toast({
         title: "Invalid slug",
         description: slugError || "Please choose a different slug",
@@ -427,6 +444,19 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
     navigate("/dashboard");
   };
 
+  const handleUpgrade = async () => {
+    try {
+      await createCheckoutSession();
+    } catch (error) {
+      console.error("Upgrade error:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -436,90 +466,96 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <DashboardSidebar
+          chatInstances={chatInstances}
+          selectedChatId={id || null}
+          onSelectChat={() => {}}
+          onCreateNew={() => navigate("/chat/new")}
+          userEmail={user?.email}
+          userPlan={plan}
+          onUpgrade={handleUpgrade}
+          onLogout={handleLogout}
+          canCreateMore={plan?.can_create_more_chats || false}
+          currentChatId={id}
+        />
+
+        <SidebarInset className="flex-1">
+          {/* Header with Breadcrumb */}
+          <header className="border-b bg-card sticky top-0 z-10">
+            <div className="px-6 py-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <button onClick={() => navigate("/dashboard")} className="hover:text-foreground transition-colors">
+                  Dashboard
+                </button>
+                <ChevronRight className="h-4 w-4" />
+                <span className="text-foreground font-medium">{form.watch('name') || 'New Chat'}</span>
+                <ChevronRight className="h-4 w-4" />
+                <span>Configuration</span>
+              </div>
               <h1 className="text-xl font-semibold">
                 {mode === 'create' ? 'Create Chat Interface' : 'Edit Chat Interface'}
               </h1>
-              <p className="text-sm text-muted-foreground">
-                {mode === 'create' 
-                  ? 'Configure your new chat interface' 
-                  : `Editing: ${form.watch('name')}`}
-              </p>
             </div>
+          </header>
+
+          {/* Main Content - Split View */}
+          <div className="px-6 py-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="flex gap-6 min-h-[calc(100vh-12rem)]">
+                  {/* Left Panel - Tabs */}
+                  <div className="w-1/2 overflow-y-auto pr-4 pb-24">
+                    <ChatConfigurationTabs
+                      form={form}
+                      mode={mode}
+                      onTemplateApply={handleTemplateApply}
+                      isSlugChecking={checkingSlug}
+                      slugError={slugError}
+                      onSlugChange={handleSlugChange}
+                      onNameChange={handleNameChange}
+                    />
+                  </div>
+
+                  {/* Right Panel - Live Preview */}
+                  <div className="w-1/2 sticky top-24 h-[calc(100vh-12rem)]">
+                    <ChatConfigurationPreview formValues={form.watch()} />
+                  </div>
+                </div>
+
+                {/* Sticky Footer with Actions */}
+                <div className="fixed bottom-0 left-0 right-0 border-t bg-card/95 backdrop-blur-sm z-20">
+                  <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      {mode === 'edit' ? 'Edit your chat configuration' : 'Create a new chat interface'}
+                    </div>
+                    <div className="flex gap-3">
+                      <Button type="button" variant="outline" onClick={handleCancel} disabled={saving}>
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={saving || checkingSlug}>
+                        {saving ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            {mode === 'create' ? 'Create Chat' : 'Save Changes'}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </Form>
           </div>
-        </div>
-      </header>
-
-      {/* Main Content - Split View */}
-      <div className="container mx-auto px-4 py-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex gap-6 min-h-[calc(100vh-12rem)]">
-              {/* Left Panel - Tabs */}
-              <div className="w-1/2 overflow-y-auto pr-4 pb-24">
-                <ChatConfigurationTabs
-                  form={form}
-                  mode={mode}
-                  onTemplateApply={handleTemplateApply}
-                  isSlugChecking={checkingSlug}
-                  slugError={slugError}
-                  onSlugChange={handleSlugChange}
-                  onNameChange={handleNameChange}
-                />
-              </div>
-
-              {/* Right Panel - Live Preview */}
-              <div className="w-1/2 sticky top-24 h-[calc(100vh-12rem)]">
-                <ChatConfigurationPreview formValues={form.watch()} />
-              </div>
-            </div>
-
-            {/* Sticky Footer with Actions */}
-            <div className="fixed bottom-0 left-0 right-0 bg-card border-t py-4 z-10">
-              <div className="container mx-auto px-4 flex justify-end gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={saving}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={saving || checkingSlug}
-                  onClick={(e) => {
-                    console.log("Save button clicked", {
-                      saving,
-                      checkingSlug,
-                      formValues: form.getValues(),
-                      formErrors: form.formState.errors
-                    });
-                  }}
-                >
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
-                  )}
-                  {mode === 'create' ? 'Create Chat Interface' : 'Save Changes'}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </Form>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

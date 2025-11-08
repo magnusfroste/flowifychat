@@ -35,6 +35,7 @@ interface DashboardSidebarProps {
   onUpgrade: () => void;
   onLogout: () => void;
   canCreateMore: boolean;
+  currentChatId?: string;
 }
 
 export function DashboardSidebar({
@@ -47,6 +48,7 @@ export function DashboardSidebar({
   onUpgrade,
   onLogout,
   canCreateMore,
+  currentChatId,
 }: DashboardSidebarProps) {
   return (
     <Sidebar className="border-r border-border">
