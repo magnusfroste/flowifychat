@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Loader2, User, Lock, Bell } from "lucide-react";
+import { ArrowLeft, Loader2, User, Lock, Bell, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useUserPlan } from "@/hooks/useUserPlan";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 interface Profile {
@@ -32,6 +34,7 @@ const Settings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { plan, loading: planLoading } = useUserPlan();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -125,7 +128,7 @@ const Settings = () => {
   };
 
   const handleToggleBrandingBadge = async (checked: boolean) => {
-    if (!user) return;
+    if (!user || !plan?.can_hide_branding) return;
 
     setHideBrandingBadge(checked);
     
@@ -374,17 +377,38 @@ const Settings = () => {
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Hide Branding Badge</Label>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-0.5 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Label>Hide Branding Badge</Label>
+                      {!planLoading && !plan?.can_hide_branding && (
+                        <Badge variant="secondary" className="text-xs bg-primary/20 text-primary border-primary/30">
+                          Pro
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Remove "Powered by Flowify" from all your public chat pages
                     </p>
                   </div>
-                  <Switch 
-                    checked={hideBrandingBadge} 
-                    onCheckedChange={handleToggleBrandingBadge}
-                  />
+                  <div className="flex flex-col items-end gap-2">
+                    <Switch 
+                      checked={hideBrandingBadge} 
+                      onCheckedChange={handleToggleBrandingBadge}
+                      disabled={!plan?.can_hide_branding}
+                    />
+                    {!planLoading && !plan?.can_hide_branding && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="text-xs h-7"
+                        onClick={() => navigate('/pricing')}
+                      >
+                        <Sparkles className="mr-1 h-3 w-3" />
+                        Upgrade
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
