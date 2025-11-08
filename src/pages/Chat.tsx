@@ -974,15 +974,6 @@ const Chat = () => {
                   >
                     <RotateCcw className="h-4 w-4" />
                   </Button>
-                  {/* Show branding badge if accessed via slug */}
-                  {!isOwner && !ownerHidesBranding && (
-                    <a
-                      href="/"
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                    >
-                      Powered by <span className="font-semibold">Flowify</span>
-                    </a>
-                  )}
                 </div>
               </div>
             </div>
@@ -1267,6 +1258,23 @@ const Chat = () => {
         )}
         </div>
       </div>
+
+      {/* Branding Badge - Bottom Right (Lovable-inspired) */}
+      {!isOwner && !ownerHidesBranding && (
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed right-4 z-50 text-xs text-muted-foreground hover:text-foreground transition-all duration-300 backdrop-blur-sm rounded-full px-3 py-1.5 border border-border/50 bg-background/50 hover:bg-background/80 shadow-sm hover:shadow-md"
+          style={{ 
+            bottom: behaviorConfig.inputPosition === 'sticky-bottom' ? '5.5rem' : '1rem' 
+          }}
+        >
+          <span className="flex items-center gap-1">
+            Powered by <span className="font-semibold">Flowify</span>
+          </span>
+        </a>
+      )}
     </SidebarProvider>
   );
 };
