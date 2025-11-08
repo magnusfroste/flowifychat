@@ -850,6 +850,7 @@ const Chat = () => {
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-screen w-full">
             <UnifiedAdminSidebar
+              mode="chat"
               currentChatId={chatInstance.id}
               currentSessionId={sessionId}
               onSessionSelect={handleSessionSelect}
