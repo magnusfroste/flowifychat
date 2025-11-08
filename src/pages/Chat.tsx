@@ -36,8 +36,11 @@ import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { ChatSidebar } from "@/components/ChatSidebar";
+import { UnifiedAdminSidebar } from "@/components/UnifiedAdminSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SignInPrompt } from "@/components/SignInPrompt";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { createCheckoutSession } from "@/lib/stripe";
 
 interface ChatInstance {
   id: string;
@@ -67,6 +70,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme } = useTheme();
+  const [chatInstances, setChatInstances] = useState<ChatInstance[]>([]);
   
   const [user, setUser] = useState<any>(null);
   const [chatInstance, setChatInstance] = useState<ChatInstance | null>(null);
@@ -94,6 +98,8 @@ const Chat = () => {
   });
   const [viewTracked, setViewTracked] = useState(false);
   const [ownerHidesBranding, setOwnerHidesBranding] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const userPlan = useUserPlan();
 
   useEffect(() => {
     // Set up auth state listener
@@ -125,6 +131,19 @@ const Chat = () => {
       }
 
       try {
+        // Load all chat instances for admin sidebar if user is authenticated
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+        if (authSession?.user) {
+          const { data: allChats } = await supabase
+            .from("chat_instances")
+            .select("*")
+            .eq("user_id", authSession.user.id)
+            .order("created_at", { ascending: false });
+          
+          if (allChats) {
+            setChatInstances(allChats as unknown as ChatInstance[]);
+          }
+        }
         // Try loading by UUID first (for owner access)
         let query = supabase
           .from("chat_instances")
@@ -157,8 +176,9 @@ const Chat = () => {
         setChatInstance(instance);
         
         // Check if owner wants to hide branding (for public viewers only)
-        const { data: { session } } = await supabase.auth.getSession();
-        const userIsOwner = session?.user?.id === instance.user_id;
+        const { data: { session: ownerSession } } = await supabase.auth.getSession();
+        const userIsOwner = ownerSession?.user?.id === instance.user_id;
+        setIsOwner(userIsOwner);
         
         if (!userIsOwner && instance.user_id) {
           const { data: profileData } = await supabase
@@ -762,6 +782,30 @@ const Chat = () => {
     handleResetSession();
   };
 
+  const handleUpgradeToPro = async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
+        navigate("/auth");
+        return;
+      }
+
+      await createCheckoutSession();
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start upgrade process. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
   // Utility: Calculate text color based on background brightness
   const getTextColor = (bgColor: string) => {
     const hex = bgColor.replace('#', '');
@@ -785,7 +829,6 @@ const Chat = () => {
   const layoutConfig = getLayoutConfig(branding);
   const behaviorConfig = getMessageBehaviorConfig(branding);
   const interactiveConfig = getInteractiveConfig(branding);
-  const isOwner = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
   // Landing page mode - no header, just centered input
   if (chatMode === 'landing') {
@@ -914,16 +957,38 @@ const Chat = () => {
   return (
     <SidebarProvider defaultOpen={isOwner}>
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
-        {/* Sidebar - only show for owners and if enabled */}
-        {layoutConfig.showSidebar && (isOwner || layoutConfig.allowAnonymousHistory) && (
-          <ChatSidebar
-            chatInstanceId={chatInstance.id}
+        {/* Unified Admin Sidebar - for owners */}
+        {isOwner ? (
+          <UnifiedAdminSidebar
+            currentChatId={chatInstance.id}
             currentSessionId={sessionId}
             onSessionSelect={handleSessionSelect}
             onNewSession={handleNewSession}
-            isOwner={isOwner}
-            userId={user?.id}
+            onChatSelect={(chatId) => {
+              // Navigate to the selected chat
+              const chat = chatInstances.find(c => c.id === chatId);
+              if (chat) {
+                navigate(`/chat/${chat.slug || chat.id}`);
+              }
+            }}
+            userEmail={user?.email}
+            userPlan={userPlan.plan}
+            onUpgrade={handleUpgradeToPro}
+            onLogout={handleLogout}
+            canCreateMore={userPlan.plan?.can_create_more_chats ?? false}
           />
+        ) : (
+          /* Public Chat Sidebar - for visitors */
+          layoutConfig.showSidebar && layoutConfig.allowAnonymousHistory && (
+            <ChatSidebar
+              chatInstanceId={chatInstance.id}
+              currentSessionId={sessionId}
+              onSessionSelect={handleSessionSelect}
+              onNewSession={handleNewSession}
+              isOwner={false}
+              userId={user?.id}
+            />
+          )
         )}
 
         {/* Main content */}
