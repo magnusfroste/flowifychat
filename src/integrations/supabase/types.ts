@@ -147,6 +147,38 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          chat_instance_id: string
+          claimed_at: string | null
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          chat_instance_id: string
+          claimed_at?: string | null
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          chat_instance_id?: string
+          claimed_at?: string | null
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_subscriptions: {
         Row: {
           cancelled_at: string | null

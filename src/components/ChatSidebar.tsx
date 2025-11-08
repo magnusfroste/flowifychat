@@ -42,6 +42,7 @@ interface ChatSidebarProps {
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
   isOwner: boolean;
+  userId?: string;
 }
 
 export function ChatSidebar({
@@ -50,6 +51,7 @@ export function ChatSidebar({
   onSessionSelect,
   onNewSession,
   isOwner,
+  userId,
 }: ChatSidebarProps) {
   const navigate = useNavigate();
   const { open: sidebarOpen } = useSidebar();
@@ -64,12 +66,41 @@ export function ChatSidebar({
   useEffect(() => {
     const loadSessions = async () => {
       try {
-        // Get all sessions with their first message and message count
-        const { data, error } = await supabase
+        let query = supabase
           .from("chat_messages")
           .select("session_id, created_at, content")
           .eq("chat_instance_id", chatInstanceId)
           .order("created_at", { ascending: true });
+
+        // If user is authenticated (not owner), filter by their claimed sessions
+        if (userId && !isOwner) {
+          // Get user's claimed session IDs
+          const { data: userSessionData } = await supabase
+            .from("user_sessions")
+            .select("session_id")
+            .eq("user_id", userId)
+            .eq("chat_instance_id", chatInstanceId);
+
+          const claimedSessionIds = userSessionData?.map(s => s.session_id) || [];
+          
+          // Show sessions that are either:
+          // 1. In localStorage (current device)
+          // 2. Claimed by this user (from any device)
+          const localSessionId = localStorage.getItem(`chat_session:${chatInstanceId}`);
+          const sessionIdsToShow = localSessionId 
+            ? [...new Set([...claimedSessionIds, localSessionId])]
+            : claimedSessionIds;
+
+          if (sessionIdsToShow.length > 0) {
+            query = query.in("session_id", sessionIdsToShow);
+          } else {
+            // User has no sessions yet
+            setLoading(false);
+            return;
+          }
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
@@ -105,7 +136,7 @@ export function ChatSidebar({
     };
 
     loadSessions();
-  }, [chatInstanceId]);
+  }, [chatInstanceId, userId, isOwner]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);

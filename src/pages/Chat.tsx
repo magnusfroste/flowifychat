@@ -20,6 +20,7 @@ import {
   getChatKeyFromRouteOrInstance,
   migrateSessionId,
 } from "@/lib/session";
+import { migrateAnonymousSessions } from "@/lib/sessionMigration";
 import {
   getQuickStartPromptsConfig,
   getWelcomeScreen,
@@ -96,8 +97,23 @@ const Chat = () => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setUser(session?.user ?? null);
+        
+        // Trigger session migration on sign-in
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Use setTimeout to defer migration and prevent blocking
+          setTimeout(async () => {
+            const migratedCount = await migrateAnonymousSessions(session.user.id);
+            
+            if (migratedCount > 0) {
+              toast({
+                title: "Chat history saved!",
+                description: `${migratedCount} conversation${migratedCount > 1 ? 's' : ''} linked to your account.`,
+              });
+            }
+          }, 0);
+        }
       }
     );
 
@@ -905,6 +921,7 @@ const Chat = () => {
             onSessionSelect={handleSessionSelect}
             onNewSession={handleNewSession}
             isOwner={isOwner}
+            userId={user?.id}
           />
         )}
 
