@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, X, ChevronRight } from "lucide-react";
+import { Loader2, Save, X, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ChatConfigurationTabs } from "@/components/ChatConfigurationTabs";
@@ -22,6 +22,14 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 // Reserved slugs
 const RESERVED_SLUGS = ['auth', 'dashboard', 'chat', 'api', 'admin', 'new', 'edit'];
@@ -485,16 +493,34 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           {/* Header with Breadcrumb */}
           <header className="border-b bg-card sticky top-0 z-10">
             <div className="px-6 py-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <button onClick={() => navigate("/dashboard")} className="hover:text-foreground transition-colors">
-                  Dashboard
-                </button>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-foreground font-medium">{form.watch('name') || 'New Chat'}</span>
-                <ChevronRight className="h-4 w-4" />
-                <span>Configuration</span>
-              </div>
-              <h1 className="text-xl font-semibold">
+              <Breadcrumb className="mb-2">
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden sm:block">
+                    <BreadcrumbLink
+                      onClick={() => navigate("/dashboard")}
+                      className="cursor-pointer"
+                    >
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden sm:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      onClick={() => navigate("/dashboard")}
+                      className="cursor-pointer"
+                    >
+                      Dashboard
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>
+                      {form.watch('name') || 'New Chat'}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+              <h1 className="text-2xl font-bold">
                 {mode === 'create' ? 'Create Chat Interface' : 'Edit Chat Interface'}
               </h1>
             </div>
