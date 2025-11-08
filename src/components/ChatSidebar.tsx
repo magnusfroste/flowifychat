@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MessageSquare, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +41,7 @@ interface ChatSidebarProps {
   currentSessionId: string;
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
+  isOwner: boolean;
 }
 
 export function ChatSidebar({
@@ -47,14 +49,17 @@ export function ChatSidebar({
   currentSessionId,
   onSessionSelect,
   onNewSession,
+  isOwner,
 }: ChatSidebarProps) {
   const navigate = useNavigate();
   const { open: sidebarOpen } = useSidebar();
+  const { toast } = useToast();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -149,10 +154,15 @@ export function ChatSidebar({
         onNewSession();
       }
 
-      toast.success("Conversation deleted");
+      toast({
+        title: "Conversation deleted",
+      });
     } catch (error) {
       console.error("Error deleting session:", error);
-      toast.error("Failed to delete conversation");
+      toast({
+        title: "Failed to delete conversation",
+        variant: "destructive",
+      });
     } finally {
       setDeleting(false);
       setDeleteDialogOpen(false);
@@ -160,9 +170,28 @@ export function ChatSidebar({
     }
   };
 
+  const handleClearHistory = () => {
+    // Clear only the current chat's session from localStorage
+    localStorage.removeItem(`chat_session:${chatInstanceId}`);
+    
+    // Clear local sessions state to update UI
+    setSessions([]);
+    
+    // Trigger new session creation
+    onNewSession();
+    
+    // Show success message
+    toast({
+      title: "Chat history cleared",
+      description: "Your conversation history has been cleared from this device",
+    });
+    
+    setClearDialogOpen(false);
+  };
+
   return (
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
-      {sidebarOpen && (
+      {isOwner && sidebarOpen && (
         <div className="p-2 border-b">
           <Button
             variant="ghost"
@@ -175,6 +204,21 @@ export function ChatSidebar({
           </Button>
         </div>
       )}
+      
+      {!isOwner && sidebarOpen && (
+        <div className="p-2 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setClearDialogOpen(true)}
+            className="w-full justify-start text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Clear My History
+          </Button>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between p-2 border-b">
         <SidebarTrigger />
         {sidebarOpen && (
@@ -234,15 +278,17 @@ export function ChatSidebar({
                           </div>
                         )}
                       </SidebarMenuButton>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => handleDeleteClick(session.session_id, e)}
-                        title="Delete conversation"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      {isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => handleDeleteClick(session.session_id, e)}
+                          title="Delete conversation"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   </SidebarMenuItem>
                 ))
@@ -268,6 +314,28 @@ export function ChatSidebar({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear your chat history?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will clear your conversation history from this device. You won't be able to access these conversations again.
+              <br /><br />
+              <span className="text-xs text-muted-foreground">Note: This only affects your device. The conversations remain in the system.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearHistory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear History
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

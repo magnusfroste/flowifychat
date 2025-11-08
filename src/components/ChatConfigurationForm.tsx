@@ -87,6 +87,7 @@ export interface ChatFormValues {
   avatarSize?: 'small' | 'medium' | 'large';
   avatarPosition?: 'top' | 'center';
   showSidebar?: boolean;
+  allowAnonymousHistory?: boolean;
   headerStyle?: 'minimal' | 'standard' | 'prominent';
   
   // Input Controls
@@ -1050,6 +1051,44 @@ export function ChatConfigurationForm({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="showSidebar"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                  <div className="space-y-0.5">
+                    <FormLabel>Show Conversation History</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Display chat history sidebar
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {form.watch("showSidebar") && (
+              <FormField
+                control={form.control}
+                name="allowAnonymousHistory"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                    <div className="space-y-0.5">
+                      <FormLabel>Show History to Anonymous Users</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Allow visitors to see their past conversations without logging in
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
           </CollapsibleContent>
         </Collapsible>
 

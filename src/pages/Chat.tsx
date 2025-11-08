@@ -898,12 +898,13 @@ const Chat = () => {
     <SidebarProvider defaultOpen={isOwner}>
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
         {/* Sidebar - only show for owners and if enabled */}
-        {isOwner && layoutConfig.showSidebar && (
+        {layoutConfig.showSidebar && (isOwner || layoutConfig.allowAnonymousHistory) && (
           <ChatSidebar
             chatInstanceId={chatInstance.id}
             currentSessionId={sessionId}
             onSessionSelect={handleSessionSelect}
             onNewSession={handleNewSession}
+            isOwner={isOwner}
           />
         )}
 

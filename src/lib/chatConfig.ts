@@ -81,6 +81,7 @@ export interface ChatBranding {
   avatarSize?: 'small' | 'medium' | 'large';
   avatarPosition?: 'top' | 'center';
   showSidebar?: boolean;
+  allowAnonymousHistory?: boolean;
   headerStyle?: 'minimal' | 'standard' | 'prominent';
   
   // Input Controls
@@ -162,6 +163,7 @@ export const getLayoutConfig = (branding: any) => {
     avatarSize: branding?.avatarSize || 'medium',
     avatarPosition: branding?.avatarPosition || 'center',
     showSidebar: branding?.showSidebar ?? true,
+    allowAnonymousHistory: branding?.allowAnonymousHistory ?? true,
     headerStyle: branding?.headerStyle || 'standard',
   };
 };
