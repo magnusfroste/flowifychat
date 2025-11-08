@@ -6,7 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatSkeleton } from "@/components/ChatSkeleton";
-import { ArrowLeft, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw } from "lucide-react";
+import { Home, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -1080,26 +1088,41 @@ const Chat = () => {
               color: isDark ? '#ffffff' : '#000000',
             }}
           >
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="flex items-center justify-between">
+                {/* Left: Breadcrumb navigation (only for owners) */}
                 <div className="flex items-center gap-4">
-                  {/* Only show back button if viewing by UUID (owner) and no sidebar */}
-                  {isOwner && !layoutConfig.showSidebar && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate("/dashboard")}
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back
-                    </Button>
+                  {isOwner && (
+                    <Breadcrumb>
+                      <BreadcrumbList>
+                        <BreadcrumbItem>
+                          <BreadcrumbLink
+                            onClick={() => navigate("/dashboard")}
+                            className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
+                          >
+                            <Home className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Dashboard</span>
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                          <BreadcrumbPage className="font-medium max-w-[200px] sm:max-w-none truncate">
+                            {chatInstance.custom_branding.chatTitle}
+                          </BreadcrumbPage>
+                        </BreadcrumbItem>
+                      </BreadcrumbList>
+                    </Breadcrumb>
                   )}
-                  {layoutConfig.headerStyle !== 'minimal' && (
+                  
+                  {/* Show chat title for non-owners (public view) */}
+                  {!isOwner && layoutConfig.headerStyle !== 'minimal' && (
                     <h1 className={`font-semibold ${layoutConfig.headerStyle === 'prominent' ? 'text-2xl' : 'text-xl'}`}>
                       {chatInstance.custom_branding.chatTitle}
                     </h1>
                   )}
                 </div>
+                
+                {/* Right: Action buttons */}
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <Button
