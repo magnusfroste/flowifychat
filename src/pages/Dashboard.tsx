@@ -21,11 +21,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Settings as SettingsIcon, Lock, Sparkles } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useUserPlan } from "@/hooks/useUserPlan";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 interface ChatInstance {
@@ -55,8 +56,10 @@ const Dashboard = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { plan, loading: planLoading } = useUserPlan();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -222,17 +225,33 @@ const Dashboard = () => {
               <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
               <span className="text-xl font-bold">Flowify</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Plan Badge & Usage */}
+              {!planLoading && plan && (
+                <div className="flex items-center gap-2">
+                  <Badge 
+                    variant={plan.plan_type === 'free' ? 'secondary' : 'default'}
+                    className={plan.plan_type !== 'free' ? 'bg-primary/20 text-primary border-primary/30' : ''}
+                  >
+                    {plan.plan_type === 'free' ? 'Free Plan' : plan.plan_type === 'pro' ? 'Pro' : 'Enterprise'}
+                  </Badge>
+                  {plan.plan_type === 'free' && (
+                    <span className="text-sm text-muted-foreground hidden sm:inline">
+                      {plan.current_chat_count} / {plan.max_chat_instances} chat{plan.max_chat_instances !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              )}
               <ThemeToggle />
               <Link to="/settings">
-                <Button variant="ghost">
+                <Button variant="ghost" size="sm">
                   <SettingsIcon className="mr-2 h-4 w-4" />
-                  Settings
+                  <span className="hidden sm:inline">Settings</span>
                 </Button>
               </Link>
-              <Button variant="ghost" onClick={handleLogout}>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
@@ -249,19 +268,42 @@ const Dashboard = () => {
         </div>
 
         {/* Create New Button */}
-        <Link to="/chat/new">
-          <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
+        {!planLoading && plan && !plan.can_create_more_chats ? (
+          <Card 
+            className="mb-8 border-2 border-muted bg-muted/20 cursor-pointer hover:border-primary/30 transition-colors"
+            onClick={() => setUpgradeDialogOpen(true)}
+          >
             <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Plus className="h-8 w-8 text-primary" />
+              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                <Lock className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-semibold mb-2">Create New Chat Interface</h3>
-                <p className="text-muted-foreground text-sm">Configure a beautiful chat experience for your workflow</p>
+                <h3 className="text-xl font-semibold mb-2">Upgrade to Create More</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  You've reached your limit of {plan.max_chat_instances} chat instance{plan.max_chat_instances !== 1 ? 's' : ''}
+                </p>
+                <Button className="bg-primary hover:bg-primary-glow">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Upgrade to Pro
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </Link>
+        ) : (
+          <Link to="/chat/new">
+            <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
+              <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Plus className="h-8 w-8 text-primary" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-2">Create New Chat Interface</h3>
+                  <p className="text-muted-foreground text-sm">Configure a beautiful chat experience for your workflow</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {/* Chat Instances Grid */}
         {chatInstances.length > 0 ? (
@@ -452,6 +494,71 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Upgrade Dialog */}
+        <AlertDialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Upgrade to Pro
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Unlock unlimited chat instances and remove Flowify branding from all your public chat pages.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium">Unlimited Chat Instances</p>
+                    <p className="text-sm text-muted-foreground">Create as many chat interfaces as you need</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium">White-Label Experience</p>
+                    <p className="text-sm text-muted-foreground">Remove "Powered by Flowify" badge</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium">Advanced Analytics</p>
+                    <p className="text-sm text-muted-foreground">Export data and detailed insights</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium">Priority Support</p>
+                    <p className="text-sm text-muted-foreground">Get help when you need it</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 p-4 bg-primary/5 rounded-lg">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold">$19</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Maybe Later</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setUpgradeDialogOpen(false);
+                  navigate('/pricing');
+                }}
+                className="bg-primary hover:bg-primary-glow"
+              >
+                View Plans
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
