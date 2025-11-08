@@ -836,34 +836,105 @@ const Chat = () => {
       ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
       : branding?.backgroundColor ? { backgroundColor: branding.backgroundColor } : {};
       
+    // ADMIN/OWNER VIEW: Expanded sidebar (Grok pattern)
+    if (isOwner) {
+      return (
+        <SidebarProvider defaultOpen={true}>
+          <div className="flex min-h-screen w-full">
+            <UnifiedAdminSidebar
+              currentChatId={chatInstance.id}
+              currentSessionId={sessionId}
+              onSessionSelect={handleSessionSelect}
+              onNewSession={handleNewSession}
+              onChatSelect={(chatId) => {
+                const chat = chatInstances.find(c => c.id === chatId);
+                if (chat) {
+                  navigate(`/chat/${chat.slug || chat.id}`);
+                }
+              }}
+              userEmail={user?.email}
+              userPlan={userPlan.plan}
+              onUpgrade={handleUpgradeToPro}
+              onLogout={handleLogout}
+              canCreateMore={userPlan.plan?.can_create_more_chats ?? false}
+            />
+            
+            {/* Main content area with landing page */}
+            <main 
+              className="flex-1 transition-all duration-200"
+              style={{
+                ...bgStyles,
+                ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
+                ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
+              }}
+            >
+              <ChatLandingPage
+                branding={branding}
+                quickStartPrompts={quickStartConfig.prompts}
+                inputPlaceholder={inputConfig.placeholder}
+                input={input}
+                onInputChange={setInput}
+                onSend={handleSend}
+                onPromptClick={(text) => {
+                  if (quickStartConfig.autoSend) {
+                    typeAndSend(text);
+                  } else {
+                    setInput(text);
+                  }
+                }}
+                sending={sending}
+                autoSend={quickStartConfig.autoSend}
+                isTypingPrompt={isTypingPrompt}
+              />
+            </main>
+          </div>
+        </SidebarProvider>
+      );
+    }
+    
+    // PUBLIC USER VIEW: Collapsed sidebar (Claude pattern)
     return (
-      <div
-        className="min-h-screen"
-        style={{
-          ...bgStyles,
-          ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
-          ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
-        }}
-      >
-        <ChatLandingPage
-          branding={branding}
-          quickStartPrompts={quickStartConfig.prompts}
-          inputPlaceholder={inputConfig.placeholder}
-          input={input}
-          onInputChange={setInput}
-          onSend={handleSend}
-          onPromptClick={(text) => {
-            if (quickStartConfig.autoSend) {
-              typeAndSend(text);
-            } else {
-              setInput(text);
-            }
-          }}
-          sending={sending}
-          autoSend={quickStartConfig.autoSend}
-          isTypingPrompt={isTypingPrompt}
-        />
-      </div>
+      <SidebarProvider defaultOpen={false}>
+        <div className="flex min-h-screen w-full">
+          <ChatSidebar
+            chatInstanceId={chatInstance.id}
+            currentSessionId={sessionId}
+            onSessionSelect={handleSessionSelect}
+            onNewSession={handleNewSession}
+            isOwner={false}
+            userId={user?.id}
+          />
+          
+          {/* Main content area with landing page */}
+          <main 
+            className="flex-1 transition-all duration-200"
+            style={{
+              ...bgStyles,
+              ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
+              ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
+            }}
+          >
+            <ChatLandingPage
+              branding={branding}
+              quickStartPrompts={quickStartConfig.prompts}
+              inputPlaceholder={inputConfig.placeholder}
+              input={input}
+              onInputChange={setInput}
+              onSend={handleSend}
+              onPromptClick={(text) => {
+                if (quickStartConfig.autoSend) {
+                  typeAndSend(text);
+                } else {
+                  setInput(text);
+                }
+              }}
+              sending={sending}
+              autoSend={quickStartConfig.autoSend}
+              isTypingPrompt={isTypingPrompt}
+            />
+          </main>
+        </div>
+      </SidebarProvider>
     );
   }
 
