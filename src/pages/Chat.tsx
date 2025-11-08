@@ -1122,18 +1122,8 @@ const Chat = () => {
                   )}
                 </div>
                 
-                {/* Right: Action buttons */}
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleResetSession}
-                    title="Reset conversation"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                  </Button>
-                </div>
+                {/* Right: Theme toggle */}
+                <ThemeToggle />
               </div>
             </div>
           </header>
