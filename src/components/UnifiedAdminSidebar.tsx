@@ -55,6 +55,7 @@ interface Session {
 }
 
 interface UnifiedAdminSidebarProps {
+  mode?: 'dashboard' | 'chat'; // New: determines sidebar behavior
   currentChatId: string;
   currentSessionId: string;
   onSessionSelect: (sessionId: string) => void;
@@ -68,6 +69,7 @@ interface UnifiedAdminSidebarProps {
 }
 
 export function UnifiedAdminSidebar({
+  mode = 'dashboard', // Default to dashboard mode
   currentChatId,
   currentSessionId,
   onSessionSelect,
@@ -114,7 +116,7 @@ export function UnifiedAdminSidebar({
     loadChatInstances();
   }, []);
 
-  // Load sessions for expanded chat
+  // Load sessions for expanded chat (or current chat in chat mode)
   useEffect(() => {
     const loadSessions = async (chatId: string) => {
       try {
@@ -155,10 +157,16 @@ export function UnifiedAdminSidebar({
       }
     };
 
-    if (expandedChatId && !sessions[expandedChatId]) {
+    // In chat mode, load sessions for current chat immediately
+    if (mode === 'chat' && currentChatId && !sessions[currentChatId]) {
+      loadSessions(currentChatId);
+    }
+    
+    // In dashboard mode, load when a chat is expanded
+    if (mode === 'dashboard' && expandedChatId && !sessions[expandedChatId]) {
       loadSessions(expandedChatId);
     }
-  }, [expandedChatId, sessions]);
+  }, [mode, currentChatId, expandedChatId, sessions]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -248,6 +256,119 @@ export function UnifiedAdminSidebar({
     }
   };
 
+  // Render chat mode - flat conversation history
+  if (mode === 'chat') {
+    const currentSessions = sessions[currentChatId] || [];
+    
+    return (
+      <>
+        <Sidebar className="border-r border-border">
+          <DashboardSidebarHeader />
+          
+          {/* New Session Button */}
+          <div className="flex items-center justify-between p-2 border-b">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onNewSession}
+              className="w-full justify-start"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              New Session
+            </Button>
+          </div>
+
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Conversation History</SidebarGroupLabel>
+              
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {loading ? (
+                    <>
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="px-2 py-3">
+                          <Skeleton className="h-12 w-full" />
+                        </div>
+                      ))}
+                    </>
+                  ) : currentSessions.length === 0 ? (
+                    <div className="px-4 py-6 text-sm text-muted-foreground text-center">
+                      No conversations yet
+                    </div>
+                  ) : (
+                    currentSessions.map((session) => (
+                      <SidebarMenuItem key={session.session_id}>
+                        <div className="relative group">
+                          <SidebarMenuButton
+                            onClick={() => onSessionSelect(session.session_id)}
+                            isActive={session.session_id === currentSessionId}
+                            className="w-full pr-8"
+                          >
+                            <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                            <div className="flex flex-col items-start flex-1 min-w-0">
+                              <span className="text-xs font-medium truncate w-full">
+                                {session.preview}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatTimestamp(session.first_message_time)} •{" "}
+                                {session.message_count} messages
+                              </span>
+                            </div>
+                          </SidebarMenuButton>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleDeleteClick(currentChatId, session.session_id, e)}
+                            title="Delete conversation"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </SidebarMenuItem>
+                    ))
+                  )}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          {/* Footer */}
+          <DashboardSidebarFooter
+            userEmail={userEmail}
+            userPlan={userPlan}
+            onUpgrade={onUpgrade}
+            onLogout={onLogout}
+          />
+        </Sidebar>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete all messages in this conversation. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
+    );
+  }
+
+  // Render dashboard mode - nested chat instances with sessions
   return (
     <>
       <Sidebar className="border-r border-border">

@@ -1039,6 +1039,7 @@ const Chat = () => {
         {/* Unified Admin Sidebar - for owners */}
         {isOwner ? (
           <UnifiedAdminSidebar
+            mode="chat"
             currentChatId={chatInstance.id}
             currentSessionId={sessionId}
             onSessionSelect={handleSessionSelect}
