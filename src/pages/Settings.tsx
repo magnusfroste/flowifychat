@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Loader2, User, Lock, Bell, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, User, Lock, Bell, Sparkles, CreditCard, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
@@ -247,7 +247,7 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
               Profile
@@ -255,6 +255,10 @@ const Settings = () => {
             <TabsTrigger value="security">
               <Lock className="h-4 w-4 mr-2" />
               Security
+            </TabsTrigger>
+            <TabsTrigger value="plans">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Plans & Billing
             </TabsTrigger>
             <TabsTrigger value="preferences">
               <Bell className="h-4 w-4 mr-2" />
@@ -352,6 +356,148 @@ const Settings = () => {
                     Change Password
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="plans">
+            <Card>
+              <CardHeader>
+                <CardTitle>Plans & Billing</CardTitle>
+                <CardDescription>
+                  Manage your subscription and view usage statistics.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Current Plan */}
+                <div>
+                  <h3 className="font-semibold mb-3">Current Plan</h3>
+                  {planLoading ? (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading plan details...
+                    </div>
+                  ) : plan ? (
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Badge 
+                          variant={plan.plan_type === 'free' ? 'secondary' : 'default'}
+                          className={plan.plan_type !== 'free' ? 'bg-primary/20 text-primary border-primary/30 text-base px-3 py-1' : 'text-base px-3 py-1'}
+                        >
+                          {plan.plan_type === 'free' ? 'Free Plan' : plan.plan_type === 'pro' ? 'Pro Plan' : 'Enterprise Plan'}
+                        </Badge>
+                        {plan.plan_type === 'pro' && (
+                          <span className="text-sm text-muted-foreground">
+                            $19/month
+                          </span>
+                        )}
+                      </div>
+                      {plan.plan_type === 'free' ? (
+                        <Button 
+                          onClick={() => navigate('/pricing')}
+                          className="bg-primary hover:bg-primary-glow"
+                        >
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Upgrade to Pro
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm">
+                          Manage Billing
+                        </Button>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+
+                <Separator />
+
+                {/* Usage Statistics */}
+                <div>
+                  <h3 className="font-semibold mb-3">Usage Statistics</h3>
+                  {!planLoading && plan ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
+                        <span className="text-sm">Chat Instances</span>
+                        <span className="font-semibold">
+                          {plan.current_chat_count} / {plan.plan_type === 'free' ? plan.max_chat_instances : '∞'}
+                        </span>
+                      </div>
+                      {plan.plan_type === 'free' && (
+                        <p className="text-xs text-muted-foreground">
+                          {plan.can_create_more_chats 
+                            ? `You can create ${plan.max_chat_instances - plan.current_chat_count} more chat instance${plan.max_chat_instances - plan.current_chat_count !== 1 ? 's' : ''}.`
+                            : 'You have reached your chat instance limit. Upgrade to Pro for unlimited instances.'
+                          }
+                        </p>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+
+                <Separator />
+
+                {/* Plan Features */}
+                <div>
+                  <h3 className="font-semibold mb-3">
+                    {plan?.plan_type === 'free' ? 'Included in Your Plan' : 'Your Pro Features'}
+                  </h3>
+                  <ul className="space-y-2">
+                    {plan?.plan_type === 'free' ? (
+                      <>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>1 chat instance</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Custom branding (colors, logo, messages)</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Basic analytics & conversation history</span>
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Unlimited chat instances</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Hide branding badge (white-label)</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Advanced analytics & export</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>Priority support</span>
+                        </li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+
+                {plan?.plan_type === 'free' && (
+                  <>
+                    <Separator />
+                    <div className="bg-primary/5 rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold">Upgrade to Pro</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Get unlimited chat instances and remove Flowify branding for just $19/month.
+                      </p>
+                      <Button 
+                        onClick={() => navigate('/pricing')}
+                        className="w-full bg-primary hover:bg-primary-glow"
+                      >
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        View Pricing Plans
+                      </Button>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
