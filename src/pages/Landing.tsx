@@ -1,11 +1,83 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight } from "lucide-react";
+import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X } from "lucide-react";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import { useState } from "react";
 
 const Landing = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="light min-h-screen bg-gradient-subtle">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
+              <span className="text-lg font-bold">Flowify</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Features
+              </a>
+              <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Pricing
+              </Link>
+              <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Sign In
+              </Link>
+              <Link to="/auth">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-background">
+            <div className="px-4 py-4 space-y-3">
+              <a
+                href="#features"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <Link
+                to="/pricing"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                to="/auth"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full" size="sm">Get Started</Button>
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -47,7 +119,7 @@ const Landing = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Everything You Need, Nothing You Don't
@@ -115,13 +187,79 @@ const Landing = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-background/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
-              <span className="text-lg font-bold">Flowify</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            {/* Logo Column */}
+            <div className="col-span-2 md:col-span-1">
+              <Link to="/" className="flex items-center gap-2 mb-4">
+                <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
+                <span className="text-lg font-bold">Flowify</span>
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                Beautiful chat interfaces for your n8n workflows
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
+
+            {/* Product Column */}
+            <div>
+              <h3 className="font-semibold mb-3">Product</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Documentation
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company Column */}
+            <div>
+              <h3 className="font-semibold mb-3">Company</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div>
+              <h3 className="font-semibold mb-3">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Terms
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Privacy
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-border">
+            <p className="text-sm text-muted-foreground text-center">
               © 2025 Flowify. All rights reserved.
             </p>
           </div>
