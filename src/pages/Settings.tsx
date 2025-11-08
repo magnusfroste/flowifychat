@@ -378,7 +378,7 @@ const Settings = () => {
                   <div className="space-y-0.5">
                     <Label>Hide Branding Badge</Label>
                     <p className="text-xs text-muted-foreground">
-                      Remove "Powered by FlowChat" from all your public chat pages
+                      Remove "Powered by Flowify" from all your public chat pages
                     </p>
                   </div>
                   <Switch 

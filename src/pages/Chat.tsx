@@ -961,7 +961,7 @@ const Chat = () => {
                       href="/"
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                     >
-                      Powered by <span className="font-semibold">FlowChat</span>
+                      Powered by <span className="font-semibold">Flowify</span>
                     </a>
                   )}
                 </div>
