@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useUserPlan } from "@/hooks/useUserPlan";
+import { createCheckoutSession } from "@/lib/stripe";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 interface ChatInstance {
@@ -57,6 +58,7 @@ const Dashboard = () => {
   const [deleting, setDeleting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { plan, loading: planLoading } = useUserPlan();
@@ -205,6 +207,27 @@ const Dashboard = () => {
       title: "Logged out",
       description: "Come back soon!",
     });
+  };
+
+  const handleUpgradeToPro = async () => {
+    setIsUpgrading(true);
+    try {
+      await createCheckoutSession();
+      setUpgradeDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Redirecting to checkout...",
+      });
+    } catch (error) {
+      console.error("Error starting upgrade:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start upgrade process",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpgrading(false);
+    }
   };
 
   if (loading) {
@@ -540,22 +563,21 @@ const Dashboard = () => {
               </div>
               <div className="mt-6 p-4 bg-primary/5 rounded-lg">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold">$19</span>
+                  <span className="text-3xl font-bold">$9</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </div>
             </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Maybe Later</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setUpgradeDialogOpen(false);
-                  navigate('/pricing');
-                }}
+              <Button 
+                onClick={handleUpgradeToPro} 
+                disabled={isUpgrading}
                 className="bg-primary hover:bg-primary-glow"
               >
-                View Plans
-              </AlertDialogAction>
+                <Sparkles className="h-4 w-4 mr-2" />
+                {isUpgrading ? "Processing..." : "Upgrade Now"}
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

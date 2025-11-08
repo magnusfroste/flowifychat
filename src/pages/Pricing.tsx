@@ -1,12 +1,40 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { createCheckoutSession } from "@/lib/stripe";
+import { toast } from "sonner";
 
 const Pricing = () => {
+  const navigate = useNavigate();
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  const handleUpgradeToPro = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast.error("Please sign in to upgrade");
+      navigate('/auth');
+      return;
+    }
+
+    setIsUpgrading(true);
+    try {
+      await createCheckoutSession();
+      toast.success("Redirecting to checkout...");
+    } catch (error) {
+      console.error("Error starting upgrade:", error);
+      toast.error("Failed to start upgrade process");
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
   const plans = [
     {
       name: "Free",
@@ -30,7 +58,7 @@ const Pricing = () => {
     },
     {
       name: "Pro",
-      price: "$19",
+      price: "$9",
       period: "per month",
       description: "For professionals who need more",
       features: [
@@ -152,16 +180,23 @@ const Pricing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  asChild
-                  variant={plan.ctaVariant}
-                  className={`w-full ${
-                    plan.highlighted ? "bg-primary hover:bg-primary-glow" : ""
-                  }`}
-                  size="lg"
-                >
-                  <Link to={plan.href}>{plan.cta}</Link>
-                </Button>
+                  {plan.name === 'Free' ? (
+                    <Button asChild className="w-full">
+                      <Link to="/auth">Get Started</Link>
+                    </Button>
+                  ) : plan.name === 'Pro' ? (
+                    <Button 
+                      className="w-full" 
+                      onClick={handleUpgradeToPro}
+                      disabled={isUpgrading}
+                    >
+                      {isUpgrading ? "Processing..." : "Upgrade to Pro"}
+                    </Button>
+                  ) : (
+                    <Button variant="outline" asChild className="w-full">
+                      <a href="mailto:sales@flowify.com">Contact Sales</a>
+                    </Button>
+                  )}
               </CardContent>
             </Card>
           ))}

@@ -13,7 +13,9 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Loader2, User, Lock, Bell, Sparkles, CreditCard, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useUserPlan } from "@/hooks/useUserPlan";
+import { createCheckoutSession, openCustomerPortal, checkSubscription } from "@/lib/stripe";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import { toast } from "sonner";
 
 interface Profile {
   id: string;
@@ -32,9 +34,10 @@ const Settings = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { plan, loading: planLoading } = useUserPlan();
+  const { toast: toastFn } = useToast();
+  const { plan, loading: planLoading, refetch: refetchPlan } = useUserPlan();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -58,11 +61,13 @@ const Settings = () => {
       } else {
         setUser(session.user);
         loadProfile(session.user.id);
+        checkSubscription().catch(console.error);
+        refetchPlan();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, refetchPlan]);
 
   const loadProfile = async (userId: string) => {
     try {
@@ -109,7 +114,7 @@ const Settings = () => {
 
       if (error) throw error;
 
-      toast({
+      toastFn({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
       });
@@ -117,13 +122,35 @@ const Settings = () => {
       await loadProfile(user.id);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast({
+      toastFn({
         title: "Error",
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUpgradeToPro = async () => {
+    setIsUpgrading(true);
+    try {
+      await createCheckoutSession();
+      toast.success("Redirecting to checkout...");
+    } catch (error) {
+      console.error("Error starting upgrade:", error);
+      toast.error("Failed to start upgrade process");
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
+  const handleManageBilling = async () => {
+    try {
+      await openCustomerPortal();
+    } catch (error) {
+      console.error("Error opening billing portal:", error);
+      toast.error("Failed to open billing management");
     }
   };
 
@@ -140,7 +167,7 @@ const Settings = () => {
 
       if (error) throw error;
 
-      toast({
+      toastFn({
         title: "Setting updated",
         description: checked 
           ? "Branding badge will be hidden on all your public chats"
@@ -149,7 +176,7 @@ const Settings = () => {
     } catch (error: any) {
       console.error("Error updating branding badge setting:", error);
       setHideBrandingBadge(!checked); // Revert on error
-      toast({
+      toastFn({
         title: "Error",
         description: "Failed to update setting. Please try again.",
         variant: "destructive",
@@ -161,7 +188,7 @@ const Settings = () => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      toast({
+      toastFn({
         title: "Error",
         description: "New passwords do not match.",
         variant: "destructive",
@@ -170,7 +197,7 @@ const Settings = () => {
     }
 
     if (newPassword.length < 8) {
-      toast({
+      toastFn({
         title: "Error",
         description: "Password must be at least 8 characters long.",
         variant: "destructive",
@@ -186,7 +213,7 @@ const Settings = () => {
 
       if (error) throw error;
 
-      toast({
+      toastFn({
         title: "Password changed",
         description: "Your password has been updated successfully.",
       });
@@ -196,7 +223,7 @@ const Settings = () => {
       setConfirmPassword("");
     } catch (error: any) {
       console.error("Error changing password:", error);
-      toast({
+      toastFn({
         title: "Error",
         description: error.message || "Failed to change password. Please try again.",
         variant: "destructive",
@@ -388,20 +415,25 @@ const Settings = () => {
                         </Badge>
                         {plan.plan_type === 'pro' && (
                           <span className="text-sm text-muted-foreground">
-                            $19/month
+                            $9/month
                           </span>
                         )}
                       </div>
                       {plan.plan_type === 'free' ? (
                         <Button 
-                          onClick={() => navigate('/pricing')}
+                          onClick={handleUpgradeToPro}
                           className="bg-primary hover:bg-primary-glow"
+                          disabled={isUpgrading}
                         >
                           <Sparkles className="mr-2 h-4 w-4" />
-                          Upgrade to Pro
+                          {isUpgrading ? "Processing..." : "Upgrade to Pro"}
                         </Button>
                       ) : (
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleManageBilling}
+                        >
                           Manage Billing
                         </Button>
                       )}
