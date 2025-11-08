@@ -21,14 +21,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, ExternalLink, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Settings as SettingsIcon, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Lock, Sparkles } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
-import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 
 interface ChatInstance {
   id: string;
@@ -53,6 +54,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [chatInstances, setChatInstances] = useState<ChatInstance[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -238,288 +240,413 @@ const Dashboard = () => {
     );
   }
 
+  const selectedChat = selectedChatId
+    ? chatInstances.find((c) => c.id === selectedChatId)
+    : null;
+
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
-              <span className="text-xl font-bold">Flowify</span>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Plan Badge & Usage */}
-              {!planLoading && plan && (
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={plan.plan_type === 'free' ? 'secondary' : 'default'}
-                    className={plan.plan_type !== 'free' ? 'bg-primary/20 text-primary border-primary/30' : ''}
-                  >
-                    {plan.plan_type === 'free' ? 'Free Plan' : plan.plan_type === 'pro' ? 'Pro' : 'Enterprise'}
-                  </Badge>
-                  {plan.plan_type === 'free' && (
-                    <span className="text-sm text-muted-foreground hidden sm:inline">
-                      {plan.current_chat_count} / {plan.max_chat_instances} chat{plan.max_chat_instances !== 1 ? 's' : ''}
-                    </span>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-gradient-subtle">
+        {/* Sidebar */}
+        <DashboardSidebar
+          chatInstances={chatInstances}
+          selectedChatId={selectedChatId}
+          onSelectChat={setSelectedChatId}
+          onCreateNew={() => navigate("/chat/new")}
+          userEmail={user?.email}
+          userPlan={plan}
+          onUpgrade={() => setUpgradeDialogOpen(true)}
+          onLogout={handleLogout}
+          canCreateMore={plan?.can_create_more_chats ?? true}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+            <div className="px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <SidebarTrigger className="lg:hidden" />
+                  {selectedChat && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedChatId(null)}
+                        className="gap-2"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to All
+                      </Button>
+                      <div className="h-4 w-px bg-border" />
+                      <h2 className="text-lg font-semibold">{selectedChat.name}</h2>
+                    </>
+                  )}
+                  {!selectedChat && (
+                    <h1 className="text-xl font-bold">Your Chat Interfaces</h1>
                   )}
                 </div>
-              )}
-              <ThemeToggle />
-              <Link to="/settings">
-                <Button variant="ghost" size="sm">
-                  <SettingsIcon className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Settings</span>
-                </Button>
-              </Link>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
+                <div className="flex items-center gap-3">
+                  {!planLoading && plan && (
+                    <Badge
+                      variant={plan.plan_type === "free" ? "secondary" : "default"}
+                      className={
+                        plan.plan_type !== "free"
+                          ? "bg-primary/20 text-primary border-primary/30"
+                          : ""
+                      }
+                    >
+                      {plan.plan_type === "free"
+                        ? "Free Plan"
+                        : plan.plan_type === "pro"
+                        ? "Pro"
+                        : "Enterprise"}
+                    </Badge>
+                  )}
+                  <ThemeToggle />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </header>
+          </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Your Chat Interfaces</h1>
-          <p className="text-muted-foreground">
-            Manage and create beautiful chat experiences for your n8n workflows
-          </p>
-        </div>
-
-        {/* Create New Button */}
-        {!planLoading && plan && !plan.can_create_more_chats ? (
-          <Card 
-            className="mb-8 border-2 border-muted bg-muted/20 cursor-pointer hover:border-primary/30 transition-colors"
-            onClick={() => setUpgradeDialogOpen(true)}
-          >
-            <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                <Lock className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-semibold mb-2">Upgrade to Create More</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  You've reached your limit of {plan.max_chat_instances} chat instance{plan.max_chat_instances !== 1 ? 's' : ''}
-                </p>
-                <Button className="bg-primary hover:bg-primary-glow">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Upgrade to Pro
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Link to="/chat/new">
-            <Card className="mb-8 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
-              <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Plus className="h-8 w-8 text-primary" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-2">Create New Chat Interface</h3>
-                  <p className="text-muted-foreground text-sm">Configure a beautiful chat experience for your workflow</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
-
-        {/* Chat Instances Grid */}
-        {chatInstances.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {chatInstances.map((chat) => {
-              const branding = chat.custom_branding as ChatInstance["custom_branding"];
-              return (
-                <Card
-                  key={chat.id}
-                  className="group hover:border-primary/50 transition-all hover:shadow-glow"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="truncate text-lg mb-2">
-                          {chat.name}
-                        </CardTitle>
-                        <CardDescription className="text-sm">
-                          {branding.chatTitle}
-                        </CardDescription>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link
-                              to={`/chat/${chat.id}`}
-                              className="cursor-pointer"
-                            >
-                              <Eye className="mr-2 h-4 w-4" />
-                              Open Chat
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              to={`/chat/${chat.id}/edit`}
-                              className="cursor-pointer"
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive cursor-pointer"
-                            onClick={() => handleDeleteClick(chat.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+          {/* Content Area */}
+          <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">{selectedChat ? (
+            // Selected Chat View - Show only the selected chat card (larger)
+            <div className="max-w-3xl mx-auto">
+              <Card className="border-2 border-primary/30 hover:border-primary/50 transition-all shadow-glow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-2xl mb-2">{selectedChat.name}</CardTitle>
+                      <CardDescription className="text-base">
+                        {(selectedChat.custom_branding as ChatInstance["custom_branding"]).chatTitle}
+                      </CardDescription>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {/* Share Link */}
-                      {chat.slug && (
-                        <div className="bg-muted/50 rounded-md p-3 space-y-2">
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Share2 className="h-3 w-3" />
-                            <span className="font-medium">Public Share Link</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-mono truncate text-foreground">
-                                {getShareableUrl(chat.slug)}
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 shrink-0"
-                              onClick={() => handleCopyLink(chat.slug!, chat.id)}
-                            >
-                              {copiedId === chat.id ? (
-                                <Check className="h-3 w-3 text-green-500" />
-                              ) : (
-                                <Copy className="h-3 w-3" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Analytics */}
-                      {chat.analytics && (
-                        <div className="bg-primary/5 rounded-md p-3">
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                            <Activity className="h-3 w-3" />
-                            <span className="font-medium">Analytics</span>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="text-center">
-                              <div className="text-lg font-semibold text-foreground">
-                                {chat.analytics.unique_views}
-                              </div>
-                              <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                <Eye className="h-3 w-3" />
-                                Views
-                              </div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-lg font-semibold text-foreground">
-                                {chat.analytics.total_messages}
-                              </div>
-                              <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                <Activity className="h-3 w-3" />
-                                Messages
-                              </div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-lg font-semibold text-foreground">
-                                {chat.analytics.active_sessions}
-                              </div>
-                              <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                <Users className="h-3 w-3" />
-                                Sessions
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Status
-                        </span>
-                        <Badge
-                          variant={chat.is_active ? "default" : "secondary"}
-                          className={
-                            chat.is_active
-                              ? "bg-primary/20 text-primary border-primary/30"
-                              : ""
-                          }
-                        >
-                          {chat.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Created
-                        </span>
-                        <span className="text-sm">
-                          {formatDistanceToNow(new Date(chat.created_at), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                      </div>
-                      <div className="pt-3 border-t border-border">
-                        <Button
-                          asChild
-                          className="w-full bg-primary hover:bg-primary-glow"
-                        >
-                          <Link to={`/chat/${chat.id}`}>
-                            <ExternalLink className="mr-2 h-4 w-4" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link to={`/chat/${selectedChat.id}`} className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4" />
                             Open Chat
                           </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={`/chat/${selectedChat.id}/edit`} className="cursor-pointer">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive cursor-pointer"
+                          onClick={() => handleDeleteClick(selectedChat.id)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Share Link */}
+                  {selectedChat.slug && (
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Share2 className="h-4 w-4" />
+                        <span className="font-medium">Public Share Link</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-mono truncate text-foreground">
+                            {getShareableUrl(selectedChat.slug)}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopyLink(selectedChat.slug!, selectedChat.id)}
+                        >
+                          {copiedId === selectedChat.id ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
+                  )}
+
+                  {/* Analytics */}
+                  {selectedChat.analytics && (
+                    <div className="bg-primary/5 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                        <Activity className="h-4 w-4" />
+                        <span className="font-medium">Analytics</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-foreground">
+                            {selectedChat.analytics.unique_views}
+                          </div>
+                          <div className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
+                            <Eye className="h-3 w-3" />
+                            Views
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-foreground">
+                            {selectedChat.analytics.total_messages}
+                          </div>
+                          <div className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
+                            <Activity className="h-3 w-3" />
+                            Messages
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-foreground">
+                            {selectedChat.analytics.active_sessions}
+                          </div>
+                          <div className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
+                            <Users className="h-3 w-3" />
+                            Sessions
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Status Badge */}
+                  <div className="flex items-center gap-2">
+                    <Badge variant={selectedChat.is_active ? "default" : "secondary"}>
+                      {selectedChat.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      Created {formatDistanceToNow(new Date(selectedChat.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            // All Chats View - Show grid of all chats
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-6">
+                <p className="text-muted-foreground">
+                  Manage and create beautiful chat experiences for your n8n workflows
+                </p>
+              </div>
+
+              {/* Create New Button */}
+              {!planLoading && plan && !plan.can_create_more_chats ? (
+                <Card
+                  className="mb-6 border-2 border-muted bg-muted/20 cursor-pointer hover:border-primary/30 transition-colors"
+                  onClick={() => setUpgradeDialogOpen(true)}
+                >
+                  <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+                    <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                      <Lock className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-xl font-semibold mb-2">Upgrade to Create More</h3>
+                      <p className="text-muted-foreground text-sm mb-4">
+                        You've reached your limit of {plan.max_chat_instances} chat instance
+                        {plan.max_chat_instances !== 1 ? "s" : ""}
+                      </p>
+                      <Button className="bg-gradient-primary hover:opacity-90">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Upgrade to Pro
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="inline-flex h-16 w-16 rounded-full bg-primary/10 items-center justify-center mb-4">
-              <img src={flowifyLogo} alt="Flowify" className="h-10 w-10" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">No chat interfaces yet</h3>
-            <p className="text-muted-foreground mb-6">
-              Create your first chat interface to get started
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button variant="secondary">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View Documentation
-              </Button>
-            </div>
-          </div>
-        )}
+              ) : (
+                <Link to="/chat/new">
+                  <Card className="mb-6 border-dashed border-2 border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
+                    <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+                      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Plus className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-xl font-semibold mb-2">Create New Chat Interface</h3>
+                        <p className="text-muted-foreground text-sm">
+                          Configure a beautiful chat experience for your workflow
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
 
-        {/* Upgrade Dialog */}
-        <AlertDialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
+              {/* Chat Instances Grid */}
+              {chatInstances.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {chatInstances.map((chat) => {
+                    const branding = chat.custom_branding as ChatInstance["custom_branding"];
+                    return (
+                      <Card
+                        key={chat.id}
+                        className="group hover:border-primary/50 transition-all hover:shadow-glow"
+                      >
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="truncate text-lg mb-2">{chat.name}</CardTitle>
+                              <CardDescription className="text-sm">{branding.chatTitle}</CardDescription>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/chat/${chat.id}`} className="cursor-pointer">
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Open Chat
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/chat/${chat.id}/edit`} className="cursor-pointer">
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive cursor-pointer"
+                                  onClick={() => handleDeleteClick(chat.id)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {/* Share Link */}
+                            {chat.slug && (
+                              <div className="bg-muted/50 rounded-md p-3 space-y-2">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Share2 className="h-3 w-3" />
+                                  <span className="font-medium">Public Share Link</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-mono truncate text-foreground">
+                                      {getShareableUrl(chat.slug)}
+                                    </p>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-2 shrink-0"
+                                    onClick={() => handleCopyLink(chat.slug!, chat.id)}
+                                  >
+                                    {copiedId === chat.id ? (
+                                      <Check className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <Copy className="h-3 w-3" />
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Analytics */}
+                            {chat.analytics && (
+                              <div className="bg-primary/5 rounded-md p-3">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                                  <Activity className="h-3 w-3" />
+                                  <span className="font-medium">Analytics</span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="text-center">
+                                    <div className="text-lg font-semibold text-foreground">
+                                      {chat.analytics.unique_views}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                      <Eye className="h-3 w-3" />
+                                      Views
+                                    </div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="text-lg font-semibold text-foreground">
+                                      {chat.analytics.total_messages}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                      <Activity className="h-3 w-3" />
+                                      Messages
+                                    </div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="text-lg font-semibold text-foreground">
+                                      {chat.analytics.active_sessions}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      Sessions
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Status */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Status</span>
+                              <Badge
+                                variant={chat.is_active ? "default" : "secondary"}
+                                className={
+                                  chat.is_active
+                                    ? "bg-primary/20 text-primary border-primary/30"
+                                    : ""
+                                }
+                              >
+                                {chat.is_active ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+
+                            {/* Created Date */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Created</span>
+                              <span className="text-sm">
+                                {formatDistanceToNow(new Date(chat.created_at), {
+                                  addSuffix: true,
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="inline-flex h-16 w-16 rounded-full bg-primary/10 items-center justify-center mb-4">
+                    <Plus className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">No chat interfaces yet</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Create your first chat interface to get started
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Upgrade Dialog */}
+      <AlertDialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
@@ -612,7 +739,7 @@ const Dashboard = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
