@@ -37,6 +37,7 @@ import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { ChatSidebar } from "@/components/ChatSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SignInPrompt } from "@/components/SignInPrompt";
 
 interface ChatInstance {
   id: string;
@@ -1003,6 +1004,11 @@ const Chat = () => {
             className="mx-auto px-4 sm:px-6 lg:px-8 py-8"
             style={{ maxWidth: `${layoutConfig.maxMessageWidth}px` }}
           >
+            {/* Sign-in prompt for anonymous users with chat history */}
+            {!user && !isOwner && messages.length >= 2 && (
+              <SignInPrompt onSignIn={() => navigate('/auth')} />
+            )}
+            
             <div className={`space-y-6 mb-32 ${getMessageAlignment()}`}>
               {messages.map((message, index) => {
                 const isLastAssistantMessage = 
