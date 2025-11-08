@@ -147,6 +147,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string | null
+          current_period_end: string | null
+          id: string
+          max_chat_instances: number
+          plan_type: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          id?: string
+          max_chat_instances?: number
+          plan_type?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          id?: string
+          max_chat_instances?: number
+          plan_type?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       chat_analytics_summary: {
@@ -171,6 +219,16 @@ export type Database = {
     }
     Functions: {
       generate_slug_from_name: { Args: { name: string }; Returns: string }
+      get_user_plan: {
+        Args: { user_id_param: string }
+        Returns: {
+          can_create_more_chats: boolean
+          can_hide_branding: boolean
+          current_chat_count: number
+          max_chat_instances: number
+          plan_type: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
