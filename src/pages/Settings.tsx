@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Loader2, User, Lock, Bell } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
@@ -16,6 +17,7 @@ interface Profile {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  hide_branding_badge: boolean;
 }
 
 const Settings = () => {
@@ -24,6 +26,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [displayName, setDisplayName] = useState("");
+  const [hideBrandingBadge, setHideBrandingBadge] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -83,6 +86,7 @@ const Settings = () => {
       } else {
         setProfile(data);
         setDisplayName(data.display_name || "");
+        setHideBrandingBadge(data.hide_branding_badge || false);
       }
     } catch (error: any) {
       console.error("Error loading profile:", error);
@@ -117,6 +121,36 @@ const Settings = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleBrandingBadge = async (checked: boolean) => {
+    if (!user) return;
+
+    setHideBrandingBadge(checked);
+    
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ hide_branding_badge: checked })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Setting updated",
+        description: checked 
+          ? "Branding badge will be hidden on all your public chats"
+          : "Branding badge will be shown on all your public chats",
+      });
+    } catch (error: any) {
+      console.error("Error updating branding badge setting:", error);
+      setHideBrandingBadge(!checked); // Revert on error
+      toast({
+        title: "Error",
+        description: "Failed to update setting. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -340,8 +374,17 @@ const Settings = () => {
 
                 <Separator />
 
-                <div className="bg-primary/5 rounded-lg p-4 text-sm text-muted-foreground">
-                  More preferences coming soon...
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Hide Branding Badge</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Remove "Powered by FlowChat" from all your public chat pages
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={hideBrandingBadge} 
+                    onCheckedChange={handleToggleBrandingBadge}
+                  />
                 </div>
               </CardContent>
             </Card>

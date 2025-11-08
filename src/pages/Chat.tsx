@@ -42,6 +42,7 @@ interface ChatInstance {
   name: string;
   slug: string | null;
   webhook_url: string;
+  user_id: string;
   custom_branding: {
     primaryColor: string;
     accentColor: string;
@@ -90,6 +91,7 @@ const Chat = () => {
     return getOrCreateSessionId(routeKey);
   });
   const [viewTracked, setViewTracked] = useState(false);
+  const [ownerHidesBranding, setOwnerHidesBranding] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener
@@ -136,6 +138,20 @@ const Chat = () => {
 
         const instance = data as unknown as ChatInstance;
         setChatInstance(instance);
+        
+        // Check if owner wants to hide branding (for public viewers only)
+        const { data: { session } } = await supabase.auth.getSession();
+        const userIsOwner = session?.user?.id === instance.user_id;
+        
+        if (!userIsOwner && instance.user_id) {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("hide_branding_badge")
+            .eq("id", instance.user_id)
+            .maybeSingle();
+          
+          setOwnerHidesBranding(profileData?.hide_branding_badge || false);
+        }
         
         // Migrate sessionId to canonical key (instance.id) if needed
         const routeKey = getChatKeyFromRouteOrInstance(id);
@@ -940,7 +956,7 @@ const Chat = () => {
                     <RotateCcw className="h-4 w-4" />
                   </Button>
                   {/* Show branding badge if accessed via slug */}
-                  {!isOwner && !branding?.hideBrandingBadge && (
+                  {!isOwner && !ownerHidesBranding && (
                     <a
                       href="/"
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"

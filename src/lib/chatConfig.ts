@@ -97,8 +97,7 @@ export interface ChatBranding {
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
   
-  // Branding Badge Control
-  hideBrandingBadge?: boolean;
+  // Branding Badge Control (removed - now controlled at user level in Settings)
 }
 
 /**
