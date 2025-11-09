@@ -201,9 +201,19 @@ export function ChatConfigurationTabs({
             <FormItem>
               <FormLabel>Welcome Message</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="How can I help you today?" rows={3} />
+                <Textarea 
+                  {...field} 
+                  placeholder="How can I help you today?" 
+                  rows={3}
+                  disabled={form.watch('useLandingPageMode')}
+                />
               </FormControl>
-              <FormDescription>First message users see</FormDescription>
+              <FormDescription>
+                {form.watch('useLandingPageMode') 
+                  ? 'First message users see (disable landing to edit)'
+                  : 'First message users see'
+                }
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -217,17 +227,26 @@ export function ChatConfigurationTabs({
             <FormItem className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <FormLabel>Enable Welcome Screen</FormLabel>
-                <FormDescription>Show welcome message before chat starts</FormDescription>
+                <FormDescription>
+                  {form.watch('useLandingPageMode')
+                    ? 'Not shown with landing page mode (disable landing to edit)'
+                    : 'Show welcome message before chat starts'
+                  }
+                </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Switch 
+                  checked={field.value} 
+                  onCheckedChange={field.onChange}
+                  disabled={form.watch('useLandingPageMode')}
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
         {/* Welcome Subtitle & Disclaimer - Only visible when welcome screen is enabled */}
-        {form.watch("welcomeScreenEnabled") && (
+        {form.watch("welcomeScreenEnabled") && !form.watch("useLandingPageMode") && (
           <>
             <FormField
               control={form.control}
