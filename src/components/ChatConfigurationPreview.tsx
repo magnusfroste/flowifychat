@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChatInterfacePreview } from "@/components/ChatInterfacePreview";
 import { ChatLandingPagePreview } from "@/components/ChatLandingPagePreview";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 import type { ChatFormValues } from "@/components/ChatConfigurationForm";
 import type { ChatBranding } from "@/lib/chatConfig";
 
@@ -25,6 +26,7 @@ export function ChatConfigurationPreview({
   const [viewMode, setViewMode] = useState<'landing' | 'chat'>(
     useLandingPageMode ? 'landing' : 'chat'
   );
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
 
   // Automatically switch to chat view if landing mode is disabled
   useEffect(() => {
@@ -32,6 +34,13 @@ export function ChatConfigurationPreview({
       setViewMode('chat');
     }
   }, [useLandingPageMode, viewMode]);
+
+  // Show welcome screen when switching to chat view if enabled
+  useEffect(() => {
+    if (viewMode === 'chat' && formValues.welcomeScreenEnabled) {
+      setShowWelcomeScreen(true);
+    }
+  }, [viewMode, formValues.welcomeScreenEnabled]);
 
   // Convert form values to ChatBranding format
   const branding: ChatBranding = {
@@ -81,6 +90,11 @@ export function ChatConfigurationPreview({
     messageActions: formValues.messageActions || 'inline',
     showCopyButton: formValues.showCopyButton ?? true,
     showRegenerateButton: formValues.showRegenerateButton ?? true,
+    
+    // Welcome Screen
+    welcomeScreenEnabled: formValues.welcomeScreenEnabled,
+    welcomeSubtitle: formValues.welcomeSubtitle,
+    welcomeDisclaimer: formValues.welcomeDisclaimer,
   };
 
   const inputPlaceholder = formValues.inputPlaceholder || "Type your message...";
@@ -168,6 +182,18 @@ export function ChatConfigurationPreview({
                 branding={branding}
                 inputPlaceholder={inputPlaceholder}
                 quickStartPrompts={formValues.quickStartPrompts || []}
+              />
+            ) : formValues.welcomeScreenEnabled && showWelcomeScreen ? (
+              <WelcomeScreen
+                config={{
+                  enabled: true,
+                  subtitle: formValues.welcomeSubtitle,
+                  disclaimer: formValues.welcomeDisclaimer,
+                }}
+                chatTitle={formValues.chatTitle || "Chat Preview"}
+                primaryColor={formValues.primaryColor || "#6366f1"}
+                branding={branding}
+                onStart={() => setShowWelcomeScreen(false)}
               />
             ) : (
               <ChatInterfacePreview

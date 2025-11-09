@@ -15,13 +15,13 @@ interface ChatInterfacePreviewProps {
   inputPlaceholder?: string;
 }
 
-const mockMessages = [
-  { role: "assistant", content: "Hi! How can I help you today?" },
-  { role: "user", content: "Can you help me understand how this works?" },
-  { role: "assistant", content: "Of course! I'd be happy to help. This is a preview of your chat interface with all your customizations applied. You can see how messages, avatars, and input styling will look." },
-];
-
 export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your message..." }: ChatInterfacePreviewProps) {
+  const mockMessages = [
+    { role: "assistant", content: branding.welcomeMessage || "Hi! How can I help you today?" },
+    { role: "user", content: "Can you help me understand how this works?" },
+    { role: "assistant", content: "Of course! I'd be happy to help. This is a preview of your chat interface with all your customizations applied. You can see how messages, avatars, and input styling will look." },
+  ];
+
   const {
     primaryColor,
     userMessageColor,
@@ -57,11 +57,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     large: 'h-10 w-10',
   };
 
-  // Message bubble classes
-  const bubbleStyleClasses = {
-    rounded: `rounded-${borderRadius}`,
-    sharp: 'rounded-none',
-    pill: 'rounded-full',
+  // Get border radius for message bubbles
+  const getBubbleBorderRadius = () => {
+    if (messageBubbleStyle === 'pill') return '9999px';
+    if (messageBubbleStyle === 'sharp') return '0px';
+    return `${borderRadius}px`;
   };
 
   // Message density classes
@@ -164,7 +164,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             return (
               <div
                 key={index}
-                className={`flex gap-3 ${avatarAlignClass} ${
+                className={`group flex gap-3 ${avatarAlignClass} ${
                   isUser ? 'flex-row-reverse' : 'flex-row'
                 } ${alignmentClasses[messageAlignment]}`}
               >
@@ -186,17 +186,32 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   </Avatar>
                 )}
 
-                {/* Message Bubble */}
-                <div
-                  className={`${densityClasses[messageDensity]} ${bubbleStyleClasses[messageBubbleStyle]} ${
-                    messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'
-                  }`}
-                  style={{ 
-                    backgroundColor: messageColor,
-                    color: getTextColor(messageColor),
-                  }}
-                >
-                  {message.content}
+                {/* Message Bubble with Timestamp */}
+                <div className={messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}>
+                  <div
+                    className={`${densityClasses[messageDensity]} ${
+                      messageAlignment === 'full-width' ? 'w-full' : ''
+                    }`}
+                    style={{ 
+                      backgroundColor: messageColor,
+                      color: getTextColor(messageColor),
+                      borderRadius: getBubbleBorderRadius(),
+                    }}
+                  >
+                    {message.content}
+                  </div>
+                  
+                  {/* Timestamp */}
+                  {branding.showTimestamps !== 'never' && (
+                    <div 
+                      className={`text-xs mt-1 px-2 transition-opacity ${
+                        branding.showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-100' : 'opacity-60'
+                      }`}
+                      style={{ color: isDark ? '#ffffff' : '#666666' }}
+                    >
+                      {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -211,10 +226,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
               </Avatar>
             )}
             <div
-              className={`${densityClasses[messageDensity]} ${bubbleStyleClasses[messageBubbleStyle]}`}
+              className={`${densityClasses[messageDensity]}`}
               style={{ 
                 backgroundColor: botMessageColor,
                 color: getTextColor(botMessageColor),
+                borderRadius: getBubbleBorderRadius(),
               }}
             >
               <TypingIndicator dotColor={getTextColor(botMessageColor)} />

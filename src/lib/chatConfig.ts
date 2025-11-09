@@ -98,6 +98,11 @@ export interface ChatBranding {
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
   
+  // Welcome Screen (flat fields for form)
+  welcomeScreenEnabled?: boolean;
+  welcomeSubtitle?: string;
+  welcomeDisclaimer?: string;
+  
   // Branding Badge Control (removed - now controlled at user level in Settings)
 }
 
