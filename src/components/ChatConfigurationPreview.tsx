@@ -167,6 +167,7 @@ export function ChatConfigurationPreview({
               <ChatLandingPagePreview
                 branding={branding}
                 inputPlaceholder={inputPlaceholder}
+                quickStartPrompts={formValues.quickStartPrompts || []}
               />
             ) : (
               <ChatInterfacePreview

@@ -116,7 +116,11 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
       primaryColor: "#6366f1",
       accentColor: "#8b5cf6",
       secondaryColor: "#64748b",
-      quickStartPrompts: [],
+      quickStartPrompts: [
+        { id: 'prompt-1', text: 'Tell me a story', enabled: true },
+        { id: 'prompt-2', text: 'Help me brainstorm', enabled: true },
+        { id: 'prompt-3', text: 'Explain a concept', enabled: true },
+      ],
       quickStartPromptsAutoSend: false,
       welcomeScreenEnabled: false,
       inputPlaceholder: "Type your message...",

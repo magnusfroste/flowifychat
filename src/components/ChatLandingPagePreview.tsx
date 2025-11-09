@@ -6,16 +6,18 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
-import type { ChatBranding } from "@/lib/chatConfig";
+import type { ChatBranding, QuickStartPrompt } from "@/lib/chatConfig";
 
 interface ChatLandingPagePreviewProps {
   branding: ChatBranding;
   inputPlaceholder: string;
+  quickStartPrompts?: QuickStartPrompt[];
 }
 
 export function ChatLandingPagePreview({
   branding,
   inputPlaceholder,
+  quickStartPrompts = [],
 }: ChatLandingPagePreviewProps) {
   const fontFamily = branding.fontFamily || 'Inter';
   const bgStyle = branding.backgroundStyle === 'gradient' 
@@ -64,13 +66,6 @@ export function ChatLandingPagePreview({
     if (inputSize === 'large') return 'h-14 text-base';
     return 'h-12';
   };
-
-  // Mock quick start prompts
-  const mockPrompts = [
-    { id: '1', text: 'Tell me a story' },
-    { id: '2', text: 'Help me brainstorm' },
-    { id: '3', text: 'Explain a concept' },
-  ];
   
   return (
     <div className="h-full flex flex-col items-center justify-center px-4 py-8" style={{ ...bgStyle, fontFamily }}>
@@ -124,21 +119,23 @@ export function ChatLandingPagePreview({
           </Button>
         </div>
 
-        {/* Quick Start Prompts */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {mockPrompts.map((prompt) => (
-            <Button
-              key={prompt.id}
-              variant="outline"
-              size="sm"
-              disabled
-              className="text-sm"
-              style={{ borderColor: branding.primaryColor }}
-            >
-              {prompt.text}
-            </Button>
-          ))}
-        </div>
+        {/* Quick Start Prompts - Only show enabled ones */}
+        {quickStartPrompts.filter(p => p.enabled).length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center">
+            {quickStartPrompts.filter(p => p.enabled).map((prompt) => (
+              <Button
+                key={prompt.id}
+                variant="outline"
+                size="sm"
+                disabled
+                className="text-sm"
+                style={{ borderColor: branding.primaryColor }}
+              >
+                {prompt.text}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
