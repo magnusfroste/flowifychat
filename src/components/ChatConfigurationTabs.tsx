@@ -69,24 +69,21 @@ export function ChatConfigurationTabs({
   };
 
   return (
-    <Tabs defaultValue="landing" className="w-full">
-      <TabsList className="grid w-full grid-cols-4 mb-6">
-        <TabsTrigger value="landing" className="text-xs">
-          🚀 Landing
-        </TabsTrigger>
+    <Tabs defaultValue="chat" className="w-full">
+      <TabsList className="grid w-full grid-cols-3 mb-6">
         <TabsTrigger value="chat" className="text-xs">
           💬 Chat
         </TabsTrigger>
-        <TabsTrigger value="branding" className="text-xs">
-          🎨 Branding
+        <TabsTrigger value="design" className="text-xs">
+          🎨 Design
         </TabsTrigger>
         <TabsTrigger value="settings" className="text-xs">
           ⚙️ Settings
         </TabsTrigger>
       </TabsList>
 
-      {/* TAB 1: LANDING */}
-      <TabsContent value="landing" className="space-y-6">
+      {/* TAB 1: CHAT EXPERIENCE */}
+      <TabsContent value="chat" className="space-y-6">
         {/* Landing Page Mode */}
         <FormField
           control={form.control}
@@ -189,10 +186,7 @@ export function ChatConfigurationTabs({
             </FormItem>
           )}
         />
-      </TabsContent>
 
-      {/* TAB 2: CHAT */}
-      <TabsContent value="chat" className="space-y-6">
         {/* Welcome Message */}
         <FormField
           control={form.control}
@@ -276,7 +270,14 @@ export function ChatConfigurationTabs({
             />
           </>
         )}
+      </TabsContent>
 
+      {/* TAB 2: DESIGN */}
+      <TabsContent value="design" className="space-y-6">
+        {/* Templates */}
+        <div>
+          <BrandingTemplates onApplyTemplate={onTemplateApply} />
+        </div>
         {/* Message Bubble Style */}
         <FormField
           control={form.control}
@@ -467,14 +468,6 @@ export function ChatConfigurationTabs({
             </FormItem>
           )}
         />
-      </TabsContent>
-
-      {/* TAB 3: BRANDING */}
-      <TabsContent value="branding" className="space-y-6">
-        {/* Templates */}
-        <div>
-          <BrandingTemplates onApplyTemplate={onTemplateApply} />
-        </div>
 
         {/* Primary, Accent & Secondary Colors */}
         <div className="grid grid-cols-2 gap-4">
@@ -733,7 +726,7 @@ export function ChatConfigurationTabs({
         />
       </TabsContent>
 
-      {/* TAB 4: SETTINGS */}
+      {/* TAB 3: SETTINGS */}
       <TabsContent value="settings" className="space-y-6">
         {/* Chat Name */}
         <FormField
