@@ -194,7 +194,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     }`}
                     style={{ 
                       backgroundColor: messageColor,
-                      color: getTextColor(messageColor),
+                      color: messageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(messageColor),
                       borderRadius: getBubbleBorderRadius(),
                     }}
                   >
@@ -229,11 +229,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
               className={`${densityClasses[messageDensity]}`}
               style={{ 
                 backgroundColor: botMessageColor,
-                color: getTextColor(botMessageColor),
+                color: botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor),
                 borderRadius: getBubbleBorderRadius(),
               }}
             >
-              <TypingIndicator dotColor={getTextColor(botMessageColor)} />
+              <TypingIndicator dotColor={botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor)} />
             </div>
           </div>
         </div>
