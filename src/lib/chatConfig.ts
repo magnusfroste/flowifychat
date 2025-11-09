@@ -116,9 +116,9 @@ export const getQuickStartPromptsConfig = (branding: any): QuickStartPromptsConf
  */
 export const getWelcomeScreen = (branding: any): WelcomeScreenConfig => {
   return {
-    enabled: branding?.welcomeScreen?.enabled ?? false,
-    subtitle: branding?.welcomeScreen?.subtitle,
-    disclaimer: branding?.welcomeScreen?.disclaimer,
+    enabled: branding?.welcomeScreenEnabled ?? false,
+    subtitle: branding?.welcomeSubtitle,
+    disclaimer: branding?.welcomeDisclaimer,
   };
 };
 
