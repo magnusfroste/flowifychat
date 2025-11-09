@@ -96,7 +96,12 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   };
 
   // Determine text color based on background brightness
-  const getTextColor = (bgColor: string) => {
+  const getTextColor = (bgColor: string, currentIsDark: boolean) => {
+    // Handle transparent - defer to theme
+    if (bgColor === 'transparent') {
+      return currentIsDark ? '#ffffff' : '#000000';
+    }
+    
     const hex = bgColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
@@ -106,9 +111,10 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   };
 
   // Determine if we're in dark mode
+  const isDarkFromColor = backgroundColor && getTextColor(backgroundColor, false) === '#ffffff';
   const isDark = colorMode === 'auto' 
     ? resolvedTheme === 'dark'
-    : colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor) === '#ffffff');
+    : colorMode === 'dark' || isDarkFromColor;
 
   // Background style - respect theme when colorMode is 'auto'
   const getBackgroundStyles = () => {
@@ -212,7 +218,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     }`}
                     style={{ 
                       backgroundColor: messageColor,
-                      color: messageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(messageColor),
+                      color: messageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(messageColor, isDark),
                       borderRadius: getBubbleBorderRadius(),
                     }}
                   >
@@ -247,11 +253,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
               className={`${densityClasses[messageDensity]}`}
               style={{ 
                 backgroundColor: botMessageColor,
-                color: botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor),
+                color: botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor, isDark),
                 borderRadius: getBubbleBorderRadius(),
               }}
             >
-              <TypingIndicator dotColor={botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor)} />
+              <TypingIndicator dotColor={botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor, isDark)} />
             </div>
           </div>
         </div>
@@ -281,7 +287,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             style={buttonStyle === 'filled' ? { 
               backgroundColor: primaryColor,
               borderRadius: `${borderRadius}px`,
-              color: getTextColor(primaryColor),
+              color: getTextColor(primaryColor, isDark),
             } : {
               borderRadius: `${borderRadius}px`,
               borderColor: primaryColor,

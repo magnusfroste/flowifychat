@@ -77,7 +77,7 @@ const Chat = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { theme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
   const [chatInstances, setChatInstances] = useState<ChatInstance[]>([]);
   
   const [user, setUser] = useState<any>(null);
@@ -815,7 +815,12 @@ const Chat = () => {
   };
 
   // Utility: Calculate text color based on background brightness
-  const getTextColor = (bgColor: string) => {
+  const getTextColor = (bgColor: string, currentIsDark: boolean) => {
+    // Handle transparent - defer to theme
+    if (bgColor === 'transparent') {
+      return currentIsDark ? '#ffffff' : '#000000';
+    }
+    
     const hex = bgColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
@@ -840,8 +845,15 @@ const Chat = () => {
 
   // Landing page mode - no header, just centered input
   if (chatMode === 'landing') {
+    const landingColorMode = branding?.colorMode || 'light';
+    const landingIsDark = landingColorMode === 'auto' 
+      ? resolvedTheme === 'dark'
+      : landingColorMode === 'dark';
+    
     const bgStyles = branding?.backgroundStyle === 'gradient' && branding?.backgroundGradientStart && branding?.backgroundGradientEnd
       ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
+      : landingColorMode === 'auto'
+      ? { backgroundColor: landingIsDark ? '#212121' : '#ffffff' }
       : branding?.backgroundColor ? { backgroundColor: branding.backgroundColor } : {};
       
     // ADMIN/OWNER VIEW: Expanded sidebar (Grok pattern)
@@ -1023,10 +1035,27 @@ const Chat = () => {
   const buttonStyle = branding?.buttonStyle || 'filled';
   const colorMode = branding?.colorMode || 'light';
   
-  const isDark = colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor) === '#ffffff');
-  const bgStyles = backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd
-    ? { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` }
-    : backgroundColor ? { backgroundColor } : {};
+  // Determine if we're in dark mode - respect theme when colorMode is 'auto'
+  const isDark = colorMode === 'auto' 
+    ? resolvedTheme === 'dark'
+    : colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor, colorMode === 'dark') === '#ffffff');
+  
+  // Background styles - respect theme when colorMode is 'auto'
+  const getBackgroundStyles = () => {
+    if (backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd) {
+      return { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` };
+    }
+    
+    if (colorMode === 'auto') {
+      return isDark 
+        ? { backgroundColor: '#212121' } // ChatGPT's dark mode background
+        : { backgroundColor: '#ffffff' };
+    }
+    
+    return backgroundColor ? { backgroundColor } : {};
+  };
+  
+  const bgStyles = getBackgroundStyles();
   
   const getBubbleRadius = () => {
     if (messageBubbleStyle === 'sharp') return '4px';
@@ -1246,19 +1275,19 @@ const Chat = () => {
                           ? userMessageColor || 'hsl(var(--muted) / 0.3)'
                           : botMessageColor || 'transparent',
                         color: message.role === "user" && userMessageColor 
-                          ? getTextColor(userMessageColor)
-                          : message.role === "assistant" && botMessageColor 
-                          ? getTextColor(botMessageColor)
-                          : isDark ? '#ffffff' : undefined,
+                          ? getTextColor(userMessageColor, isDark)
+                          : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
+                          ? getTextColor(botMessageColor, isDark)
+                          : isDark ? '#ffffff' : '#000000',
                       }}
                     >
                       <div 
                         className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
                         style={{
                           color: message.role === "user" && userMessageColor 
-                            ? getTextColor(userMessageColor)
-                            : message.role === "assistant" && botMessageColor 
-                            ? getTextColor(botMessageColor)
+                            ? getTextColor(userMessageColor, isDark)
+                            : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
+                            ? getTextColor(botMessageColor, isDark)
                             : isDark ? '#ffffff' : '#000000'
                         }}
                       >
@@ -1310,9 +1339,9 @@ const Chat = () => {
                           className="text-xs mt-2 opacity-70"
                           style={{
                             color: message.role === "user" && userMessageColor 
-                              ? getTextColor(userMessageColor)
-                              : message.role === "assistant" && botMessageColor 
-                              ? getTextColor(botMessageColor)
+                              ? getTextColor(userMessageColor, isDark)
+                              : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
+                              ? getTextColor(botMessageColor, isDark)
                               : isDark ? '#ffffff' : '#666666'
                           }}
                         >
@@ -1363,7 +1392,7 @@ const Chat = () => {
                 <div className="flex justify-start animate-fade-in">
                   <Card style={{ backgroundColor: botMessageColor || 'transparent' }}>
                     <div className="p-4">
-                      <TypingIndicator dotColor={botMessageColor ? getTextColor(botMessageColor) : undefined} />
+                      <TypingIndicator dotColor={botMessageColor && botMessageColor !== 'transparent' ? getTextColor(botMessageColor, isDark) : isDark ? '#ffffff' : '#000000'} />
                     </div>
                   </Card>
                 </div>
@@ -1421,7 +1450,7 @@ const Chat = () => {
                     style={buttonStyle === 'filled' ? { 
                       backgroundColor: branding.primaryColor,
                       borderRadius: `${Math.min(borderRadius, 20)}px`,
-                      color: getTextColor(branding.primaryColor),
+                      color: getTextColor(branding.primaryColor, isDark),
                     } : {
                       borderRadius: `${Math.min(borderRadius, 20)}px`,
                       borderColor: branding.primaryColor,
