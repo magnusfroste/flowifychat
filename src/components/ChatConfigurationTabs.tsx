@@ -138,6 +138,22 @@ export function ChatConfigurationTabs({
           />
         )}
 
+        {/* Input Placeholder */}
+        <FormField
+          control={form.control}
+          name="inputPlaceholder"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Input Placeholder</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Type your message..." />
+              </FormControl>
+              <FormDescription>Text shown in the input field</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Quick Start Prompts */}
         <FormField
           control={form.control}
@@ -170,22 +186,6 @@ export function ChatConfigurationTabs({
               <FormControl>
                 <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* Input Placeholder */}
-        <FormField
-          control={form.control}
-          name="inputPlaceholder"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Input Placeholder</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Type your message..." />
-              </FormControl>
-              <FormDescription>Text shown in the input field</FormDescription>
-              <FormMessage />
             </FormItem>
           )}
         />
