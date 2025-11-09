@@ -546,7 +546,10 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
 
                   {/* Right Panel - Live Preview */}
                   <div className="w-1/2 sticky top-24 h-[calc(100vh-12rem)]">
-                    <ChatConfigurationPreview formValues={form.watch()} />
+              <ChatConfigurationPreview 
+                formValues={form.watch()} 
+                useLandingPageMode={form.watch('useLandingPageMode')}
+              />
                   </div>
                 </div>
 

@@ -3,7 +3,7 @@
  * Live preview of chat interface with current form settings
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Monitor, Smartphone, Sparkles, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,11 +14,24 @@ import type { ChatBranding } from "@/lib/chatConfig";
 
 interface ChatConfigurationPreviewProps {
   formValues: ChatFormValues;
+  useLandingPageMode?: boolean;
 }
 
-export function ChatConfigurationPreview({ formValues }: ChatConfigurationPreviewProps) {
+export function ChatConfigurationPreview({ 
+  formValues, 
+  useLandingPageMode = true 
+}: ChatConfigurationPreviewProps) {
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
-  const [viewMode, setViewMode] = useState<'landing' | 'chat'>('landing');
+  const [viewMode, setViewMode] = useState<'landing' | 'chat'>(
+    useLandingPageMode ? 'landing' : 'chat'
+  );
+
+  // Automatically switch to chat view if landing mode is disabled
+  useEffect(() => {
+    if (!useLandingPageMode && viewMode === 'landing') {
+      setViewMode('chat');
+    }
+  }, [useLandingPageMode, viewMode]);
 
   // Convert form values to ChatBranding format
   const branding: ChatBranding = {
@@ -91,7 +104,8 @@ export function ChatConfigurationPreview({ formValues }: ChatConfigurationPrevie
               variant={viewMode === 'landing' ? 'default' : 'outline'}
               onClick={() => setViewMode('landing')}
               className="h-8 w-8"
-              title="Landing View"
+              title={useLandingPageMode ? "Landing View" : "Landing disabled in settings"}
+              disabled={!useLandingPageMode}
             >
               <Sparkles className="h-4 w-4" />
             </Button>
