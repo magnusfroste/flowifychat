@@ -284,7 +284,8 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
           />
           <Button
             size="icon"
-            style={buttonStyle === 'filled' ? { 
+            variant="ghost"
+            style={buttonStyle === 'filled' ? {
               backgroundColor: primaryColor,
               borderRadius: `${borderRadius}px`,
               color: getTextColor(primaryColor, isDark),

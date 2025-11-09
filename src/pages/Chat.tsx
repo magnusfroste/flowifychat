@@ -1447,6 +1447,7 @@ const Chat = () => {
                     onClick={() => handleSend()}
                     disabled={!input.trim() || sending || isTypingPrompt}
                     size="icon"
+                    variant="ghost"
                     style={buttonStyle === 'filled' ? { 
                       backgroundColor: branding.primaryColor,
                       borderRadius: `${Math.min(borderRadius, 20)}px`,
