@@ -1371,26 +1371,6 @@ const Chat = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Start Prompts - Show only when there's just the welcome message */}
-            {messages.length === 1 && !sending && quickStartConfig.prompts.length > 0 && (
-              <div className="mb-32">
-                <QuickStartPrompts
-                  prompts={quickStartConfig.prompts}
-                  onPromptClick={(text) => {
-                    if (quickStartConfig.autoSend) {
-                      // Auto-send the prompt with typing animation
-                      typeAndSend(text);
-                    } else {
-                      // Just populate the input field
-                      setInput(text);
-                    }
-                  }}
-                  disabled={sending || isTypingPrompt}
-                  primaryColor={branding.primaryColor}
-                />
-              </div>
-            )}
-
             {/* Scroll to Bottom Button */}
             {showScrollButton && (
               <Button
