@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { useTheme } from "next-themes";
 import type { ChatBranding } from "@/lib/chatConfig";
 
 interface ChatInterfacePreviewProps {
@@ -16,6 +17,8 @@ interface ChatInterfacePreviewProps {
 }
 
 export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your message..." }: ChatInterfacePreviewProps) {
+  const { resolvedTheme } = useTheme();
+  
   const mockMessages = [
     { role: "assistant", content: branding.welcomeMessage || "Hi! How can I help you today?" },
     { role: "user", content: "Can you help me understand how this works?" },
@@ -92,11 +95,6 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     'full-width': 'w-full max-w-full',
   };
 
-  // Background style
-  const backgroundStyles = backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd
-    ? { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` }
-    : { backgroundColor };
-
   // Determine text color based on background brightness
   const getTextColor = (bgColor: string) => {
     const hex = bgColor.replace('#', '');
@@ -107,7 +105,27 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     return brightness > 128 ? '#000000' : '#ffffff';
   };
 
-  const isDark = colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor) === '#ffffff');
+  // Determine if we're in dark mode
+  const isDark = colorMode === 'auto' 
+    ? resolvedTheme === 'dark'
+    : colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor) === '#ffffff');
+
+  // Background style - respect theme when colorMode is 'auto'
+  const getBackgroundStyles = () => {
+    if (backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd) {
+      return { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` };
+    }
+    
+    if (colorMode === 'auto') {
+      return isDark 
+        ? { backgroundColor: '#212121' } // ChatGPT's dark mode background
+        : { backgroundColor: '#ffffff' };
+    }
+    
+    return { backgroundColor };
+  };
+  
+  const backgroundStyles = getBackgroundStyles();
   const headerBg = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.7)';
   const headerTextColor = isDark ? '#ffffff' : '#000000';
   const inputAreaBg = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.7)';
