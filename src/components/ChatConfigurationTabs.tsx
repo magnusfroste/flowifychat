@@ -69,114 +69,58 @@ export function ChatConfigurationTabs({
   };
 
   return (
-    <Tabs defaultValue="basic" className="w-full">
-      <TabsList className="grid w-full grid-cols-5 mb-6">
-        <TabsTrigger value="basic" className="text-xs">
-          📋 Basic
+    <Tabs defaultValue="landing" className="w-full">
+      <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsTrigger value="landing" className="text-xs">
+          🚀 Landing
+        </TabsTrigger>
+        <TabsTrigger value="chat" className="text-xs">
+          💬 Chat
         </TabsTrigger>
         <TabsTrigger value="branding" className="text-xs">
           🎨 Branding
         </TabsTrigger>
-        <TabsTrigger value="messages" className="text-xs">
-          💬 Messages
-        </TabsTrigger>
-        <TabsTrigger value="quickstart" className="text-xs">
-          🚀 Quick Start
-        </TabsTrigger>
-        <TabsTrigger value="advanced" className="text-xs">
-          ⚙️ Advanced
+        <TabsTrigger value="settings" className="text-xs">
+          ⚙️ Settings
         </TabsTrigger>
       </TabsList>
 
-      {/* TAB 1: BASIC INFO */}
-      <TabsContent value="basic" className="space-y-6">
-        {/* Templates */}
-        <div>
-          <BrandingTemplates onApplyTemplate={onTemplateApply} />
-        </div>
-
-        {/* Chat Name */}
+      {/* TAB 1: LANDING */}
+      <TabsContent value="landing" className="space-y-6">
+        {/* Landing Page Mode */}
         <FormField
           control={form.control}
-          name="name"
+          name="useLandingPageMode"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Chat Name</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="My Support Chat"
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onNameChange(e.target.value);
-                  }}
-                />
-              </FormControl>
-              <FormDescription>Internal name for this chat interface</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Share Link Slug */}
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Share Link</FormLabel>
-              <div className="flex gap-2">
-                <FormControl>
-                  <div className="relative flex-1">
-                    <Input
-                      {...field}
-                      placeholder="my-chat"
-                      onChange={(e) => {
-                        field.onChange(e);
-                        onSlugChange(e.target.value);
-                      }}
-                    />
-                    {isSlugChecking && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
-                </FormControl>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="px-3 py-2 border rounded-md hover:bg-muted transition-colors"
-                >
-                  {copiedLink ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                </button>
+            <FormItem className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel>Landing Page Mode</FormLabel>
+                <FormDescription>Show centered input before first message</FormDescription>
               </div>
-              {field.value && !slugError && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                  <LinkIcon className="h-3 w-3" />
-                  <span className="font-mono text-xs">{getShareableUrl(field.value)}</span>
-                </div>
-              )}
-              {slugError && <p className="text-sm text-destructive mt-2">{slugError}</p>}
-              <FormDescription>Unique URL for sharing this chat</FormDescription>
-              <FormMessage />
+              <FormControl>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
             </FormItem>
           )}
         />
 
-        {/* Webhook URL */}
-        <FormField
-          control={form.control}
-          name="webhookUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>n8n Webhook URL (Optional)</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="https://your-n8n-instance.com/webhook/..." />
-              </FormControl>
-              <FormDescription>Send chat messages to your n8n workflow</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Landing Tagline - Only visible when Landing Page Mode is enabled */}
+        {form.watch("useLandingPageMode") && (
+          <FormField
+            control={form.control}
+            name="landingTagline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Landing Tagline</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Ready when you are." />
+                </FormControl>
+                <FormDescription>Subtitle displayed on the landing page</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* Chat Title */}
         <FormField
@@ -210,148 +154,70 @@ export function ChatConfigurationTabs({
           )}
         />
 
-        {/* Primary & Accent Colors */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="primaryColor"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Primary Color</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2">
-                    <Input type="color" {...field} className="w-16 h-10 p-1" />
-                    <Input {...field} placeholder="#6366f1" className="flex-1" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="accentColor"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Accent Color</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2">
-                    <Input type="color" {...field} className="w-16 h-10 p-1" />
-                    <Input {...field} placeholder="#8b5cf6" className="flex-1" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </TabsContent>
-
-      {/* TAB 2: BRANDING */}
-      <TabsContent value="branding" className="space-y-6">
-        {/* Logo Upload */}
+        {/* Quick Start Prompts */}
         <FormField
           control={form.control}
-          name="logoUrl"
+          name="quickStartPrompts"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Logo</FormLabel>
+              <FormLabel>Quick Start Prompts</FormLabel>
               <FormControl>
-                <ImageUpload
-                  currentImageUrl={field.value || ""}
-                  onImageUploaded={field.onChange}
-                  bucket="chat-logos"
-                  label="Upload Logo"
+                <QuickStartPromptsEditor
+                  prompts={field.value || []}
+                  onChange={field.onChange}
                 />
               </FormControl>
-              <FormDescription>Displayed at the top of the chat</FormDescription>
+              <FormDescription>Suggested prompts for users to click</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Avatar Upload */}
+        {/* Auto-send Toggle */}
         <FormField
           control={form.control}
-          name="avatarUrl"
+          name="quickStartPromptsAutoSend"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bot Avatar</FormLabel>
+            <FormItem className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel>Auto-send Quick Prompts</FormLabel>
+                <FormDescription>Send prompt immediately when clicked</FormDescription>
+              </div>
               <FormControl>
-                <ImageUpload
-                  currentImageUrl={field.value || ""}
-                  onImageUploaded={field.onChange}
-                  bucket="chat-avatars"
-                  label="Upload Avatar"
-                />
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormDescription>Bot's profile picture in messages</FormDescription>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Background Style */}
+        {/* Welcome Screen Enabled */}
         <FormField
           control={form.control}
-          name="backgroundStyle"
+          name="welcomeScreenEnabled"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Background Style</FormLabel>
+            <FormItem className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel>Enable Welcome Screen</FormLabel>
+                <FormDescription>Show welcome message before chat starts</FormDescription>
+              </div>
               <FormControl>
-                <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-4">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="solid" id="solid" />
-                    <label htmlFor="solid" className="text-sm cursor-pointer">Solid</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="gradient" id="gradient" />
-                    <label htmlFor="gradient" className="text-sm cursor-pointer">Gradient</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="pattern" id="pattern" />
-                    <label htmlFor="pattern" className="text-sm cursor-pointer">Pattern</label>
-                  </div>
-                </RadioGroup>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Background Colors */}
-        {form.watch("backgroundStyle") === "solid" && (
-          <FormField
-            control={form.control}
-            name="backgroundColor"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Background Color</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2">
-                    <Input type="color" {...field} className="w-16 h-10 p-1" />
-                    <Input {...field} placeholder="#ffffff" className="flex-1" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {form.watch("backgroundStyle") === "gradient" && (
-          <div className="grid grid-cols-2 gap-4">
+        {/* Welcome Subtitle */}
+        {form.watch("welcomeScreenEnabled") && (
+          <>
             <FormField
               control={form.control}
-              name="backgroundGradientStart"
+              name="welcomeSubtitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Gradient Start</FormLabel>
+                  <FormLabel>Welcome Subtitle</FormLabel>
                   <FormControl>
-                    <div className="flex gap-2">
-                      <Input type="color" {...field} className="w-16 h-10 p-1" />
-                      <Input {...field} placeholder="#fdf4ff" className="flex-1" />
-                    </div>
+                    <Input {...field} placeholder="How can we help you today?" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -359,95 +225,39 @@ export function ChatConfigurationTabs({
             />
             <FormField
               control={form.control}
-              name="backgroundGradientEnd"
+              name="welcomeDisclaimer"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Gradient End</FormLabel>
+                  <FormLabel>Welcome Disclaimer</FormLabel>
                   <FormControl>
-                    <div className="flex gap-2">
-                      <Input type="color" {...field} className="w-16 h-10 p-1" />
-                      <Input {...field} placeholder="#fef3c7" className="flex-1" />
-                    </div>
+                    <Textarea {...field} placeholder="By using this chat..." rows={2} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
+          </>
         )}
 
-        {/* Layout Style */}
+        {/* Input Placeholder */}
         <FormField
           control={form.control}
-          name="layoutStyle"
+          name="inputPlaceholder"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Layout Style</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="centered">Centered</SelectItem>
-                  <SelectItem value="left-visual">Left Visual</SelectItem>
-                  <SelectItem value="compact">Compact</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Font Family */}
-        <FormField
-          control={form.control}
-          name="fontFamily"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Font Family</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Inter">Inter</SelectItem>
-                  <SelectItem value="Roboto">Roboto</SelectItem>
-                  <SelectItem value="Poppins">Poppins</SelectItem>
-                  <SelectItem value="Open Sans">Open Sans</SelectItem>
-                  <SelectItem value="Lato">Lato</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Secondary Color */}
-        <FormField
-          control={form.control}
-          name="secondaryColor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Secondary Color</FormLabel>
+              <FormLabel>Input Placeholder</FormLabel>
               <FormControl>
-                <div className="flex gap-2">
-                  <Input type="color" {...field} className="w-16 h-10 p-1" />
-                  <Input {...field} placeholder="#64748b" className="flex-1" />
-                </div>
+                <Input {...field} placeholder="Type your message..." />
               </FormControl>
-              <FormDescription>Used for accents and secondary UI elements</FormDescription>
+              <FormDescription>Text shown in the input field</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
       </TabsContent>
 
-      {/* TAB 3: MESSAGES */}
-      <TabsContent value="messages" className="space-y-6">
+      {/* TAB 2: CHAT */}
+      <TabsContent value="chat" className="space-y-6">
         {/* Message Bubble Style */}
         <FormField
           control={form.control}
@@ -640,112 +450,244 @@ export function ChatConfigurationTabs({
         />
       </TabsContent>
 
-      {/* TAB 4: QUICK START */}
-      <TabsContent value="quickstart" className="space-y-6">
-        {/* Quick Start Prompts */}
+      {/* TAB 3: BRANDING */}
+      <TabsContent value="branding" className="space-y-6">
+        {/* Templates */}
+        <div>
+          <BrandingTemplates onApplyTemplate={onTemplateApply} />
+        </div>
+
+        {/* Primary, Accent & Secondary Colors */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="primaryColor"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Primary Color</FormLabel>
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Input type="color" {...field} className="w-16 h-10 p-1" />
+                    <Input {...field} placeholder="#6366f1" className="flex-1" />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="accentColor"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Accent Color</FormLabel>
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Input type="color" {...field} className="w-16 h-10 p-1" />
+                    <Input {...field} placeholder="#8b5cf6" className="flex-1" />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
-          name="quickStartPrompts"
+          name="secondaryColor"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Quick Start Prompts</FormLabel>
+              <FormLabel>Secondary Color</FormLabel>
               <FormControl>
-                <QuickStartPromptsEditor
-                  prompts={field.value || []}
-                  onChange={field.onChange}
+                <div className="flex gap-2">
+                  <Input type="color" {...field} className="w-16 h-10 p-1" />
+                  <Input {...field} placeholder="#64748b" className="flex-1" />
+                </div>
+              </FormControl>
+              <FormDescription>Used for accents and secondary UI elements</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Logo Upload */}
+        <FormField
+          control={form.control}
+          name="logoUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Logo</FormLabel>
+              <FormControl>
+                <ImageUpload
+                  currentImageUrl={field.value || ""}
+                  onImageUploaded={field.onChange}
+                  bucket="chat-logos"
+                  label="Upload Logo"
                 />
               </FormControl>
-              <FormDescription>Suggested prompts for users to click</FormDescription>
+              <FormDescription>Displayed at the top of the chat</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Auto-send Toggle */}
+        {/* Avatar Upload */}
         <FormField
           control={form.control}
-          name="quickStartPromptsAutoSend"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Auto-send Quick Prompts</FormLabel>
-                <FormDescription>Send prompt immediately when clicked</FormDescription>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* Welcome Screen Enabled */}
-        <FormField
-          control={form.control}
-          name="welcomeScreenEnabled"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Enable Welcome Screen</FormLabel>
-                <FormDescription>Show welcome message before chat starts</FormDescription>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* Welcome Subtitle */}
-        {form.watch("welcomeScreenEnabled") && (
-          <>
-            <FormField
-              control={form.control}
-              name="welcomeSubtitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Welcome Subtitle</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="How can we help you today?" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="welcomeDisclaimer"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Welcome Disclaimer</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} placeholder="By using this chat..." rows={2} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
-
-        {/* Input Placeholder */}
-        <FormField
-          control={form.control}
-          name="inputPlaceholder"
+          name="avatarUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Input Placeholder</FormLabel>
+              <FormLabel>Bot Avatar</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Type your message..." />
+                <ImageUpload
+                  currentImageUrl={field.value || ""}
+                  onImageUploaded={field.onChange}
+                  bucket="chat-avatars"
+                  label="Upload Avatar"
+                />
               </FormControl>
-              <FormDescription>Text shown in the input field</FormDescription>
+              <FormDescription>Bot's profile picture in messages</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-      </TabsContent>
 
-      {/* TAB 5: ADVANCED */}
-      <TabsContent value="advanced" className="space-y-6">
+        {/* Background Style */}
+        <FormField
+          control={form.control}
+          name="backgroundStyle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Background Style</FormLabel>
+              <FormControl>
+                <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="solid" id="solid" />
+                    <label htmlFor="solid" className="text-sm cursor-pointer">Solid</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="gradient" id="gradient" />
+                    <label htmlFor="gradient" className="text-sm cursor-pointer">Gradient</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="pattern" id="pattern" />
+                    <label htmlFor="pattern" className="text-sm cursor-pointer">Pattern</label>
+                  </div>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Background Colors */}
+        {form.watch("backgroundStyle") === "solid" && (
+          <FormField
+            control={form.control}
+            name="backgroundColor"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Background Color</FormLabel>
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Input type="color" {...field} className="w-16 h-10 p-1" />
+                    <Input {...field} placeholder="#ffffff" className="flex-1" />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {form.watch("backgroundStyle") === "gradient" && (
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="backgroundGradientStart"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gradient Start</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Input type="color" {...field} className="w-16 h-10 p-1" />
+                      <Input {...field} placeholder="#fdf4ff" className="flex-1" />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="backgroundGradientEnd"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gradient End</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Input type="color" {...field} className="w-16 h-10 p-1" />
+                      <Input {...field} placeholder="#fef3c7" className="flex-1" />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        {/* Layout Style */}
+        <FormField
+          control={form.control}
+          name="layoutStyle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Layout Style</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="centered">Centered</SelectItem>
+                  <SelectItem value="left-visual">Left Visual</SelectItem>
+                  <SelectItem value="compact">Compact</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Font Family */}
+        <FormField
+          control={form.control}
+          name="fontFamily"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Font Family</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Inter">Inter</SelectItem>
+                  <SelectItem value="Roboto">Roboto</SelectItem>
+                  <SelectItem value="Poppins">Poppins</SelectItem>
+                  <SelectItem value="Open Sans">Open Sans</SelectItem>
+                  <SelectItem value="Lato">Lato</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Color Mode */}
         <FormField
           control={form.control}
@@ -770,41 +712,92 @@ export function ChatConfigurationTabs({
             </FormItem>
           )}
         />
+      </TabsContent>
 
-        {/* Landing Page Mode */}
+      {/* TAB 4: SETTINGS */}
+      <TabsContent value="settings" className="space-y-6">
+        {/* Chat Name */}
         <FormField
           control={form.control}
-          name="useLandingPageMode"
+          name="name"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Landing Page Mode</FormLabel>
-                <FormDescription>Show centered input before first message</FormDescription>
-              </div>
+            <FormItem>
+              <FormLabel>Chat Name</FormLabel>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Input
+                  {...field}
+                  placeholder="My Support Chat"
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onNameChange(e.target.value);
+                  }}
+                />
               </FormControl>
+              <FormDescription>Internal name for this chat interface</FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Landing Tagline - Only visible when Landing Page Mode is enabled */}
-        {form.watch("useLandingPageMode") && (
-          <FormField
-            control={form.control}
-            name="landingTagline"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Landing Tagline</FormLabel>
+        {/* Share Link Slug */}
+        <FormField
+          control={form.control}
+          name="slug"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Share Link</FormLabel>
+              <div className="flex gap-2">
                 <FormControl>
-                  <Input {...field} placeholder="Ready when you are." />
+                  <div className="relative flex-1">
+                    <Input
+                      {...field}
+                      placeholder="my-chat"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onSlugChange(e.target.value);
+                      }}
+                    />
+                    {isSlugChecking && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
                 </FormControl>
-                <FormDescription>Subtitle displayed on the landing page</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="px-3 py-2 border rounded-md hover:bg-muted transition-colors"
+                >
+                  {copiedLink ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                </button>
+              </div>
+              {field.value && !slugError && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                  <LinkIcon className="h-3 w-3" />
+                  <span className="font-mono text-xs">{getShareableUrl(field.value)}</span>
+                </div>
+              )}
+              {slugError && <p className="text-sm text-destructive mt-2">{slugError}</p>}
+              <FormDescription>Unique URL for sharing this chat</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Webhook URL */}
+        <FormField
+          control={form.control}
+          name="webhookUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>n8n Webhook URL (Optional)</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="https://your-n8n-instance.com/webhook/..." />
+              </FormControl>
+              <FormDescription>Send chat messages to your n8n workflow</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </TabsContent>
     </Tabs>
   );
