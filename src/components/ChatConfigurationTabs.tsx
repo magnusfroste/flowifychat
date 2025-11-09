@@ -104,6 +104,22 @@ export function ChatConfigurationTabs({
           )}
         />
 
+        {/* Chat Title */}
+        <FormField
+          control={form.control}
+          name="chatTitle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Chat Title</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Welcome to Support" />
+              </FormControl>
+              <FormDescription>Displayed as the main heading</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Landing Tagline - Only visible when Landing Page Mode is enabled */}
         {form.watch("useLandingPageMode") && (
           <FormField
@@ -121,22 +137,6 @@ export function ChatConfigurationTabs({
             )}
           />
         )}
-
-        {/* Chat Title */}
-        <FormField
-          control={form.control}
-          name="chatTitle"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Chat Title</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Welcome to Support" />
-              </FormControl>
-              <FormDescription>Displayed as the main heading</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Welcome Message */}
         <FormField

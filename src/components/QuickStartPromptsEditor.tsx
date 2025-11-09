@@ -51,8 +51,7 @@ export function QuickStartPromptsEditor({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Quick Start Prompts</Label>
+      <div className="flex items-center justify-end">
         <span className="text-xs text-muted-foreground">
           {prompts.length}/{maxPrompts}
         </span>
