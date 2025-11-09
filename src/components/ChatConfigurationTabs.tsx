@@ -138,22 +138,6 @@ export function ChatConfigurationTabs({
           />
         )}
 
-        {/* Welcome Message */}
-        <FormField
-          control={form.control}
-          name="welcomeMessage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Welcome Message</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="How can I help you today?" rows={3} />
-              </FormControl>
-              <FormDescription>First message users see</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Quick Start Prompts */}
         <FormField
           control={form.control}
@@ -190,7 +174,42 @@ export function ChatConfigurationTabs({
           )}
         />
 
-        {/* Welcome Screen Enabled */}
+        {/* Input Placeholder */}
+        <FormField
+          control={form.control}
+          name="inputPlaceholder"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Input Placeholder</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Type your message..." />
+              </FormControl>
+              <FormDescription>Text shown in the input field</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TabsContent>
+
+      {/* TAB 2: CHAT */}
+      <TabsContent value="chat" className="space-y-6">
+        {/* Welcome Message */}
+        <FormField
+          control={form.control}
+          name="welcomeMessage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Welcome Message</FormLabel>
+              <FormControl>
+                <Textarea {...field} placeholder="How can I help you today?" rows={3} />
+              </FormControl>
+              <FormDescription>First message users see</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Enable Welcome Screen */}
         <FormField
           control={form.control}
           name="welcomeScreenEnabled"
@@ -207,7 +226,7 @@ export function ChatConfigurationTabs({
           )}
         />
 
-        {/* Welcome Subtitle */}
+        {/* Welcome Subtitle & Disclaimer - Only visible when welcome screen is enabled */}
         {form.watch("welcomeScreenEnabled") && (
           <>
             <FormField
@@ -239,25 +258,6 @@ export function ChatConfigurationTabs({
           </>
         )}
 
-        {/* Input Placeholder */}
-        <FormField
-          control={form.control}
-          name="inputPlaceholder"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Input Placeholder</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Type your message..." />
-              </FormControl>
-              <FormDescription>Text shown in the input field</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </TabsContent>
-
-      {/* TAB 2: CHAT */}
-      <TabsContent value="chat" className="space-y-6">
         {/* Message Bubble Style */}
         <FormField
           control={form.control}
