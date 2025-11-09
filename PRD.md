@@ -72,6 +72,7 @@ A web application that allows users to:
   - **Avatar URL**: Custom bot avatar image
   - **Quick Start Prompts**: Array of suggested conversation starters
   - **Landing Page Mode**: Toggle between immediate chat vs landing page with prompts
+  - **Template Presets**: Quick-apply branding styles (OpenAI, Claude, Grok, Playful) - see §5.5
 - **Acceptance Criteria**:
   - ✅ Colors applied throughout chat interface
   - ✅ Avatar displayed in message bubbles (if provided)
@@ -366,6 +367,71 @@ last_activity: timestamp
 - All UI components from shadcn/ui
 - Custom variants for chat-specific needs
 - Consistent spacing and padding (4px grid)
+
+### 5.5 Branding Templates
+
+#### 5.5.1 Available Templates
+Flowify provides pre-configured branding templates that allow users to quickly style their chat interfaces with recognizable aesthetics:
+
+1. **OpenAI Style** (Default/First)
+   - Clean, professional design
+   - Minimalist message bubbles
+   - Trust signal through familiar interface
+   - Best for: Professional/business contexts
+
+2. **Claude Style**
+   - Warm, conversational aesthetic
+   - Softer colors and rounded elements
+   - Focus on readability
+   - Best for: Thoughtful, long-form conversations
+
+3. **Grok Style**
+   - Bold, modern interface
+   - High contrast and vibrant
+   - Playful yet professional
+   - Best for: Tech-forward audiences
+
+4. **Playful**
+   - Colorful and engaging
+   - Unique visual identity
+   - Encourages experimentation
+   - Best for: Creative/casual applications
+
+#### 5.5.2 Template Ordering Rationale
+
+**Decision**: Keep OpenAI Style as the first template
+
+**Reasoning**:
+- **Recognition & Trust**: OpenAI's interface is widely recognized and trusted by users, making it an effective default that signals professionalism and reliability
+- **Safe Starting Point**: Provides a neutral, polished baseline that works well across most use cases
+- **User Expectations**: Most developers creating chat interfaces expect this style, reducing cognitive load
+- **Easy Customization**: Users can easily apply the template and then customize specific elements
+
+**Alternative Considered**: Playful as default
+- Would emphasize creativity and uniqueness
+- Better showcases customization possibilities
+- Could differentiate from competitors
+
+**Conclusion**: For initial product launch, prioritizing trust and familiarity (OpenAI Style first) is more important than emphasizing creativity. As the product matures and gains user trust, we can reconsider highlighting more distinctive templates.
+
+#### 5.5.3 Template Application
+- Templates appear in the **Design** tab of the configuration interface
+- Clicking a template applies all associated values:
+  - Colors (primary, accent, user/bot message colors)
+  - Layout settings (bubble style, border radius, spacing)
+  - Typography (font families, sizes)
+  - Input/button styles
+  - Interactive features (hover states, animations)
+- Live preview updates immediately upon template selection
+- Users can apply a template then customize individual properties
+- All form fields sync with template values via `form.setValue()`
+
+#### 5.5.4 Future Template Enhancements
+- **Custom Template Saving**: Allow users to save their configurations as custom templates
+- **Template Categories**: Group by style (Professional, Creative, Dark Mode)
+- **Template Preview**: Show before/after comparison on hover
+- **Community Templates**: Share templates across users
+- **Industry-Specific Templates**: Healthcare, Education, E-commerce presets
 
 ---
 
