@@ -61,7 +61,6 @@ export function ChatSidebar({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -72,9 +71,19 @@ export function ChatSidebar({
           .eq("chat_instance_id", chatInstanceId)
           .order("created_at", { ascending: true });
 
-        // If user is authenticated (not owner), filter by their claimed sessions
-        if (userId && !isOwner) {
-          // Get user's claimed session IDs
+        // Filter sessions based on user type
+        if (!userId && !isOwner) {
+          // Anonymous user - only show their local session
+          const localSessionId = localStorage.getItem(`chat_session:${chatInstanceId}`);
+          if (localSessionId) {
+            query = query.eq("session_id", localSessionId);
+          } else {
+            // No local session yet
+            setLoading(false);
+            return;
+          }
+        } else if (userId && !isOwner) {
+          // Authenticated user (not owner) - filter by their claimed sessions
           const { data: userSessionData } = await supabase
             .from("user_sessions")
             .select("session_id")
@@ -206,24 +215,6 @@ export function ChatSidebar({
     }
   };
 
-  const handleClearHistory = () => {
-    // Clear only the current chat's session from localStorage
-    localStorage.removeItem(`chat_session:${chatInstanceId}`);
-    
-    // Clear local sessions state to update UI
-    setSessions([]);
-    
-    // Trigger new session creation
-    onNewSession();
-    
-    // Show success message
-    toast({
-      title: "Chat history cleared",
-      description: "Your conversation history has been cleared from this device",
-    });
-    
-    setClearDialogOpen(false);
-  };
 
   return (
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
@@ -241,19 +232,6 @@ export function ChatSidebar({
         </div>
       )}
       
-      {!isOwner && sidebarOpen && (
-        <div className="p-2 border-b">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setClearDialogOpen(true)}
-            className="w-full justify-start text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear My History
-          </Button>
-        </div>
-      )}
       
       <div className="flex items-center justify-between p-2 border-b">
         <SidebarTrigger />
@@ -355,27 +333,6 @@ export function ChatSidebar({
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear your chat history?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will clear your conversation history from this device. You won't be able to access these conversations again.
-              <br /><br />
-              <span className="text-xs text-muted-foreground">Note: This only affects your device. The conversations remain in the system.</span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleClearHistory}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Clear History
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Sidebar>
   );
 }
