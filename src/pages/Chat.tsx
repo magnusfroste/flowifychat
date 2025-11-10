@@ -1334,9 +1334,11 @@ const Chat = () => {
                           {message.content}
                         </ReactMarkdown>
                       </div>
-                      {showTimestamps && (
+                      {showTimestamps !== 'never' && (
                         <p 
-                          className="text-xs mt-2 opacity-70"
+                          className={`text-xs mt-2 transition-opacity ${
+                            showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-70' : 'opacity-70'
+                          }`}
                           style={{
                             color: message.role === "user" && userMessageColor 
                               ? getTextColor(userMessageColor, isDark)
