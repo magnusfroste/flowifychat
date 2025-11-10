@@ -43,6 +43,8 @@ interface ChatSidebarProps {
   onNewSession: () => void;
   isOwner: boolean;
   userId?: string;
+  routeId?: string;
+  chatSlug?: string | null;
 }
 
 export function ChatSidebar({
@@ -52,6 +54,8 @@ export function ChatSidebar({
   onNewSession,
   isOwner,
   userId,
+  routeId,
+  chatSlug,
 }: ChatSidebarProps) {
   const navigate = useNavigate();
   const { open: sidebarOpen } = useSidebar();
@@ -74,7 +78,8 @@ export function ChatSidebar({
         // Filter sessions based on user type
         if (!userId && !isOwner) {
           // Anonymous user - only show their local session
-          const localSessionId = localStorage.getItem(`chat_session:${chatInstanceId}`);
+          const chatKey = routeId || chatInstanceId;
+          const localSessionId = localStorage.getItem(`chat_session:${chatKey}`);
           if (localSessionId) {
             query = query.eq("session_id", localSessionId);
           } else {
@@ -95,8 +100,9 @@ export function ChatSidebar({
           // Show sessions that are either:
           // 1. In localStorage (current device)
           // 2. Claimed by this user (from any device)
-          const localSessionId = localStorage.getItem(`chat_session:${chatInstanceId}`);
-          const sessionIdsToShow = localSessionId 
+          const chatKey = routeId || chatInstanceId;
+          const localSessionId = localStorage.getItem(`chat_session:${chatKey}`);
+          const sessionIdsToShow = localSessionId
             ? [...new Set([...claimedSessionIds, localSessionId])]
             : claimedSessionIds;
 

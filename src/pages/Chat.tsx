@@ -1018,6 +1018,8 @@ const Chat = () => {
             onNewSession={handleNewSession}
             isOwner={false}
             userId={user?.id}
+            routeId={id}
+            chatSlug={chatInstance.slug}
           />
           
           {/* Main content area with landing page */}
@@ -1216,6 +1218,8 @@ const Chat = () => {
               onNewSession={handleNewSession}
               isOwner={false}
               userId={user?.id}
+              routeId={id}
+              chatSlug={chatInstance.slug}
             />
           )
         )}
