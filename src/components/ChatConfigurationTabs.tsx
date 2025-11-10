@@ -32,7 +32,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { BrandingTemplates, type BrandingTemplate } from "@/components/BrandingTemplates";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
-import type { ChatFormValues } from "@/components/ChatConfigurationForm";
+import type { ChatFormValues } from "@/types/chatConfiguration";
 
 interface ChatConfigurationTabsProps {
   form: UseFormReturn<ChatFormValues>;

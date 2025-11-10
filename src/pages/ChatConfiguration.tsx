@@ -17,7 +17,7 @@ import { ChatConfigurationTabs } from "@/components/ChatConfigurationTabs";
 import { ChatConfigurationPreview } from "@/components/ChatConfigurationPreview";
 import { BrandingTemplate } from "@/components/BrandingTemplates";
 import { generateSlug } from "@/lib/slugUtils";
-import type { ChatFormValues } from "@/components/ChatConfigurationForm";
+import type { ChatFormValues } from "@/types/chatConfiguration";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { useUserPlan } from "@/hooks/useUserPlan";

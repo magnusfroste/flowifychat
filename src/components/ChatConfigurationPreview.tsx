@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { ChatInterfacePreview } from "@/components/ChatInterfacePreview";
 import { ChatLandingPagePreview } from "@/components/ChatLandingPagePreview";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
-import type { ChatFormValues } from "@/components/ChatConfigurationForm";
+import type { ChatFormValues } from "@/types/chatConfiguration";
 import type { ChatBranding } from "@/lib/chatConfig";
 
 interface ChatConfigurationPreviewProps {
