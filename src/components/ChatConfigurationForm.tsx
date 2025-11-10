@@ -134,7 +134,7 @@ export function ChatConfigurationForm({
   const [messagesAppearanceOpen, setMessagesAppearanceOpen] = useState(false);
   const [layoutStructureOpen, setLayoutStructureOpen] = useState(false);
   const [messageBehaviorOpen, setMessageBehaviorOpen] = useState(false);
-  const [interactiveElementsOpen, setInteractiveElementsOpen] = useState(false);
+  const [interactiveElementsOpen, setInteractiveElementsOpen] = useState(true);
   const [quickStartOpen, setQuickStartOpen] = useState(false);
   const [buttonInputOpen, setButtonInputOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);

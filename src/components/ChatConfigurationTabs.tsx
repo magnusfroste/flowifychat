@@ -330,29 +330,6 @@ export function ChatConfigurationTabs({
           )}
         />
 
-        {/* Show Timestamps */}
-        <FormField
-          control={form.control}
-          name="showTimestamps"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Show Timestamps</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="always">Always</SelectItem>
-                  <SelectItem value="hover">On Hover</SelectItem>
-                  <SelectItem value="never">Never</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>When to display message timestamps</FormDescription>
-            </FormItem>
-          )}
-        />
 
         {/* User & Bot Message Colors */}
         <div className="grid grid-cols-2 gap-4">
