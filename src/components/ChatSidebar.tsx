@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { MessageSquare, Plus, Trash2, ArrowLeft, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,6 +66,7 @@ export function ChatSidebar({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -159,6 +161,11 @@ export function ChatSidebar({
 
     loadSessions();
   }, [chatInstanceId, userId, isOwner]);
+
+  // Filter sessions based on search query
+  const filteredSessions = sessions.filter(session =>
+    session.preview.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -255,6 +262,31 @@ export function ChatSidebar({
         )}
       </div>
 
+      {sidebarOpen && (
+        <div className="p-2 border-b">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 pr-8 h-8 text-sm"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       <SidebarContent>
         <SidebarGroup>
           {sidebarOpen && (
@@ -277,8 +309,14 @@ export function ChatSidebar({
                     No conversations yet
                   </div>
                 )
+              ) : filteredSessions.length === 0 ? (
+                sidebarOpen && (
+                  <div className="px-4 py-6 text-sm text-muted-foreground text-center">
+                    No matching conversations
+                  </div>
+                )
               ) : (
-                sessions.map((session) => (
+                filteredSessions.map((session) => (
                   <SidebarMenuItem key={session.session_id}>
                     <div className="relative group">
                       <SidebarMenuButton
