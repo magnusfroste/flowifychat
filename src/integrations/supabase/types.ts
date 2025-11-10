@@ -55,6 +55,9 @@ export type Database = {
           custom_branding: Json | null
           id: string
           is_active: boolean | null
+          n8n_auth_enabled: boolean | null
+          n8n_auth_password: string | null
+          n8n_auth_username: string | null
           name: string
           slug: string | null
           updated_at: string
@@ -66,6 +69,9 @@ export type Database = {
           custom_branding?: Json | null
           id?: string
           is_active?: boolean | null
+          n8n_auth_enabled?: boolean | null
+          n8n_auth_password?: string | null
+          n8n_auth_username?: string | null
           name: string
           slug?: string | null
           updated_at?: string
@@ -77,6 +83,9 @@ export type Database = {
           custom_branding?: Json | null
           id?: string
           is_active?: boolean | null
+          n8n_auth_enabled?: boolean | null
+          n8n_auth_password?: string | null
+          n8n_auth_username?: string | null
           name?: string
           slug?: string | null
           updated_at?: string

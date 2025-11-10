@@ -71,4 +71,9 @@ export interface ChatFormValues {
   messageActions?: 'inline' | 'hover' | 'menu';
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
+  
+  // n8n Authentication
+  n8nAuthEnabled?: boolean;
+  n8nAuthUsername?: string;
+  n8nAuthPassword?: string;
 }

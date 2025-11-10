@@ -61,6 +61,9 @@ interface ChatInstance {
   name: string;
   slug: string | null;
   webhook_url: string;
+  n8n_auth_enabled?: boolean;
+  n8n_auth_username?: string;
+  n8n_auth_password?: string;
   user_id: string;
   custom_branding: {
     primaryColor: string;
@@ -435,12 +438,20 @@ const Chat = () => {
         metadataConfig
       );
 
+      // Build headers with optional basic auth
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (chatInstance.n8n_auth_enabled && chatInstance.n8n_auth_username && chatInstance.n8n_auth_password) {
+        const credentials = btoa(`${chatInstance.n8n_auth_username}:${chatInstance.n8n_auth_password}`);
+        headers["Authorization"] = `Basic ${credentials}`;
+      }
+
       // Send to n8n webhook
       const response = await fetch(chatInstance.webhook_url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -610,9 +621,19 @@ const Chat = () => {
         metadata
       );
 
+      // Build headers with optional basic auth
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (chatInstance.n8n_auth_enabled && chatInstance.n8n_auth_username && chatInstance.n8n_auth_password) {
+        const credentials = btoa(`${chatInstance.n8n_auth_username}:${chatInstance.n8n_auth_password}`);
+        headers["Authorization"] = `Basic ${credentials}`;
+      }
+
       const response = await fetch(chatInstance.webhook_url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(webhookPayload),
       });
 

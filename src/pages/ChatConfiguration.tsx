@@ -87,6 +87,9 @@ const formSchema = z.object({
   messageActions: z.enum(['inline', 'hover', 'menu']).optional(),
   showCopyButton: z.boolean().optional(),
   showRegenerateButton: z.boolean().optional(),
+  n8nAuthEnabled: z.boolean().optional(),
+  n8nAuthUsername: z.string().optional(),
+  n8nAuthPassword: z.string().optional(),
 });
 
 interface ChatConfigurationProps {
@@ -212,6 +215,9 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           name: data.name,
           slug: data.slug,
           webhookUrl: data.webhook_url || "",
+          n8nAuthEnabled: data.n8n_auth_enabled || false,
+          n8nAuthUsername: data.n8n_auth_username || "",
+          n8nAuthPassword: data.n8n_auth_password || "",
           welcomeMessage: branding.welcomeMessage || "",
           chatTitle: branding.chatTitle || data.name,
           primaryColor: branding.primaryColor || "#6366f1",
@@ -428,6 +434,9 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           name: values.name,
           slug: values.slug,
           webhook_url: values.webhookUrl || null,
+          n8n_auth_enabled: values.n8nAuthEnabled || false,
+          n8n_auth_username: values.n8nAuthUsername || null,
+          n8n_auth_password: values.n8nAuthPassword || null,
           custom_branding: customBranding,
         });
 
@@ -445,6 +454,9 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
             name: values.name,
             slug: values.slug,
             webhook_url: values.webhookUrl || null,
+            n8n_auth_enabled: values.n8nAuthEnabled || false,
+            n8n_auth_username: values.n8nAuthUsername || null,
+            n8n_auth_password: values.n8nAuthPassword || null,
             custom_branding: customBranding,
           })
           .eq("id", id);

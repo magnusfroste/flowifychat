@@ -788,6 +788,64 @@ export function ChatConfigurationTabs({
           )}
         />
 
+        {/* n8n Authentication Section */}
+        <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+          <FormField
+            control={form.control}
+            name="n8nAuthEnabled"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <FormLabel>Enable n8n Authentication</FormLabel>
+                  <FormDescription>
+                    Secure your n8n webhook with basic auth
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {form.watch('n8nAuthEnabled') && (
+            <>
+              <FormField
+                control={form.control}
+                name="n8nAuthUsername"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="admin" />
+                    </FormControl>
+                    <FormDescription>Basic auth username</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="n8nAuthPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="password" placeholder="••••••••" />
+                    </FormControl>
+                    <FormDescription>Basic auth password</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+        </div>
+
         {/* Interactive Elements Section */}
         <div className="space-y-4 pt-6 border-t">
           <div>
