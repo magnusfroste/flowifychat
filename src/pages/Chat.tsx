@@ -1037,7 +1037,7 @@ const Chat = () => {
                 borderColor: 'hsl(var(--border))',
               }}
             >
-              <div className="max-w-4xl mx-auto px-4 py-4">
+              <div className="max-w-4xl mx-auto px-4 py-3">
                 <div className="flex items-center justify-between">
                   {layoutConfig.headerStyle !== 'minimal' && (
                     <h1 className="font-semibold text-xl">
@@ -1238,7 +1238,7 @@ const Chat = () => {
               color: isDark ? '#ffffff' : '#000000',
             }}
           >
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
               <div className="flex items-center justify-between">
                 {/* Left: Breadcrumb navigation (only for owners) */}
                 <div className="flex items-center gap-4">
