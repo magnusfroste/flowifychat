@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatSkeleton } from "@/components/ChatSkeleton";
-import { Home, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw } from "lucide-react";
+import { Home, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -1378,116 +1384,22 @@ const Chat = () => {
                       )}
                     </div>
                     {/* Action buttons */}
-                    {interactiveConfig.messageActions === 'inline' || getButtonStyleVariant() !== 'openai' ? (
-                      getButtonStyleVariant() === 'claude' ? (
-                        // CLAUDE STYLE: Right-aligned inline
-                        <div className="flex justify-end gap-1 mt-1">
-                          {interactiveConfig.showCopyButton && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopyMessage(message.id, message.content)}
-                              className="h-7 w-7 p-0 opacity-60 hover:opacity-100 transition-opacity"
-                              title="Copy"
-                            >
-                              {copiedMessageId === message.id ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
-                          {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRegenerate}
-                              className="h-7 w-7 p-0 opacity-60 hover:opacity-100 transition-opacity"
-                              title="Regenerate"
-                            >
-                              <RotateCw className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ) : getButtonStyleVariant() === 'grok' ? (
-                        // GROK STYLE: Ultra-compact below message
-                        <div className="flex gap-0.5 mt-0.5">
-                          {interactiveConfig.showCopyButton && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopyMessage(message.id, message.content)}
-                              className="h-5 w-5 p-0 opacity-40 hover:opacity-80 transition-opacity"
-                              title="Copy"
-                            >
-                              {copiedMessageId === message.id ? (
-                                <Check className="h-2.5 w-2.5" />
-                              ) : (
-                                <Copy className="h-2.5 w-2.5" />
-                              )}
-                            </Button>
-                          )}
-                          {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRegenerate}
-                              className="h-5 w-5 p-0 opacity-40 hover:opacity-80 transition-opacity"
-                              title="Regenerate"
-                            >
-                              <RotateCw className="h-2.5 w-2.5" />
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        // OPENAI STYLE: Standard inline with text labels
-                        <div className="flex gap-2 mt-2">
-                          {interactiveConfig.showCopyButton && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopyMessage(message.id, message.content)}
-                              className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
-                              title="Copy"
-                            >
-                              {copiedMessageId === message.id ? (
-                                <Check className="h-3 w-3" />
-                              ) : (
-                                <Copy className="h-3 w-3" />
-                              )}
-                              <span className="ml-1">Copy</span>
-                            </Button>
-                          )}
-                          {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRegenerate}
-                              className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
-                              title="Regenerate"
-                            >
-                              <RotateCw className="h-3 w-3" />
-                              <span className="ml-1">Regenerate</span>
-                            </Button>
-                          )}
-                        </div>
-                      )
-                    ) : (
-                      // FALLBACK: Vertical layout on right side (hover style)
-                      <>
+                    {interactiveConfig.messageActions === 'inline' && (
+                      <div className="flex gap-2 mt-2">
                         {interactiveConfig.showCopyButton && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleCopyMessage(message.id, message.content)}
-                            className="absolute top-1 -right-10 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Copy message"
+                            className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
+                            title="Copy"
                           >
                             {copiedMessageId === message.id ? (
-                              <Check className="h-4 w-4" />
+                              <Check className="h-3 w-3" />
                             ) : (
-                              <Copy className="h-4 w-4" />
+                              <Copy className="h-3 w-3" />
                             )}
+                            <span className="ml-1">Copy</span>
                           </Button>
                         )}
                         {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
@@ -1495,13 +1407,82 @@ const Chat = () => {
                             variant="ghost"
                             size="sm"
                             onClick={handleRegenerate}
-                            className="absolute top-10 -right-10 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Regenerate response"
+                            className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
+                            title="Regenerate"
                           >
-                            <RotateCw className="h-4 w-4" />
+                            <RotateCw className="h-3 w-3" />
+                            <span className="ml-1">Regenerate</span>
                           </Button>
                         )}
-                      </>
+                      </div>
+                    )}
+
+                    {interactiveConfig.messageActions === 'hover' && (
+                      <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {interactiveConfig.showCopyButton && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyMessage(message.id, message.content)}
+                            className="h-7 px-2"
+                            title="Copy"
+                          >
+                            {copiedMessageId === message.id ? (
+                              <Check className="h-3 w-3" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                            <span className="ml-1">Copy</span>
+                          </Button>
+                        )}
+                        {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRegenerate}
+                            className="h-7 px-2"
+                            title="Regenerate"
+                          >
+                            <RotateCw className="h-3 w-3" />
+                            <span className="ml-1">Regenerate</span>
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {interactiveConfig.messageActions === 'menu' && (
+                      <div className="mt-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 opacity-60 hover:opacity-100 transition-opacity"
+                              title="Message actions"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            {interactiveConfig.showCopyButton && (
+                              <DropdownMenuItem onClick={() => handleCopyMessage(message.id, message.content)}>
+                                {copiedMessageId === message.id ? (
+                                  <Check className="h-4 w-4 mr-2" />
+                                ) : (
+                                  <Copy className="h-4 w-4 mr-2" />
+                                )}
+                                Copy
+                              </DropdownMenuItem>
+                            )}
+                            {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
+                              <DropdownMenuItem onClick={handleRegenerate}>
+                                <RotateCw className="h-4 w-4 mr-2" />
+                                Regenerate
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     )}
                   </div>
                 </div>

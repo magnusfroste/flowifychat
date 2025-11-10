@@ -3,13 +3,20 @@
  * Shows realistic chat interface with mock messages
  */
 
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { useTheme } from "next-themes";
 import type { ChatBranding } from "@/lib/chatConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface ChatInterfacePreviewProps {
   branding: ChatBranding;
@@ -18,11 +25,12 @@ interface ChatInterfacePreviewProps {
 
 export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your message..." }: ChatInterfacePreviewProps) {
   const { resolvedTheme } = useTheme();
+  const [copiedMessageId, setCopiedMessageId] = useState<number | null>(null);
   
   const mockMessages = [
-    { role: "assistant", content: branding.welcomeMessage || "Hi! How can I help you today?" },
-    { role: "user", content: "Can you help me understand how this works?" },
-    { role: "assistant", content: "Of course! I'd be happy to help. This is a preview of your chat interface with all your customizations applied. You can see how messages, avatars, and input styling will look." },
+    { id: 1, role: "assistant", content: branding.welcomeMessage || "Hi! How can I help you today?" },
+    { id: 2, role: "user", content: "Can you help me understand how this works?" },
+    { id: 3, role: "assistant", content: "Of course! I'd be happy to help. This is a preview of your chat interface with all your customizations applied. You can see how messages, avatars, and input styling will look." },
   ];
 
   const {
@@ -51,7 +59,16 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     inputStyle = 'outline',
     buttonStyle = 'filled',
     colorMode = 'light',
+    messageActions = 'inline',
+    showCopyButton = true,
+    showRegenerateButton = true,
   } = branding;
+
+  const handleCopyMessage = (messageId: number, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedMessageId(messageId);
+    setTimeout(() => setCopiedMessageId(null), 2000);
+  };
 
   // Avatar size classes
   const avatarSizeClasses = {
@@ -184,10 +201,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             const isUser = message.role === 'user';
             const messageColor = isUser ? userMessageColor : botMessageColor;
             const avatarAlignClass = avatarPosition === 'center' ? 'items-center' : 'items-start';
+            const isLastMessage = index === mockMessages.length - 1;
 
             return (
               <div
-                key={index}
+                key={message.id}
                 className={`group flex gap-3 ${avatarAlignClass} ${
                   isUser ? 'flex-row-reverse' : 'flex-row'
                 } ${alignmentClasses[messageAlignment]}`}
@@ -210,7 +228,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   </Avatar>
                 )}
 
-                {/* Message Bubble with Timestamp */}
+                {/* Message Bubble with Timestamp and Actions */}
                 <div className={messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}>
                   <div
                     className={`${densityClasses[messageDensity]} ${
@@ -235,6 +253,112 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     >
                       {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                     </div>
+                  )}
+
+                  {/* Action Buttons - Only for assistant messages */}
+                  {!isUser && (
+                    <>
+                      {messageActions === 'inline' && (
+                        <div className="flex gap-2 mt-2">
+                          {showCopyButton && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopyMessage(message.id, message.content)}
+                              className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
+                              title="Copy"
+                            >
+                              {copiedMessageId === message.id ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                              <span className="ml-1">Copy</span>
+                            </Button>
+                          )}
+                          {showRegenerateButton && isLastMessage && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {}}
+                              className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
+                              title="Regenerate"
+                            >
+                              <RotateCw className="h-3 w-3" />
+                              <span className="ml-1">Regenerate</span>
+                            </Button>
+                          )}
+                        </div>
+                      )}
+
+                      {messageActions === 'hover' && (
+                        <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {showCopyButton && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopyMessage(message.id, message.content)}
+                              className="h-7 px-2"
+                              title="Copy"
+                            >
+                              {copiedMessageId === message.id ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                              <span className="ml-1">Copy</span>
+                            </Button>
+                          )}
+                          {showRegenerateButton && isLastMessage && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {}}
+                              className="h-7 px-2"
+                              title="Regenerate"
+                            >
+                              <RotateCw className="h-3 w-3" />
+                              <span className="ml-1">Regenerate</span>
+                            </Button>
+                          )}
+                        </div>
+                      )}
+
+                      {messageActions === 'menu' && (
+                        <div className="mt-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 opacity-60 hover:opacity-100 transition-opacity"
+                                title="Message actions"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              {showCopyButton && (
+                                <DropdownMenuItem onClick={() => handleCopyMessage(message.id, message.content)}>
+                                  {copiedMessageId === message.id ? (
+                                    <Check className="h-4 w-4 mr-2" />
+                                  ) : (
+                                    <Copy className="h-4 w-4 mr-2" />
+                                  )}
+                                  Copy
+                                </DropdownMenuItem>
+                              )}
+                              {showRegenerateButton && isLastMessage && (
+                                <DropdownMenuItem onClick={() => {}}>
+                                  <RotateCw className="h-4 w-4 mr-2" />
+                                  Regenerate
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
