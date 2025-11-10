@@ -124,20 +124,22 @@ export function ChatSidebar({
         
         data?.forEach((msg) => {
           if (!sessionMap.has(msg.session_id)) {
+            // Initialize session - preview will be set later
             sessionMap.set(msg.session_id, {
               session_id: msg.session_id,
               first_message_time: msg.created_at,
               message_count: 1,
-              preview: msg.role === 'user' ? msg.content.substring(0, 50) : "New conversation",
+              preview: "New conversation", // Default, will be replaced if user message found
             });
           } else {
             const session = sessionMap.get(msg.session_id)!;
             session.message_count += 1;
-            
-            // If we haven't found a user message yet for preview, update it
-            if (session.preview === "New conversation" && msg.role === 'user') {
-              session.preview = msg.content.substring(0, 50);
-            }
+          }
+          
+          // Always try to set preview from first user message
+          const session = sessionMap.get(msg.session_id)!;
+          if (msg.role === 'user' && session.preview === "New conversation") {
+            session.preview = msg.content.substring(0, 50);
           }
         });
 
