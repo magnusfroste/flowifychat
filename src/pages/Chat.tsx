@@ -1352,39 +1352,68 @@ const Chat = () => {
                       )}
                     </div>
                     {/* Action buttons */}
-                    {interactiveConfig.showCopyButton && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCopyMessage(message.id, message.content)}
-                        className={`absolute top-1 -right-10 h-8 w-8 p-0 ${
-                          interactiveConfig.messageActions === 'inline' 
-                            ? 'opacity-100' 
-                            : 'opacity-0 group-hover:opacity-100'
-                        } transition-opacity`}
-                        title="Copy message"
-                      >
-                        {copiedMessageId === message.id ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
+                    {interactiveConfig.messageActions === 'inline' ? (
+                      // Horizontal layout below message (OpenAI style)
+                      <div className="flex gap-1 mt-2">
+                        {interactiveConfig.showCopyButton && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyMessage(message.id, message.content)}
+                            className="h-7 px-2 text-xs"
+                            title="Copy"
+                          >
+                            {copiedMessageId === message.id ? (
+                              <Check className="h-3 w-3 mr-1" />
+                            ) : (
+                              <Copy className="h-3 w-3 mr-1" />
+                            )}
+                            <span>Copy</span>
+                          </Button>
                         )}
-                      </Button>
-                    )}
-                    {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRegenerate}
-                        className={`absolute top-10 -right-10 h-8 w-8 p-0 ${
-                          interactiveConfig.messageActions === 'inline' 
-                            ? 'opacity-100' 
-                            : 'opacity-0 group-hover:opacity-100'
-                        } transition-opacity`}
-                        title="Regenerate response"
-                      >
-                        <RotateCw className="h-4 w-4" />
-                      </Button>
+                        {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRegenerate}
+                            className="h-7 px-2 text-xs"
+                            title="Regenerate"
+                          >
+                            <RotateCw className="h-3 w-3 mr-1" />
+                            <span>Regenerate</span>
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      // Vertical layout on right side (hover style)
+                      <>
+                        {interactiveConfig.showCopyButton && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyMessage(message.id, message.content)}
+                            className="absolute top-1 -right-10 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Copy message"
+                          >
+                            {copiedMessageId === message.id ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                        {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRegenerate}
+                            className="absolute top-10 -right-10 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Regenerate response"
+                          >
+                            <RotateCw className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
