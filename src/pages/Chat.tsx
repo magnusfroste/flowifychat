@@ -207,22 +207,28 @@ const Chat = () => {
           setOwnerHidesBranding(profileData?.hide_branding_badge || false);
         }
         
-        // Migrate sessionId to canonical key (instance.id) if needed
-        const routeKey = getChatKeyFromRouteOrInstance(id);
-        const canonicalKey = getChatKeyFromRouteOrInstance(id, instance.id);
-        
-        if (routeKey !== canonicalKey) {
-          migrateSessionId(routeKey, canonicalKey);
-          const migratedSessionId = getOrCreateSessionId(canonicalKey);
-          setSessionId(migratedSessionId);
+        // Only migrate if we're in owner mode (UUID access) and have an old slug-based session
+        if (isUUID && instance.slug) {
+          // Owner accessing via UUID - check if we should migrate from old slug-based key
+          const slugKey = getChatKeyFromRouteOrInstance(instance.slug);
+          const uuidKey = getChatKeyFromRouteOrInstance(id, instance.id);
+          
+          // Only migrate if slug key exists (has data to migrate)
+          const slugStorageKey = `chat_session:${slugKey}`;
+          if (localStorage.getItem(slugStorageKey)) {
+            migrateSessionId(slugKey, uuidKey);
+            const migratedSessionId = getOrCreateSessionId(uuidKey);
+            setSessionId(migratedSessionId);
+          }
         }
+        // For slug-based access, keep using the slug as the stable key
+        // No migration needed - session persists as chat_session:demo
         
         // Track view event (only for public shared chats accessed via slug)
-        // Delay until sessionId is confirmed from canonical key
         if (!isUUID && !viewTracked) {
           await trackAnalyticsEvent({
             chat_instance_id: instance.id,
-            session_id: routeKey !== canonicalKey ? getOrCreateSessionId(canonicalKey) : sessionId,
+            session_id: sessionId,
             event_type: "view",
           });
           setViewTracked(true);
