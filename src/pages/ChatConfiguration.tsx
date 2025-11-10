@@ -404,6 +404,22 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
         userMessageColor: values.userMessageColor,
         botMessageColor: values.botMessageColor,
         colorMode: values.colorMode,
+        messageAlignment: values.messageAlignment,
+        maxMessageWidth: values.maxMessageWidth,
+        showAvatars: values.showAvatars,
+        avatarSize: values.avatarSize,
+        avatarPosition: values.avatarPosition,
+        showSidebar: values.showSidebar,
+        allowAnonymousHistory: values.allowAnonymousHistory,
+        headerStyle: values.headerStyle,
+        inputPosition: values.inputPosition,
+        inputSize: values.inputSize,
+        sendButtonStyle: values.sendButtonStyle,
+        messageSpacing: values.messageSpacing,
+        animationSpeed: values.animationSpeed,
+        messageActions: values.messageActions,
+        showCopyButton: values.showCopyButton,
+        showRegenerateButton: values.showRegenerateButton,
       };
 
       if (mode === 'create') {
