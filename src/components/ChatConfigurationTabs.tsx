@@ -787,6 +787,98 @@ export function ChatConfigurationTabs({
             </FormItem>
           )}
         />
+
+        {/* Interactive Elements Section */}
+        <div className="space-y-4 pt-6 border-t">
+          <div>
+            <h3 className="font-medium text-lg mb-1">🎮 Interactive Elements</h3>
+            <p className="text-sm text-muted-foreground">Action buttons and user interactions</p>
+          </div>
+
+          {/* Message Actions Style */}
+          <FormField
+            control={form.control}
+            name="messageActions"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Message Actions Style</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="inline">Always Visible</SelectItem>
+                    <SelectItem value="hover">Show on Hover</SelectItem>
+                    <SelectItem value="menu">Menu Button</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>How message action buttons appear</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Show Timestamps */}
+          <FormField
+            control={form.control}
+            name="showTimestamps"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Show Timestamps</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="always">Always</SelectItem>
+                    <SelectItem value="hover">On Hover</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>When to display message timestamps</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Show Copy Button */}
+          <FormField
+            control={form.control}
+            name="showCopyButton"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                <div className="space-y-0.5">
+                  <FormLabel>Show Copy Button</FormLabel>
+                  <FormDescription>Allow users to copy messages</FormDescription>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Show Regenerate Button */}
+          <FormField
+            control={form.control}
+            name="showRegenerateButton"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                <div className="space-y-0.5">
+                  <FormLabel>Show Regenerate Button</FormLabel>
+                  <FormDescription>Allow users to regenerate responses</FormDescription>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );
