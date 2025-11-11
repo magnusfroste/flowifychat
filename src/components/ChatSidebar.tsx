@@ -3,6 +3,7 @@ import { MessageSquare, Plus, Trash2, ArrowLeft, Search, X } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getLocalSessionList, removeSessionFromLocalList } from "@/lib/session";
 import {
   Sidebar,
   SidebarContent,
@@ -78,19 +79,23 @@ export function ChatSidebar({
           .order("created_at", { ascending: true });
 
         // Filter sessions based on user type
+        const chatKey = routeId || chatInstanceId;
+        
         if (!userId && !isOwner) {
-          // Anonymous user - only show their local session
-          const chatKey = routeId || chatInstanceId;
-          const localSessionId = localStorage.getItem(`chat_session:${chatKey}`);
-          if (localSessionId) {
-            query = query.eq("session_id", localSessionId);
+          // Anonymous user - show all sessions from local list
+          const localList = getLocalSessionList(chatKey);
+          const currentSessionId = localStorage.getItem(`chat_session:${chatKey}`);
+          const sessionIdsToShow = [...new Set([...localList, ...(currentSessionId ? [currentSessionId] : [])])];
+          
+          if (sessionIdsToShow.length > 0) {
+            query = query.in("session_id", sessionIdsToShow);
           } else {
-            // No local session yet
+            // No sessions yet
             setLoading(false);
             return;
           }
         } else if (userId && !isOwner) {
-          // Authenticated user (not owner) - filter by their claimed sessions
+          // Authenticated user (not owner) - show claimed sessions + local list
           const { data: userSessionData } = await supabase
             .from("user_sessions")
             .select("session_id")
@@ -98,20 +103,14 @@ export function ChatSidebar({
             .eq("chat_instance_id", chatInstanceId);
 
           const claimedSessionIds = userSessionData?.map(s => s.session_id) || [];
-          
-          // Show sessions that are either:
-          // 1. In localStorage (current device)
-          // 2. Claimed by this user (from any device)
-          const chatKey = routeId || chatInstanceId;
-          const localSessionId = localStorage.getItem(`chat_session:${chatKey}`);
-          const sessionIdsToShow = localSessionId
-            ? [...new Set([...claimedSessionIds, localSessionId])]
-            : claimedSessionIds;
+          const localList = getLocalSessionList(chatKey);
+          const currentSessionId = localStorage.getItem(`chat_session:${chatKey}`);
+          const sessionIdsToShow = [...new Set([...claimedSessionIds, ...localList, ...(currentSessionId ? [currentSessionId] : [])])];
 
           if (sessionIdsToShow.length > 0) {
             query = query.in("session_id", sessionIdsToShow);
           } else {
-            // User has no sessions yet
+            // No sessions yet
             setLoading(false);
             return;
           }
@@ -160,7 +159,7 @@ export function ChatSidebar({
     };
 
     loadSessions();
-  }, [chatInstanceId, userId, isOwner]);
+  }, [chatInstanceId, userId, isOwner, routeId]);
 
   // Filter sessions based on search query
   const filteredSessions = sessions.filter(session =>
@@ -208,6 +207,10 @@ export function ChatSidebar({
 
       // Remove from local state
       setSessions(sessions.filter(s => s.session_id !== sessionToDelete));
+      
+      // Remove from local list (for anonymous users)
+      const chatKey = routeId || chatInstanceId;
+      removeSessionFromLocalList(chatKey, sessionToDelete);
       
       // If deleted current session, start new one
       if (sessionToDelete === currentSessionId) {

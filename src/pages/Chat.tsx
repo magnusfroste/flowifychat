@@ -33,6 +33,8 @@ import {
   clearSessionId,
   getChatKeyFromRouteOrInstance,
   migrateSessionId,
+  addSessionToLocalList,
+  ensureSessionInList,
 } from "@/lib/session";
 import { migrateAnonymousSessions } from "@/lib/sessionMigration";
 import {
@@ -757,6 +759,7 @@ const Chat = () => {
     const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
     clearSessionId(canonicalKey);
     const newSessionId = getOrCreateSessionId(canonicalKey);
+    addSessionToLocalList(canonicalKey, newSessionId);
     setSessionId(newSessionId);
     setViewTracked(false);
     
@@ -809,7 +812,8 @@ const Chat = () => {
   const handleSessionSelect = (newSessionId: string) => {
     // Update the session ID
     const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
-    localStorage.setItem(`chat_session_${canonicalKey}`, newSessionId);
+    localStorage.setItem(`chat_session:${canonicalKey}`, newSessionId);
+    ensureSessionInList(canonicalKey, newSessionId);
     setSessionId(newSessionId);
     
     // Messages will be reloaded by the useEffect that watches sessionId

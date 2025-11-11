@@ -67,3 +67,46 @@ export const migrateSessionId = (oldKey: string, newKey: string): void => {
     localStorage.removeItem(oldStorageKey);
   }
 };
+
+/**
+ * Storage key for the list of all sessions for a chat
+ */
+const SESSIONS_LIST_PREFIX = "chat_sessions:";
+const getSessionsListKey = (chatKey: string): string => {
+  return `${SESSIONS_LIST_PREFIX}${chatKey}`;
+};
+
+/**
+ * Get all session IDs for a chat from localStorage
+ */
+export const getLocalSessionList = (chatKey: string): string[] => {
+  try {
+    const raw = localStorage.getItem(getSessionsListKey(chatKey));
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Add a session ID to the list for a chat (adds to beginning)
+ */
+export const addSessionToLocalList = (chatKey: string, sessionId: string): void => {
+  const list = getLocalSessionList(chatKey);
+  if (!list.includes(sessionId)) {
+    localStorage.setItem(getSessionsListKey(chatKey), JSON.stringify([sessionId, ...list]));
+  }
+};
+
+/**
+ * Remove a session ID from the list for a chat
+ */
+export const removeSessionFromLocalList = (chatKey: string, sessionId: string): void => {
+  const list = getLocalSessionList(chatKey).filter(id => id !== sessionId);
+  localStorage.setItem(getSessionsListKey(chatKey), JSON.stringify(list));
+};
+
+/**
+ * Ensure a session ID is in the list (idempotent add)
+ */
+export const ensureSessionInList = addSessionToLocalList;
