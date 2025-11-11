@@ -159,6 +159,28 @@ export function ChatSidebar({
     };
 
     loadSessions();
+
+    // Subscribe to real-time updates for new messages
+    const channel = supabase
+      .channel(`chat_messages_${chatInstanceId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `chat_instance_id=eq.${chatInstanceId}`
+        },
+        () => {
+          // New message inserted - reload sessions immediately
+          loadSessions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [chatInstanceId, userId, isOwner, routeId]);
 
   // Filter sessions based on search query

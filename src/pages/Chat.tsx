@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ChatSkeleton } from "@/components/ChatSkeleton";
+
 import { Home, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
@@ -893,7 +893,11 @@ const Chat = () => {
   };
 
   if (loading) {
-    return <ChatSkeleton />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   if (!chatInstance) return null;
