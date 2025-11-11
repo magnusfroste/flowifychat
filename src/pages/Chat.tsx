@@ -28,15 +28,7 @@ import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/pris
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { trackAnalyticsEvent, buildWebhookPayload } from "@/lib/analytics";
-import {
-  getOrCreateSessionId,
-  clearSessionId,
-  getChatKeyFromRouteOrInstance,
-  migrateSessionId,
-  addSessionToLocalList,
-  ensureSessionInList,
-} from "@/lib/session";
-import { migrateAnonymousSessions } from "@/lib/sessionMigration";
+import { migrateAllSessionsForUser, SessionManager } from "@/lib/SessionManager";
 import {
   getQuickStartPromptsConfig,
   getWelcomeScreen,
@@ -104,17 +96,8 @@ const Chat = () => {
   const [isTypingPrompt, setIsTypingPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [sessionId, setSessionId] = useState(() => {
-    // Check if ?new=1 param forces a new session
-    const forceNew = searchParams.get("new") === "1";
-    const routeKey = getChatKeyFromRouteOrInstance(id);
-    
-    if (forceNew) {
-      clearSessionId(routeKey);
-    }
-    
-    return getOrCreateSessionId(routeKey);
-  });
+  // Session management will be initialized after we know the chatInstance.id
+  const [sessionId, setSessionId] = useState<string>("");
   const [viewTracked, setViewTracked] = useState(false);
   const [ownerHidesBranding, setOwnerHidesBranding] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
@@ -128,9 +111,8 @@ const Chat = () => {
         
         // Trigger session migration on sign-in
         if (event === 'SIGNED_IN' && session?.user) {
-          // Use setTimeout to defer migration and prevent blocking
           setTimeout(async () => {
-            const migratedCount = await migrateAnonymousSessions(session.user.id);
+            const migratedCount = await migrateAllSessionsForUser(session.user.id);
             
             if (migratedCount > 0) {
               toast({
@@ -194,6 +176,18 @@ const Chat = () => {
         const instance = data as unknown as ChatInstance;
         setChatInstance(instance);
         
+        // Initialize session for this chat
+        const forceNew = searchParams.get("new") === "1";
+        const manager = new SessionManager(instance.id, authSession?.user?.id || null);
+        
+        if (forceNew) {
+          const newSessionId = manager.createNewSession();
+          setSessionId(newSessionId);
+        } else {
+          const currentSessionId = manager.getOrCreateSession();
+          setSessionId(currentSessionId);
+        }
+        
         // Check if owner wants to hide branding (for public viewers only)
         const { data: { session: ownerSession } } = await supabase.auth.getSession();
         const userIsOwner = ownerSession?.user?.id === instance.user_id;
@@ -208,23 +202,6 @@ const Chat = () => {
           
           setOwnerHidesBranding(profileData?.hide_branding_badge || false);
         }
-        
-        // Only migrate if we're in owner mode (UUID access) and have an old slug-based session
-        if (isUUID && instance.slug) {
-          // Owner accessing via UUID - check if we should migrate from old slug-based key
-          const slugKey = getChatKeyFromRouteOrInstance(instance.slug);
-          const uuidKey = getChatKeyFromRouteOrInstance(id, instance.id);
-          
-          // Only migrate if slug key exists (has data to migrate)
-          const slugStorageKey = `chat_session:${slugKey}`;
-          if (localStorage.getItem(slugStorageKey)) {
-            migrateSessionId(slugKey, uuidKey);
-            const migratedSessionId = getOrCreateSessionId(uuidKey);
-            setSessionId(migratedSessionId);
-          }
-        }
-        // For slug-based access, keep using the slug as the stable key
-        // No migration needed - session persists as chat_session:demo
         
         // Track view event (only for public shared chats accessed via slug)
         if (!isUUID && !viewTracked) {
@@ -756,10 +733,8 @@ const Chat = () => {
   const handleResetSession = async () => {
     if (!chatInstance) return;
     
-    const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
-    clearSessionId(canonicalKey);
-    const newSessionId = getOrCreateSessionId(canonicalKey);
-    addSessionToLocalList(canonicalKey, newSessionId);
+    const sessionManager = new SessionManager(chatInstance.id, user?.id || null);
+    const newSessionId = sessionManager.createNewSession();
     setSessionId(newSessionId);
     setViewTracked(false);
     
@@ -810,10 +785,11 @@ const Chat = () => {
   };
 
   const handleSessionSelect = (newSessionId: string) => {
-    // Update the session ID
-    const canonicalKey = getChatKeyFromRouteOrInstance(id, chatInstance?.id);
-    localStorage.setItem(`chat_session:${canonicalKey}`, newSessionId);
-    ensureSessionInList(canonicalKey, newSessionId);
+    if (!chatInstance) return;
+    
+    // Switch to the selected session
+    const sessionManager = new SessionManager(chatInstance.id, user?.id || null);
+    sessionManager.switchSession(newSessionId);
     setSessionId(newSessionId);
     
     // Messages will be reloaded by the useEffect that watches sessionId
