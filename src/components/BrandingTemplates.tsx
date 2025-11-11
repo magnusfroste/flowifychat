@@ -76,7 +76,7 @@ export const templates: BrandingTemplate[] = [
       borderRadius: 8,
       buttonStyle: 'filled',
       inputStyle: 'outline',
-      colorMode: 'auto',
+      colorMode: 'light',
       
       messageAlignment: 'center',
       maxMessageWidth: 768,
