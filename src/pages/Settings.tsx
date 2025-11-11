@@ -16,7 +16,7 @@ import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession, openCustomerPortal, checkSubscription } from "@/lib/stripe";
 import { toast } from "sonner";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 interface Profile {
   id: string;
@@ -265,11 +265,10 @@ const Settings = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <DashboardSidebar
-          chatInstances={chatInstances}
+        <AppSidebar
+          mode="dashboard"
           selectedChatId={null}
-          onSelectChat={() => {}}
-          onCreateNew={() => navigate("/chat/new")}
+          onChatSelect={() => {}}
           userEmail={user?.email}
           userPlan={plan}
           onUpgrade={handleUpgradeToPro}

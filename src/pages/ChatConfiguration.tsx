@@ -19,7 +19,7 @@ import { BrandingTemplate } from "@/components/BrandingTemplates";
 import { generateSlug } from "@/lib/slugUtils";
 import type { ChatFormValues } from "@/types/chatConfiguration";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
 import {
@@ -508,11 +508,10 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <DashboardSidebar
-          chatInstances={chatInstances}
+        <AppSidebar
+          mode="edit"
           selectedChatId={id || null}
-          onSelectChat={() => {}}
-          onCreateNew={() => navigate("/chat/new")}
+          onChatSelect={() => {}}
           userEmail={user?.email}
           userPlan={plan}
           onUpgrade={handleUpgrade}

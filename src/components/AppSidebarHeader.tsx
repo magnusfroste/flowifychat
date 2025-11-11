@@ -1,7 +1,7 @@
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
-export function DashboardSidebarHeader() {
+export function AppSidebarHeader() {
   const { open: sidebarOpen } = useSidebar();
   
   return (

@@ -8,36 +8,32 @@ import { UserPlan } from "@/hooks/useUserPlan";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/ui/sidebar";
 
-interface DashboardSidebarFooterProps {
+interface AppSidebarFooterProps {
   userEmail: string | undefined;
   userPlan: UserPlan | null;
   onUpgrade: () => void;
   onLogout: () => void;
 }
 
-export function DashboardSidebarFooter({
+export function AppSidebarFooter({
   userEmail,
   userPlan,
   onUpgrade,
   onLogout,
-}: DashboardSidebarFooterProps) {
+}: AppSidebarFooterProps) {
   const { open: sidebarOpen } = useSidebar();
   
-  // Extract initials from email
   const initials = userEmail ? userEmail[0].toUpperCase() : "U";
   
-  // Plan badge text
   const planText = userPlan?.plan_type === "free"
     ? "Free Plan"
     : userPlan?.plan_type === "pro"
     ? "Pro"
     : "Enterprise";
   
-  // Collapsed state: Show upgrade button + avatar with dropdown menu
   if (!sidebarOpen) {
     return (
       <div className="border-t border-border p-2 space-y-2">
-        {/* Upgrade button - visible when free plan */}
         {userPlan?.plan_type === "free" && (
           <Button
             onClick={onUpgrade}
@@ -49,7 +45,6 @@ export function DashboardSidebarFooter({
           </Button>
         )}
         
-        {/* Avatar with dropdown menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all mx-auto">
@@ -60,7 +55,6 @@ export function DashboardSidebarFooter({
           </DropdownMenuTrigger>
           
           <DropdownMenuContent side="right" align="end" className="w-56 bg-background">
-            {/* User info header */}
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium truncate">{userEmail}</p>
@@ -81,7 +75,6 @@ export function DashboardSidebarFooter({
             
             <DropdownMenuSeparator />
             
-            {/* Settings */}
             <DropdownMenuItem asChild>
               <Link to="/settings" className="cursor-pointer flex items-center">
                 <SettingsIcon className="mr-2 h-4 w-4" />
@@ -91,7 +84,6 @@ export function DashboardSidebarFooter({
             
             <DropdownMenuSeparator />
             
-            {/* Logout */}
             <DropdownMenuItem onClick={onLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
@@ -102,11 +94,9 @@ export function DashboardSidebarFooter({
     );
   }
   
-  // Expanded state: Clean user menu with dropdown
   return (
     <div className="border-t border-border">
       <div className="p-4 space-y-3">
-        {/* Upgrade CTA for Free plan - always visible at top */}
         {userPlan?.plan_type === "free" && (
           <Button
             onClick={onUpgrade}
@@ -118,7 +108,6 @@ export function DashboardSidebarFooter({
           </Button>
         )}
         
-        {/* User info with dropdown - clickable to access Settings/Logout */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-3 px-1 py-2 rounded-lg hover:bg-accent cursor-pointer transition-colors">
@@ -146,7 +135,6 @@ export function DashboardSidebarFooter({
           </DropdownMenuTrigger>
           
           <DropdownMenuContent side="right" align="end" className="w-56 bg-background">
-            {/* User info header */}
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium truncate">{userEmail}</p>
@@ -167,7 +155,6 @@ export function DashboardSidebarFooter({
             
             <DropdownMenuSeparator />
             
-            {/* Settings */}
             <DropdownMenuItem asChild>
               <Link to="/settings" className="cursor-pointer flex items-center">
                 <SettingsIcon className="mr-2 h-4 w-4" />
@@ -177,7 +164,6 @@ export function DashboardSidebarFooter({
             
             <DropdownMenuSeparator />
             
-            {/* Logout */}
             <DropdownMenuItem onClick={onLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               Logout

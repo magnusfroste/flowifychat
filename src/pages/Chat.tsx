@@ -52,7 +52,7 @@ import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { ChatSidebar } from "@/components/ChatSidebar";
-import { UnifiedAdminSidebar } from "@/components/UnifiedAdminSidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SignInPrompt } from "@/components/SignInPrompt";
 import { useUserPlan } from "@/hooks/useUserPlan";
@@ -928,7 +928,7 @@ const Chat = () => {
       return (
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-screen w-full">
-            <UnifiedAdminSidebar
+            <AppSidebar
               mode="chat"
               currentChatId={chatInstance.id}
               currentSessionId={sessionId}
@@ -1197,7 +1197,7 @@ const Chat = () => {
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
         {/* Unified Admin Sidebar - for owners */}
         {isOwner ? (
-          <UnifiedAdminSidebar
+          <AppSidebar
             mode="chat"
             currentChatId={chatInstance.id}
             currentSessionId={sessionId}

@@ -29,7 +29,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 interface ChatInstance {
   id: string;
@@ -248,11 +248,10 @@ const Dashboard = () => {
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gradient-subtle">
         {/* Sidebar */}
-        <DashboardSidebar
-          chatInstances={chatInstances}
+        <AppSidebar
+          mode="dashboard"
           selectedChatId={selectedChatId}
-          onSelectChat={setSelectedChatId}
-          onCreateNew={() => navigate("/chat/new")}
+          onChatSelect={setSelectedChatId}
           userEmail={user?.email}
           userPlan={plan}
           onUpgrade={() => setUpgradeDialogOpen(true)}
