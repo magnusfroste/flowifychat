@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { SessionManager } from "@/lib/SessionManager";
 import {
   Sidebar,
   SidebarContent,
@@ -157,6 +158,32 @@ export function AppSidebar({
           }
         });
 
+        // Include empty sessions from SessionManager
+        const { data: { user } } = await supabase.auth.getUser();
+        const manager = new SessionManager(chatId, user?.id || null);
+        const visibleSessionIds = await manager.getAllVisibleSessions();
+
+        for (const id of visibleSessionIds) {
+          if (!sessionMap.has(id)) {
+            sessionMap.set(id, {
+              session_id: id,
+              first_message_time: new Date().toISOString(),
+              message_count: 0,
+              preview: "New conversation",
+            });
+          }
+        }
+
+        // Ensure currentSessionId is included
+        if (currentSessionId && !sessionMap.has(currentSessionId)) {
+          sessionMap.set(currentSessionId, {
+            session_id: currentSessionId,
+            first_message_time: new Date().toISOString(),
+            message_count: 0,
+            preview: "New conversation",
+          });
+        }
+
         const sessionList = Array.from(sessionMap.values()).sort(
           (a, b) =>
             new Date(b.first_message_time).getTime() -
@@ -169,14 +196,102 @@ export function AppSidebar({
       }
     };
 
-    if (mode === 'chat' && currentChatId && !sessions[currentChatId]) {
+    if (mode === 'chat' && currentChatId) {
       loadSessions(currentChatId);
     }
     
     if (mode === 'edit' && expandedChatId && !sessions[expandedChatId]) {
       loadSessions(expandedChatId);
     }
-  }, [mode, currentChatId, expandedChatId, sessions]);
+  }, [mode, currentChatId, expandedChatId, currentSessionId]);
+
+  // Subscribe to real-time inserts for chat mode
+  useEffect(() => {
+    if (mode !== 'chat' || !currentChatId) return;
+
+    const channel = supabase
+      .channel(`app_sidebar_${currentChatId}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'chat_messages', 
+          filter: `chat_instance_id=eq.${currentChatId}` 
+        },
+        () => {
+          // Reload sessions when new message arrives
+          const loadSessions = async () => {
+            try {
+              const { data, error } = await supabase
+                .from("chat_messages")
+                .select("session_id, created_at, content")
+                .eq("chat_instance_id", currentChatId)
+                .order("created_at", { ascending: true });
+
+              if (error) throw error;
+
+              const sessionMap = new Map<string, Session>();
+              
+              data?.forEach((msg) => {
+                if (!sessionMap.has(msg.session_id)) {
+                  sessionMap.set(msg.session_id, {
+                    session_id: msg.session_id,
+                    first_message_time: msg.created_at,
+                    message_count: 1,
+                    preview: msg.content.substring(0, 50),
+                  });
+                } else {
+                  const session = sessionMap.get(msg.session_id)!;
+                  session.message_count += 1;
+                }
+              });
+
+              const { data: { user } } = await supabase.auth.getUser();
+              const manager = new SessionManager(currentChatId, user?.id || null);
+              const visibleSessionIds = await manager.getAllVisibleSessions();
+
+              for (const id of visibleSessionIds) {
+                if (!sessionMap.has(id)) {
+                  sessionMap.set(id, {
+                    session_id: id,
+                    first_message_time: new Date().toISOString(),
+                    message_count: 0,
+                    preview: "New conversation",
+                  });
+                }
+              }
+
+              if (currentSessionId && !sessionMap.has(currentSessionId)) {
+                sessionMap.set(currentSessionId, {
+                  session_id: currentSessionId,
+                  first_message_time: new Date().toISOString(),
+                  message_count: 0,
+                  preview: "New conversation",
+                });
+              }
+
+              const sessionList = Array.from(sessionMap.values()).sort(
+                (a, b) =>
+                  new Date(b.first_message_time).getTime() -
+                  new Date(a.first_message_time).getTime()
+              );
+
+              setSessions((prev) => ({ ...prev, [currentChatId]: sessionList }));
+            } catch (error) {
+              console.error("Error reloading sessions:", error);
+            }
+          };
+          
+          loadSessions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [mode, currentChatId, currentSessionId]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
