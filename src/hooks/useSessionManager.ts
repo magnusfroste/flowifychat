@@ -1,42 +1,42 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { SessionManager } from "@/lib/SessionManager";
 
 /**
  * React hook for session management
  * Provides a SessionManager instance and reactive session state
  */
-export function useSessionManager(chatInstanceId: string, userId: string | null = null) {
-  const sessionManager = useMemo(
-    () => new SessionManager(chatInstanceId, userId),
-    [chatInstanceId, userId]
-  );
+export function useSessionManager(chatInstanceId: string, userId: string) {
+  const [sessionManager] = useState(() => new SessionManager(chatInstanceId, userId));
+  const [currentSessionId, setCurrentSessionId] = useState<string>("");
 
-  const [currentSessionId, setCurrentSessionId] = useState<string>(() =>
-    sessionManager.getOrCreateSession()
-  );
-
-  // Update session manager when userId changes
+  // Initialize session on mount
   useEffect(() => {
-    const manager = new SessionManager(chatInstanceId, userId);
-    setCurrentSessionId(manager.getOrCreateSession());
-  }, [chatInstanceId, userId]);
+    const initSession = async () => {
+      const sessionId = await sessionManager.getOrCreateSession();
+      setCurrentSessionId(sessionId);
+    };
+    initSession();
+  }, [sessionManager]);
 
   const switchSession = (sessionId: string) => {
     sessionManager.switchSession(sessionId);
     setCurrentSessionId(sessionId);
   };
 
-  const createNewSession = () => {
-    const newSessionId = sessionManager.createNewSession();
+  const createNewSession = async () => {
+    const newSessionId = await sessionManager.createNewSession();
     setCurrentSessionId(newSessionId);
     return newSessionId;
   };
 
-  const clearSession = () => {
-    sessionManager.clearCurrentSession();
-    const newSessionId = sessionManager.getOrCreateSession();
-    setCurrentSessionId(newSessionId);
-    return newSessionId;
+  const deleteSession = async (sessionId: string) => {
+    await sessionManager.deleteSession(sessionId);
+    // Create new session if deleted current one
+    if (sessionId === currentSessionId) {
+      const newSessionId = await sessionManager.createNewSession();
+      setCurrentSessionId(newSessionId);
+      return newSessionId;
+    }
   };
 
   return {
@@ -44,6 +44,6 @@ export function useSessionManager(chatInstanceId: string, userId: string | null 
     currentSessionId,
     switchSession,
     createNewSession,
-    clearSession,
+    deleteSession,
   };
 }

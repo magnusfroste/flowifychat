@@ -51,6 +51,7 @@ export type Database = {
       }
       chat_instances: {
         Row: {
+          chat_type: string | null
           created_at: string
           custom_branding: Json | null
           id: string
@@ -65,6 +66,7 @@ export type Database = {
           webhook_url: string
         }
         Insert: {
+          chat_type?: string | null
           created_at?: string
           custom_branding?: Json | null
           id?: string
@@ -79,6 +81,7 @@ export type Database = {
           webhook_url: string
         }
         Update: {
+          chat_type?: string | null
           created_at?: string
           custom_branding?: Json | null
           id?: string

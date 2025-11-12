@@ -41,6 +41,7 @@ const formSchema = z.object({
     (val) => !val || val === '' || z.string().url().safeParse(val).success,
     { message: "Must be a valid URL or leave empty" }
   ),
+  chatType: z.enum(['public', 'authenticated']).optional().default('authenticated'),
   welcomeMessage: z.string().optional(),
   chatTitle: z.string().min(1, "Chat title is required"),
   primaryColor: z.string(),
@@ -157,6 +158,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
       messageActions: 'inline',
       showCopyButton: true,
       showRegenerateButton: true,
+      chatType: 'authenticated',
     },
   });
 
@@ -215,6 +217,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           name: data.name,
           slug: data.slug,
           webhookUrl: data.webhook_url || "",
+          chatType: (data as any).chat_type || 'authenticated',
           n8nAuthEnabled: data.n8n_auth_enabled || false,
           n8nAuthUsername: data.n8n_auth_username || "",
           n8nAuthPassword: data.n8n_auth_password || "",
@@ -433,6 +436,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           user_id: session.user.id,
           name: values.name,
           slug: values.slug,
+          chat_type: values.chatType || 'authenticated',
           webhook_url: values.webhookUrl || null,
           n8n_auth_enabled: values.n8nAuthEnabled || false,
           n8n_auth_username: values.n8nAuthUsername || null,
@@ -453,6 +457,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           .update({
             name: values.name,
             slug: values.slug,
+            chat_type: values.chatType || 'authenticated',
             webhook_url: values.webhookUrl || null,
             n8n_auth_enabled: values.n8nAuthEnabled || false,
             n8n_auth_username: values.n8nAuthUsername || null,

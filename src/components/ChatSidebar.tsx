@@ -72,8 +72,8 @@ export function ChatSidebar({
   useEffect(() => {
     const loadSessions = async () => {
       try {
-        const sessionManager = new SessionManager(chatInstanceId, userId || null);
-        const visibleSessionIds = await sessionManager.getAllVisibleSessions();
+        const sessionManager = new SessionManager(chatInstanceId, userId!);
+        const visibleSessionIds = await sessionManager.getAllSessions();
         
         if (visibleSessionIds.length === 0) {
           setLoading(false);
@@ -212,10 +212,6 @@ export function ChatSidebar({
 
       // Remove from local state
       setSessions(sessions.filter(s => s.session_id !== sessionToDelete));
-      
-      // Remove from local list
-      const sessionManager = new SessionManager(chatInstanceId, userId || null);
-      sessionManager.removeFromLocalList(sessionToDelete);
       
       // If deleted current session, start new one
       if (sessionToDelete === currentSessionId) {

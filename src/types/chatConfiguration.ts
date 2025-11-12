@@ -62,6 +62,11 @@ export interface ChatUXConfig {
 // ============================================
 
 /**
+ * Chat Type - Public vs Authenticated
+ */
+export type ChatType = 'public' | 'authenticated';
+
+/**
  * Complete Chat Branding Configuration
  * This is the main type used throughout the application
  */
@@ -147,6 +152,7 @@ export interface ChatFormValues {
   name: string;
   slug: string;
   webhookUrl: string;
+  chatType?: ChatType;
   welcomeMessage: string;
   chatTitle: string;
   primaryColor: string;

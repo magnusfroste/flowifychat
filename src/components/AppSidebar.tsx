@@ -160,17 +160,19 @@ export function AppSidebar({
 
         // Include empty sessions from SessionManager
         const { data: { user } } = await supabase.auth.getUser();
-        const manager = new SessionManager(chatId, user?.id || null);
-        const visibleSessionIds = await manager.getAllVisibleSessions();
+        if (user) {
+          const manager = new SessionManager(chatId, user.id);
+          const visibleSessionIds = await manager.getAllSessions();
 
-        for (const id of visibleSessionIds) {
-          if (!sessionMap.has(id)) {
-            sessionMap.set(id, {
-              session_id: id,
-              first_message_time: new Date().toISOString(),
-              message_count: 0,
-              preview: "New conversation",
-            });
+          for (const id of visibleSessionIds) {
+            if (!sessionMap.has(id)) {
+              sessionMap.set(id, {
+                session_id: id,
+                first_message_time: new Date().toISOString(),
+                message_count: 0,
+                preview: "New conversation",
+              });
+            }
           }
         }
 
@@ -248,17 +250,19 @@ export function AppSidebar({
               });
 
               const { data: { user } } = await supabase.auth.getUser();
-              const manager = new SessionManager(currentChatId, user?.id || null);
-              const visibleSessionIds = await manager.getAllVisibleSessions();
+              if (user) {
+                const manager = new SessionManager(currentChatId, user.id);
+                const visibleSessionIds = await manager.getAllSessions();
 
-              for (const id of visibleSessionIds) {
-                if (!sessionMap.has(id)) {
-                  sessionMap.set(id, {
-                    session_id: id,
-                    first_message_time: new Date().toISOString(),
-                    message_count: 0,
-                    preview: "New conversation",
-                  });
+                for (const id of visibleSessionIds) {
+                  if (!sessionMap.has(id)) {
+                    sessionMap.set(id, {
+                      session_id: id,
+                      first_message_time: new Date().toISOString(),
+                      message_count: 0,
+                      preview: "New conversation",
+                    });
+                  }
                 }
               }
 

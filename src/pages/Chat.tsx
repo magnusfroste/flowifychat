@@ -22,7 +22,8 @@ import { sendToWebhook } from "@/lib/webhookService";
 import { ChatHeader } from "@/components/ChatHeader";
 import { MessageList } from "@/components/MessageList";
 import { ChatInput } from "@/components/ChatInput";
-import { migrateAllSessionsForUser, SessionManager } from "@/lib/SessionManager";
+import { SessionManager } from "@/lib/SessionManager";
+import { PublicChat } from "@/components/PublicChat";
 import {
   getQuickStartPromptsConfig,
   getWelcomeScreen,
@@ -54,6 +55,7 @@ interface ChatInstance {
   n8n_auth_username?: string;
   n8n_auth_password?: string;
   user_id: string;
+  chat_type?: 'public' | 'authenticated';
   custom_branding: {
     primaryColor: string;
     accentColor: string;
@@ -103,20 +105,6 @@ const Chat = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user ?? null);
-        
-        // Trigger session migration on sign-in
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(async () => {
-            const migratedCount = await migrateAllSessionsForUser(session.user.id);
-            
-            if (migratedCount > 0) {
-              toast({
-                title: "Chat history saved!",
-                description: `${migratedCount} conversation${migratedCount > 1 ? 's' : ''} linked to your account.`,
-              });
-            }
-          }, 0);
-        }
       }
     );
 
@@ -128,12 +116,12 @@ const Chat = () => {
 
       try {
         // Load all chat instances for admin sidebar if user is authenticated
-        const { data: { session: authSession } } = await supabase.auth.getSession();
-        if (authSession?.user) {
+        const { data: { session: currentAuthSession } } = await supabase.auth.getSession();
+        if (currentAuthSession?.user) {
           const { data: allChats } = await supabase
             .from("chat_instances")
             .select("*")
-            .eq("user_id", authSession.user.id)
+            .eq("user_id", currentAuthSession.user.id)
             .order("created_at", { ascending: false });
           
           if (allChats) {
@@ -171,15 +159,28 @@ const Chat = () => {
         const instance = data as unknown as ChatInstance;
         setChatInstance(instance);
         
-        // Initialize session for this chat
+        // PUBLIC MODE: Skip all session/user logic
+        if (instance.chat_type === 'public') {
+          setLoading(false);
+          return;
+        }
+        
+        // AUTHENTICATED MODE: Require login
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+        if (!authSession) {
+          navigate("/auth");
+          return;
+        }
+        
+        // Initialize session for authenticated user
         const forceNew = searchParams.get("new") === "1";
-        const manager = new SessionManager(instance.id, authSession?.user?.id || null);
+        const manager = new SessionManager(instance.id, authSession.user.id);
         
         if (forceNew) {
-          const newSessionId = manager.createNewSession();
+          const newSessionId = await manager.createNewSession();
           setSessionId(newSessionId);
         } else {
-          const currentSessionId = manager.getOrCreateSession();
+          const currentSessionId = await manager.getOrCreateSession();
           setSessionId(currentSessionId);
         }
         
@@ -614,10 +615,10 @@ const Chat = () => {
   };
 
   const handleResetSession = async () => {
-    if (!chatInstance) return;
+    if (!chatInstance || !user) return;
     
-    const sessionManager = new SessionManager(chatInstance.id, user?.id || null);
-    const newSessionId = sessionManager.createNewSession();
+    const sessionManager = new SessionManager(chatInstance.id, user.id);
+    const newSessionId = await sessionManager.createNewSession();
     setSessionId(newSessionId);
     setViewTracked(false);
     
@@ -668,10 +669,10 @@ const Chat = () => {
   };
 
   const handleSessionSelect = (newSessionId: string) => {
-    if (!chatInstance) return;
+    if (!chatInstance || !user) return;
     
     // Switch to the selected session
-    const sessionManager = new SessionManager(chatInstance.id, user?.id || null);
+    const sessionManager = new SessionManager(chatInstance.id, user.id);
     sessionManager.switchSession(newSessionId);
     setSessionId(newSessionId);
     
@@ -761,6 +762,12 @@ const Chat = () => {
 
   if (!chatInstance) return null;
 
+  // PUBLIC CHAT MODE: Render PublicChat component
+  if (chatInstance.chat_type === 'public') {
+    return <PublicChat chatInstance={chatInstance} />;
+  }
+
+  // AUTHENTICATED CHAT MODE: Full featured chat with sessions
   const branding = chatInstance.custom_branding as any;
   const quickStartConfig = getQuickStartPromptsConfig(branding);
   const welcomeScreenConfig = getWelcomeScreen(branding);
