@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
-import { Home, Send, Loader2, RotateCcw, Copy, Check, ArrowDown, RotateCw, MoreVertical } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Loader2, RotateCcw, ArrowDown, Home } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -21,13 +15,13 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { trackAnalyticsEvent, buildWebhookPayload } from "@/lib/analytics";
+import { useTheme } from "next-themes";
+import { trackAnalyticsEvent } from "@/lib/analytics";
+import { sendToWebhook } from "@/lib/webhookService";
+import { ChatHeader } from "@/components/ChatHeader";
+import { MessageList } from "@/components/MessageList";
+import { ChatInput } from "@/components/ChatInput";
 import { migrateAllSessionsForUser, SessionManager } from "@/lib/SessionManager";
 import {
   getQuickStartPromptsConfig,
@@ -414,86 +408,28 @@ const Chat = () => {
     });
 
     try {
-      // Build enhanced webhook payload
       const branding = chatInstance.custom_branding as any;
       const metadataConfig = getMetadataConfig(branding);
-      const payload = buildWebhookPayload(
-        userMessage.content,
-        sessionId,
-        { id: chatInstance.id, slug: chatInstance.slug },
-        metadataConfig
+      
+      const assistantContent = await sendToWebhook(
+        {
+          url: chatInstance.webhook_url,
+          authEnabled: chatInstance.n8n_auth_enabled,
+          username: chatInstance.n8n_auth_username,
+          password: chatInstance.n8n_auth_password,
+        },
+        {
+          message: userMessage.content,
+          sessionId,
+          chatInstance: { id: chatInstance.id, slug: chatInstance.slug },
+          metadataConfig,
+        }
       );
 
-      // Build headers with optional basic auth
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      if (chatInstance.n8n_auth_enabled && chatInstance.n8n_auth_username && chatInstance.n8n_auth_password) {
-        const credentials = btoa(`${chatInstance.n8n_auth_username}:${chatInstance.n8n_auth_password}`);
-        headers["Authorization"] = `Basic ${credentials}`;
-      }
-
-      // Send to n8n webhook
-      const response = await fetch(chatInstance.webhook_url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send message to webhook");
-      }
-
-      // Read response as text first (works for both streaming and non-streaming)
-      const text = await response.text();
-      let assistantContent = '';
-
-      // Try parsing as regular JSON first (non-streaming)
-      try {
-        const data = JSON.parse(text);
-        
-        // Handle error responses
-        if (data.type === "error") {
-          throw new Error(data.content || "Error from webhook");
-        }
-        
-        // Handle single JSON response (non-streaming)
-        assistantContent = data.output || data.content || data.response || '';
-        
-      } catch (e) {
-        // If single JSON parse fails, try NDJSON (streaming format)
-        const lines = text.split('\n').filter(line => line.trim());
-        
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            
-            // Handle streaming error
-            if (parsed.type === 'error') {
-              throw new Error(parsed.content || 'Error from webhook');
-            }
-            
-            // Handle streaming items (n8n streaming format)
-            if (parsed.type === 'item' && parsed.content) {
-              assistantContent += parsed.content;
-            }
-            // Handle non-streaming single-line format (fallback for NDJSON without 'type')
-            else if (!parsed.type && (parsed.output || parsed.content || parsed.response)) {
-              assistantContent += parsed.output || parsed.content || parsed.response;
-            }
-          } catch (lineError) {
-            // Skip invalid JSON lines
-            console.warn('Skipping invalid JSON line:', line);
-          }
-        }
-      }
-
-      // Add assistant response with accumulated content
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: assistantContent || "I received your message!",
+        content: assistantContent,
         timestamp: new Date(),
       };
 
@@ -597,82 +533,28 @@ const Chat = () => {
     // Resend the user message
     setSending(true);
     const branding = chatInstance.custom_branding as any;
-    const metadata = branding?.metadata || {};
+    const metadataConfig = getMetadataConfig(branding);
 
     try {
-      const webhookPayload = buildWebhookPayload(
-        userMessage.content,
-        sessionId,
-        { id: chatInstance.id, slug: chatInstance.slug },
-        metadata
+      const assistantContent = await sendToWebhook(
+        {
+          url: chatInstance.webhook_url,
+          authEnabled: chatInstance.n8n_auth_enabled,
+          username: chatInstance.n8n_auth_username,
+          password: chatInstance.n8n_auth_password,
+        },
+        {
+          message: userMessage.content,
+          sessionId,
+          chatInstance: { id: chatInstance.id, slug: chatInstance.slug },
+          metadataConfig,
+        }
       );
-
-      // Build headers with optional basic auth
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      if (chatInstance.n8n_auth_enabled && chatInstance.n8n_auth_username && chatInstance.n8n_auth_password) {
-        const credentials = btoa(`${chatInstance.n8n_auth_username}:${chatInstance.n8n_auth_password}`);
-        headers["Authorization"] = `Basic ${credentials}`;
-      }
-
-      const response = await fetch(chatInstance.webhook_url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(webhookPayload),
-      });
-
-      if (!response.ok) throw new Error("Webhook request failed");
-
-      // Read response as text first (works for both streaming and non-streaming)
-      const text = await response.text();
-      let assistantContent = '';
-
-      // Try parsing as regular JSON first (non-streaming)
-      try {
-        const data = JSON.parse(text);
-        
-        // Handle error responses
-        if (data.type === "error") {
-          throw new Error(data.content || "Error from webhook");
-        }
-        
-        // Handle single JSON response (non-streaming)
-        assistantContent = data.output || data.content || data.response || '';
-        
-      } catch (e) {
-        // If single JSON parse fails, try NDJSON (streaming format)
-        const lines = text.split('\n').filter(line => line.trim());
-        
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            
-            // Handle streaming error
-            if (parsed.type === 'error') {
-              throw new Error(parsed.content || 'Error from webhook');
-            }
-            
-            // Handle streaming items (n8n streaming format)
-            if (parsed.type === 'item' && parsed.content) {
-              assistantContent += parsed.content;
-            }
-            // Handle non-streaming single-line format (fallback for NDJSON without 'type')
-            else if (!parsed.type && (parsed.output || parsed.content || parsed.response)) {
-              assistantContent += parsed.output || parsed.content || parsed.response;
-            }
-          } catch (lineError) {
-            // Skip invalid JSON lines
-            console.warn('Skipping invalid JSON line:', line);
-          }
-        }
-      }
 
       const newAssistantMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: assistantContent || "I received your message!",
+        content: assistantContent,
         timestamp: new Date(),
       };
 
@@ -1218,54 +1100,12 @@ const Chat = () => {
             ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
           }}
         >
-          {/* Header */}
-          <header 
-            className={`border-b backdrop-blur-sm sticky top-0 z-10 ${getHeaderClass()}`}
-            style={{
-              backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.7)',
-              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-              color: isDark ? '#ffffff' : '#000000',
-            }}
-          >
-            <div className="px-6 py-3">
-              <div className="flex items-center justify-between">
-                {/* Left: Breadcrumb navigation (only for owners) */}
-                <div className="flex items-center gap-4">
-                  {isOwner && (
-                    <Breadcrumb>
-                      <BreadcrumbList>
-                        <BreadcrumbItem>
-                          <BreadcrumbLink
-                            onClick={() => navigate("/dashboard")}
-                            className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
-                          >
-                            <Home className="h-3.5 w-3.5" />
-                            <span className="hidden sm:inline">Dashboard</span>
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                          <BreadcrumbPage className="font-medium max-w-[200px] sm:max-w-none truncate">
-                            {chatInstance.custom_branding.chatTitle}
-                          </BreadcrumbPage>
-                        </BreadcrumbItem>
-                      </BreadcrumbList>
-                    </Breadcrumb>
-                  )}
-                  
-                  {/* Show chat title for non-owners (public view) */}
-                  {!isOwner && layoutConfig.headerStyle !== 'minimal' && (
-                    <h1 className={`font-semibold ${layoutConfig.headerStyle === 'prominent' ? 'text-2xl' : 'text-xl'}`}>
-                      {chatInstance.custom_branding.chatTitle}
-                    </h1>
-                  )}
-                </div>
-                
-                {/* Right: Theme toggle */}
-                <ThemeToggle />
-              </div>
-            </div>
-          </header>
+          <ChatHeader
+            isOwner={isOwner}
+            chatTitle={chatInstance.custom_branding.chatTitle}
+            headerStyle={layoutConfig.headerStyle}
+            isDark={isDark}
+          />
 
           {/* Main Content */}
           {chatMode === 'welcome' ? (
@@ -1288,233 +1128,32 @@ const Chat = () => {
               <SignInPrompt onSignIn={() => navigate('/auth')} />
             )}
             
-            <div className={`space-y-6 mb-32 ${getMessageAlignment()}`}>
-              {messages.map((message, index) => {
-                const isLastAssistantMessage = 
-                  message.role === "assistant" && 
-                  index === messages.length - 1;
-                
-                return (
-                <div
-                  key={message.id}
-                  className={`flex animate-scale-in group ${getMessageSpacing()} ${
-                    layoutConfig.messageAlignment === 'full-width' 
-                      ? 'w-full' 
-                      : message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {/* Avatar for bot messages */}
-                  {message.role === "assistant" && layoutConfig.showAvatars && branding.avatarUrl && (
-                    <div className={`${getAvatarSize()} rounded-full overflow-hidden mr-3 flex-shrink-0 ${layoutConfig.avatarPosition === 'top' ? 'mt-1' : 'self-center'}`}>
-                      <img 
-                        src={branding.avatarUrl} 
-                        alt="Bot"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
-                    <div
-                      className={getDensityPadding()}
-                      style={{
-                        borderRadius: getBubbleRadius(),
-                        backgroundColor: message.role === "user" 
-                          ? userMessageColor || 'hsl(var(--muted) / 0.3)'
-                          : botMessageColor || 'transparent',
-                        color: message.role === "user" && userMessageColor 
-                          ? getTextColor(userMessageColor, isDark)
-                          : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                          ? getTextColor(botMessageColor, isDark)
-                          : isDark ? '#ffffff' : '#000000',
-                      }}
-                    >
-                      <div 
-                        className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
-                        style={{
-                          color: message.role === "user" && userMessageColor 
-                            ? getTextColor(userMessageColor, isDark)
-                            : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                            ? getTextColor(botMessageColor, isDark)
-                            : isDark ? '#ffffff' : '#000000'
-                        }}
-                      >
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            code({ node, inline, className, children, ...props }: any) {
-                              const match = /language-(\w+)/.exec(className || "");
-                              const codeContent = String(children).replace(/\n$/, "");
-                              const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
-                              
-                              return !inline && match ? (
-                                <div className="relative group/code">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleCopyCode(codeContent, blockId)}
-                                    className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 z-10"
-                                    title="Copy code"
-                                  >
-                                    {copiedCodeBlock === blockId ? (
-                                      <Check className="h-4 w-4" />
-                                    ) : (
-                                      <Copy className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                  <SyntaxHighlighter
-                                    style={theme === "dark" ? oneDark : oneLight}
-                                    language={match[1]}
-                                    PreTag="div"
-                                    {...props}
-                                  >
-                                    {codeContent}
-                                  </SyntaxHighlighter>
-                                </div>
-                              ) : (
-                                <code className={className} {...props}>
-                                  {children}
-                                </code>
-                              );
-                            },
-                          }}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
-                      </div>
-                      {showTimestamps !== 'never' && (
-                        <p 
-                          className={`text-xs mt-2 transition-opacity ${
-                            showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-70' : 'opacity-70'
-                          }`}
-                          style={{
-                            color: message.role === "user" && userMessageColor 
-                              ? getTextColor(userMessageColor, isDark)
-                              : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                              ? getTextColor(botMessageColor, isDark)
-                              : isDark ? '#ffffff' : '#666666'
-                          }}
-                        >
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      )}
-                    </div>
-                    {/* Action buttons */}
-                    {interactiveConfig.messageActions === 'inline' && (
-                      <div className="flex gap-2 mt-2">
-                        {interactiveConfig.showCopyButton && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopyMessage(message.id, message.content)}
-                            className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
-                            title="Copy"
-                          >
-                            {copiedMessageId === message.id ? (
-                              <Check className="h-3 w-3" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                            <span className="ml-1">Copy</span>
-                          </Button>
-                        )}
-                        {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleRegenerate}
-                            className="h-7 px-2 opacity-80 hover:opacity-100 transition-opacity"
-                            title="Regenerate"
-                          >
-                            <RotateCw className="h-3 w-3" />
-                            <span className="ml-1">Regenerate</span>
-                          </Button>
-                        )}
-                      </div>
-                    )}
-
-                    {interactiveConfig.messageActions === 'hover' && (
-                      <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {interactiveConfig.showCopyButton && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopyMessage(message.id, message.content)}
-                            className="h-7 px-2"
-                            title="Copy"
-                          >
-                            {copiedMessageId === message.id ? (
-                              <Check className="h-3 w-3" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                            <span className="ml-1">Copy</span>
-                          </Button>
-                        )}
-                        {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleRegenerate}
-                            className="h-7 px-2"
-                            title="Regenerate"
-                          >
-                            <RotateCw className="h-3 w-3" />
-                            <span className="ml-1">Regenerate</span>
-                          </Button>
-                        )}
-                      </div>
-                    )}
-
-                    {interactiveConfig.messageActions === 'menu' && (
-                      <div className="mt-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0 opacity-60 hover:opacity-100 transition-opacity"
-                              title="Message actions"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start">
-                            {interactiveConfig.showCopyButton && (
-                              <DropdownMenuItem onClick={() => handleCopyMessage(message.id, message.content)}>
-                                {copiedMessageId === message.id ? (
-                                  <Check className="h-4 w-4 mr-2" />
-                                ) : (
-                                  <Copy className="h-4 w-4 mr-2" />
-                                )}
-                                Copy
-                              </DropdownMenuItem>
-                            )}
-                            {interactiveConfig.showRegenerateButton && isLastAssistantMessage && !sending && (
-                              <DropdownMenuItem onClick={handleRegenerate}>
-                                <RotateCw className="h-4 w-4 mr-2" />
-                                Regenerate
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    )}
+            <MessageList
+              messages={messages}
+              theme={theme}
+              isDark={isDark}
+              branding={branding}
+              layoutConfig={layoutConfig}
+              behaviorConfig={behaviorConfig}
+              interactiveConfig={interactiveConfig}
+              copiedMessageId={copiedMessageId}
+              copiedCodeBlock={copiedCodeBlock}
+              onCopyMessage={handleCopyMessage}
+              onCopyCode={handleCopyCode}
+              onRegenerate={handleRegenerate}
+              sending={sending}
+            />
+            {sending && (
+              <div className="flex justify-start animate-fade-in">
+                <Card style={{ backgroundColor: botMessageColor || 'transparent' }}>
+                  <div className="p-4">
+                    <TypingIndicator dotColor={botMessageColor && botMessageColor !== 'transparent' ? getTextColor(botMessageColor, isDark) : isDark ? '#ffffff' : '#000000'} />
                   </div>
-                </div>
-              );
-              })}
-              {sending && (
-                <div className="flex justify-start animate-fade-in">
-                  <Card style={{ backgroundColor: botMessageColor || 'transparent' }}>
-                    <div className="p-4">
-                      <TypingIndicator dotColor={botMessageColor && botMessageColor !== 'transparent' ? getTextColor(botMessageColor, isDark) : isDark ? '#ffffff' : '#000000'} />
-                    </div>
-                  </Card>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+                </Card>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
             {/* Scroll to Bottom Button */}
             {showScrollButton && (
@@ -1544,53 +1183,20 @@ const Chat = () => {
                 className="mx-auto px-4 sm:px-6 lg:px-8 py-4"
                 style={{ maxWidth: behaviorConfig.inputPosition === 'floating' ? '100%' : `${layoutConfig.maxMessageWidth}px` }}
               >
-                <div className="relative">
-                  <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                    placeholder={inputConfig.placeholder}
-                    style={{ 
-                      borderRadius: `${borderRadius}px`,
-                      color: isDark && inputStyle === 'filled' ? '#ffffff' : undefined,
-                    }}
-                    className={`${getInputSize()} ${getInputStyleClasses()} ${
-                      behaviorConfig.inputSize === 'compact' ? 'pr-10 pl-4' : behaviorConfig.inputSize === 'large' ? 'pr-16 pl-6' : 'pr-14 pl-5'
-                    } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/40' : ''}`}
-                    disabled={sending || isTypingPrompt}
-                  />
-                  <Button
-                    onClick={() => handleSend()}
-                    disabled={!input.trim() || sending || isTypingPrompt}
-                    size="icon"
-                    variant="ghost"
-                    style={buttonStyle === 'filled' ? { 
-                      backgroundColor: branding.primaryColor,
-                      borderRadius: `${Math.min(borderRadius, 20)}px`,
-                      color: getTextColor(branding.primaryColor, isDark),
-                    } : {
-                      borderRadius: `${Math.min(borderRadius, 20)}px`,
-                      borderColor: branding.primaryColor,
-                      color: branding.primaryColor,
-                    }}
-                    className={`absolute ${
-                      behaviorConfig.inputSize === 'large' 
-                        ? 'right-2 top-1/2 -translate-y-1/2 h-10 w-10' 
-                        : 'right-2 top-1/2 -translate-y-1/2 h-8 w-8'
-                    } ${getButtonClasses()} ${
-                      input.trim() && !sending && !isTypingPrompt ? 'animate-pulse' : ''
-                    } shadow-lg`}
-                  >
-                    {sending || isTypingPrompt ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <ChatInput
+                  value={input}
+                  onChange={setInput}
+                  onSend={() => handleSend()}
+                  sending={sending}
+                  placeholder={inputConfig.placeholder}
+                  inputStyle={inputStyle}
+                  buttonStyle={buttonStyle}
+                  inputSize={behaviorConfig.inputSize}
+                  isDark={isDark}
+                  primaryColor={chatInstance.custom_branding.primaryColor}
+                />
               </div>
             </div>
-          </div>
           </>
         )}
         </div>

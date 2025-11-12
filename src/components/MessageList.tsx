@@ -1,0 +1,260 @@
+/**
+ * View Component: Message List
+ * Renders chat messages with markdown support
+ */
+
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Button } from "@/components/ui/button";
+import { Copy, Check, RotateCw } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreVertical } from "lucide-react";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
+
+interface MessageListProps {
+  messages: Message[];
+  theme: string | undefined;
+  isDark: boolean;
+  branding: any;
+  layoutConfig: any;
+  behaviorConfig: any;
+  interactiveConfig: any;
+  copiedMessageId: string | null;
+  copiedCodeBlock: string | null;
+  onCopyMessage: (messageId: string, content: string) => void;
+  onCopyCode: (code: string, blockId: string) => void;
+  onRegenerate: () => void;
+  sending: boolean;
+}
+
+export function MessageList({
+  messages,
+  theme,
+  isDark,
+  branding,
+  layoutConfig,
+  behaviorConfig,
+  interactiveConfig,
+  copiedMessageId,
+  copiedCodeBlock,
+  onCopyMessage,
+  onCopyCode,
+  onRegenerate,
+  sending,
+}: MessageListProps) {
+  const getTextColor = (bgColor: string, currentIsDark: boolean) => {
+    if (bgColor === 'transparent') {
+      return currentIsDark ? '#ffffff' : '#000000';
+    }
+    
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
+
+  const getBubbleRadius = () => {
+    const messageBubbleStyle = branding?.messageBubbleStyle || 'rounded';
+    const borderRadius = branding?.borderRadius || 8;
+    
+    if (messageBubbleStyle === 'sharp') return '4px';
+    if (messageBubbleStyle === 'pill') return '24px';
+    return `${borderRadius}px`;
+  };
+
+  const getDensityPadding = () => {
+    const messageDensity = branding?.messageDensity || 'comfortable';
+    if (messageDensity === 'compact') return 'py-2 px-3';
+    if (messageDensity === 'spacious') return 'py-4 px-5';
+    return 'py-3 px-4';
+  };
+
+  const getMessageSpacing = () => {
+    if (behaviorConfig.messageSpacing === 'tight') return 'mb-4';
+    if (behaviorConfig.messageSpacing === 'relaxed') return 'mb-8';
+    return 'mb-6';
+  };
+
+  const getMessageAlignment = () => {
+    if (layoutConfig.messageAlignment === 'center') return 'mx-auto';
+    if (layoutConfig.messageAlignment === 'full-width') return 'max-w-full';
+    return '';
+  };
+
+  const getAvatarSize = () => {
+    if (layoutConfig.avatarSize === 'small') return 'h-6 w-6';
+    if (layoutConfig.avatarSize === 'large') return 'h-12 w-12';
+    return 'h-8 w-8';
+  };
+
+  const showTimestamps = branding?.showTimestamps || 'hover';
+  const userMessageColor = branding?.userMessageColor;
+  const botMessageColor = branding?.botMessageColor;
+
+  return (
+    <div className={`space-y-6 mb-32 ${getMessageAlignment()}`}>
+      {messages.map((message, index) => {
+        const isLastAssistantMessage = 
+          message.role === "assistant" && 
+          index === messages.length - 1;
+        
+        return (
+          <div
+            key={message.id}
+            className={`flex animate-scale-in group ${getMessageSpacing()} ${
+              layoutConfig.messageAlignment === 'full-width' 
+                ? 'w-full' 
+                : message.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            {message.role === "assistant" && layoutConfig.showAvatars && branding.avatarUrl && (
+              <div className={`${getAvatarSize()} rounded-full overflow-hidden mr-3 flex-shrink-0 ${layoutConfig.avatarPosition === 'top' ? 'mt-1' : 'self-center'}`}>
+                <img 
+                  src={branding.avatarUrl} 
+                  alt="Bot"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
+              <div
+                className={getDensityPadding()}
+                style={{
+                  borderRadius: getBubbleRadius(),
+                  backgroundColor: message.role === "user" 
+                    ? userMessageColor || 'hsl(var(--muted) / 0.3)'
+                    : botMessageColor || 'transparent',
+                  color: message.role === "user" && userMessageColor 
+                    ? getTextColor(userMessageColor, isDark)
+                    : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
+                    ? getTextColor(botMessageColor, isDark)
+                    : isDark ? '#ffffff' : '#000000',
+                }}
+              >
+                <div 
+                  className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
+                  style={{
+                    color: message.role === "user" && userMessageColor 
+                      ? getTextColor(userMessageColor, isDark)
+                      : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
+                      ? getTextColor(botMessageColor, isDark)
+                      : isDark ? '#ffffff' : '#000000'
+                  }}
+                >
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code({ node, inline, className, children, ...props }: any) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        const codeContent = String(children).replace(/\n$/, "");
+                        const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
+                        
+                        return !inline && match ? (
+                          <div className="relative group/code">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onCopyCode(codeContent, blockId)}
+                              className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 z-10"
+                              title="Copy code"
+                            >
+                              {copiedCodeBlock === blockId ? (
+                                <Check className="h-4 w-4" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <SyntaxHighlighter
+                              style={theme === "dark" ? oneDark : oneLight}
+                              language={match[1]}
+                              PreTag="div"
+                              {...props}
+                            >
+                              {codeContent}
+                            </SyntaxHighlighter>
+                          </div>
+                        ) : (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+                {showTimestamps !== 'never' && (
+                  <p 
+                    className={`text-xs mt-2 transition-opacity ${
+                      showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-70' : 'opacity-70'
+                    }`}
+                    style={{
+                      color: message.role === "user" && userMessageColor 
+                        ? getTextColor(userMessageColor, isDark)
+                        : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
+                        ? getTextColor(botMessageColor, isDark)
+                        : isDark ? '#ffffff' : '#666666'
+                    }}
+                  >
+                    {message.timestamp.toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
+              
+              {interactiveConfig.showMessageActions && (
+                <div className="absolute -right-2 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {interactiveConfig.showCopyButton && (
+                        <DropdownMenuItem onClick={() => onCopyMessage(message.id, message.content)}>
+                          {copiedMessageId === message.id ? (
+                            <>
+                              <Check className="mr-2 h-4 w-4" />
+                              Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="mr-2 h-4 w-4" />
+                              Copy
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                      )}
+                      {interactiveConfig.showRegenerateButton && isLastAssistantMessage && (
+                        <DropdownMenuItem onClick={onRegenerate} disabled={sending}>
+                          <RotateCw className="mr-2 h-4 w-4" />
+                          Regenerate
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
