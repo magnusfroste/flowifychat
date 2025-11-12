@@ -7,7 +7,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2 } from "lucide-react";
-import type { QuickStartPrompt, ChatBranding } from "@/lib/chatConfig";
+import type { QuickStartPrompt, ChatBranding } from "@/types/chatConfiguration";
 
 interface ChatLandingPageProps {
   branding: ChatBranding;

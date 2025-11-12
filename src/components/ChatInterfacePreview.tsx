@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { useTheme } from "next-themes";
-import type { ChatBranding } from "@/lib/chatConfig";
+import type { ChatBranding } from "@/types/chatConfiguration";
 import {
   DropdownMenu,
   DropdownMenuContent,

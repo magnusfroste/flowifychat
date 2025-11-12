@@ -39,6 +39,7 @@ import {
   getMessageBehaviorConfig,
   getInteractiveConfig,
 } from "@/lib/chatConfig";
+import type { ChatBranding } from "@/types/chatConfiguration";
 import { QuickStartPrompts } from "@/components/QuickStartPrompts";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatLandingPage } from "@/components/ChatLandingPage";

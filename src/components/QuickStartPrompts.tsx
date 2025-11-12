@@ -4,7 +4,7 @@
  */
 
 import { Button } from "@/components/ui/button";
-import type { QuickStartPrompt } from "@/lib/chatConfig";
+import type { QuickStartPrompt } from "@/types/chatConfiguration";
 
 interface QuickStartPromptsProps {
   prompts: QuickStartPrompt[];

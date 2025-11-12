@@ -5,7 +5,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { WelcomeScreenConfig } from "@/lib/chatConfig";
+import type { WelcomeScreenConfig } from "@/types/chatConfiguration";
 
 interface WelcomeScreenProps {
   config: WelcomeScreenConfig;

@@ -1,110 +1,18 @@
 /**
  * Model Layer: Chat Configuration Utilities
  * Provides type-safe access to chat branding configuration with fallbacks
+ * 
+ * All types are now consolidated in src/types/chatConfiguration.ts
  */
 
-export interface QuickStartPrompt {
-  id: string;
-  text: string;
-  enabled: boolean;
-}
-
-export interface WelcomeScreenConfig {
-  enabled: boolean;
-  subtitle?: string;
-  disclaimer?: string;
-}
-
-export interface MetadataConfig {
-  includeReferrer: boolean;
-  includeUserAgent: boolean;
-  customFields: Record<string, string>;
-}
-
-export interface InputConfig {
-  placeholder: string;
-  submitLabel: string;
-}
-
-export interface QuickStartPromptsConfig {
-  prompts: QuickStartPrompt[];
-  autoSend: boolean;
-}
-
-export interface ChatUXConfig {
-  useLandingPageMode: boolean;
-}
-
-export interface ChatBranding {
-  primaryColor: string;
-  accentColor: string;
-  avatarUrl: string | null;
-  welcomeMessage: string;
-  chatTitle: string;
-  quickStartPrompts?: QuickStartPrompt[];
-  welcomeScreen?: WelcomeScreenConfig;
-  inputPlaceholder?: string;
-  inputSubmitLabel?: string;
-  metadata?: MetadataConfig;
-  useLandingPageMode?: boolean;
-  
-  // Landing Page Branding
-  logoUrl?: string;
-  landingTagline?: string;
-  backgroundStyle?: 'solid' | 'gradient' | 'pattern';
-  backgroundGradientStart?: string;
-  backgroundGradientEnd?: string;
-  backgroundColor?: string;
-  layoutStyle?: 'centered' | 'left-visual' | 'compact';
-  fontFamily?: string;
-  
-  // Message Appearance
-  messageBubbleStyle?: 'rounded' | 'sharp' | 'pill';
-  messageDensity?: 'compact' | 'comfortable' | 'spacious';
-  showTimestamps?: 'always' | 'hover' | 'never';
-  
-  // Button & Input Styling
-  buttonStyle?: 'filled' | 'outline' | 'ghost';
-  inputStyle?: 'outline' | 'filled' | 'underline';
-  borderRadius?: number;
-  
-  // Advanced Colors
-  secondaryColor?: string;
-  userMessageColor?: string;
-  botMessageColor?: string;
-  colorMode?: 'light' | 'dark' | 'auto';
-  
-  // Layout Controls
-  messageAlignment?: 'left' | 'center' | 'full-width';
-  maxMessageWidth?: number;
-  showAvatars?: boolean;
-  avatarSize?: 'small' | 'medium' | 'large';
-  avatarPosition?: 'top' | 'center';
-  showSidebar?: boolean;
-  allowAnonymousHistory?: boolean;
-  headerStyle?: 'minimal' | 'standard' | 'prominent';
-  
-  // Input Controls
-  inputPosition?: 'floating' | 'sticky-bottom';
-  inputSize?: 'compact' | 'comfortable' | 'large';
-  sendButtonStyle?: 'icon' | 'text' | 'icon-text';
-  
-  // Message Behavior
-  messageSpacing?: 'tight' | 'normal' | 'relaxed';
-  animationSpeed?: 'fast' | 'normal' | 'slow';
-  
-  // Interactive Elements
-  messageActions?: 'inline' | 'hover' | 'menu';
-  showCopyButton?: boolean;
-  showRegenerateButton?: boolean;
-  
-  // Welcome Screen (flat fields for form)
-  welcomeScreenEnabled?: boolean;
-  welcomeSubtitle?: string;
-  welcomeDisclaimer?: string;
-  
-  // Branding Badge Control (removed - now controlled at user level in Settings)
-}
+import type {
+  QuickStartPrompt,
+  WelcomeScreenConfig,
+  MetadataConfig,
+  InputConfig,
+  QuickStartPromptsConfig,
+  ChatUXConfig,
+} from "@/types/chatConfiguration";
 
 /**
  * Get quick start prompts configuration with fallback
