@@ -158,34 +158,6 @@ export function AppSidebar({
           }
         });
 
-        // Include empty sessions from SessionManager
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const manager = new SessionManager(chatId, user.id);
-          const visibleSessionIds = await manager.getAllSessions();
-
-          for (const id of visibleSessionIds) {
-            if (!sessionMap.has(id)) {
-              sessionMap.set(id, {
-                session_id: id,
-                first_message_time: new Date().toISOString(),
-                message_count: 0,
-                preview: "New conversation",
-              });
-            }
-          }
-        }
-
-        // Ensure currentSessionId is included
-        if (currentSessionId && !sessionMap.has(currentSessionId)) {
-          sessionMap.set(currentSessionId, {
-            session_id: currentSessionId,
-            first_message_time: new Date().toISOString(),
-            message_count: 0,
-            preview: "New conversation",
-          });
-        }
-
         const sessionList = Array.from(sessionMap.values()).sort(
           (a, b) =>
             new Date(b.first_message_time).getTime() -
@@ -249,32 +221,6 @@ export function AppSidebar({
                 }
               });
 
-              const { data: { user } } = await supabase.auth.getUser();
-              if (user) {
-                const manager = new SessionManager(currentChatId, user.id);
-                const visibleSessionIds = await manager.getAllSessions();
-
-                for (const id of visibleSessionIds) {
-                  if (!sessionMap.has(id)) {
-                    sessionMap.set(id, {
-                      session_id: id,
-                      first_message_time: new Date().toISOString(),
-                      message_count: 0,
-                      preview: "New conversation",
-                    });
-                  }
-                }
-              }
-
-              if (currentSessionId && !sessionMap.has(currentSessionId)) {
-                sessionMap.set(currentSessionId, {
-                  session_id: currentSessionId,
-                  first_message_time: new Date().toISOString(),
-                  message_count: 0,
-                  preview: "New conversation",
-                });
-              }
-
               const sessionList = Array.from(sessionMap.values()).sort(
                 (a, b) =>
                   new Date(b.first_message_time).getTime() -
@@ -328,13 +274,12 @@ export function AppSidebar({
     
     setDeleting(true);
     try {
-      const { error } = await supabase
-        .from("chat_messages")
-        .delete()
-        .eq("session_id", sessionToDelete.sessionId)
-        .eq("chat_instance_id", sessionToDelete.chatId);
-
-      if (error) throw error;
+      // Use SessionManager to properly delete both messages and user_sessions
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const sessionManager = new SessionManager(sessionToDelete.chatId, user.id);
+      await sessionManager.deleteSession(sessionToDelete.sessionId);
 
       setSessions((prev) => ({
         ...prev,

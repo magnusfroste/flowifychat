@@ -115,18 +115,6 @@ export function ChatSidebar({
           }
         });
 
-        // Ensure sessions with no messages yet are included (e.g., freshly created)
-        for (const id of visibleSessionIds) {
-          if (!sessionMap.has(id)) {
-            sessionMap.set(id, {
-              session_id: id,
-              first_message_time: new Date().toISOString(),
-              message_count: 0,
-              preview: "New conversation",
-            });
-          }
-        }
-
         const sessionList = Array.from(sessionMap.values()).sort(
           (a, b) =>
             new Date(b.first_message_time).getTime() -
@@ -202,13 +190,9 @@ export function ChatSidebar({
     
     setDeleting(true);
     try {
-      const { error } = await supabase
-        .from("chat_messages")
-        .delete()
-        .eq("session_id", sessionToDelete)
-        .eq("chat_instance_id", chatInstanceId);
-
-      if (error) throw error;
+      // Use SessionManager to properly delete both messages and user_sessions
+      const sessionManager = new SessionManager(chatInstanceId, userId!);
+      await sessionManager.deleteSession(sessionToDelete);
 
       // Remove from local state
       setSessions(sessions.filter(s => s.session_id !== sessionToDelete));

@@ -60,6 +60,27 @@ export class SessionManager {
   }
 
   /**
+   * Get the latest session without creating a new one
+   * Returns null if no sessions exist
+   */
+  async getLatestSession(): Promise<string | null> {
+    const { data, error } = await supabase
+      .from('user_sessions')
+      .select('session_id')
+      .eq('user_id', this.userId)
+      .eq('chat_instance_id', this.chatInstanceId)
+      .order('claimed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      return data.session_id;
+    }
+
+    return null; // Don't auto-create
+  }
+
+  /**
    * Switch to a specific session (just returns the sessionId now)
    */
   switchSession(sessionId: string): string {

@@ -180,8 +180,8 @@ const Chat = () => {
           const newSessionId = await manager.createNewSession();
           setSessionId(newSessionId);
         } else {
-          const currentSessionId = await manager.getOrCreateSession();
-          setSessionId(currentSessionId);
+          const currentSessionId = await manager.getLatestSession();
+          setSessionId(currentSessionId || ""); // Empty string if no sessions
         }
         
         // Check if owner wants to hide branding (for public viewers only)
@@ -230,6 +230,7 @@ const Chat = () => {
   useEffect(() => {
     const loadMessages = async () => {
       if (!chatInstance) return;
+      if (!sessionId) return; // Don't load messages for empty session
 
       try {
         const { data, error } = await supabase
@@ -370,6 +371,17 @@ const Chat = () => {
     const textToSend = messageText || input;
     if (!textToSend.trim() || !chatInstance) return;
 
+    // Create session on first message if needed
+    let activeSessionId = sessionId;
+    if (!activeSessionId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const manager = new SessionManager(chatInstance.id, session.user.id);
+        activeSessionId = await manager.createNewSession();
+        setSessionId(activeSessionId);
+      }
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -385,7 +397,7 @@ const Chat = () => {
     try {
       await supabase.from("chat_messages").insert({
         chat_instance_id: chatInstance.id,
-        session_id: sessionId,
+        session_id: activeSessionId,
         role: "user",
         content: userMessage.content,
       });
@@ -401,7 +413,7 @@ const Chat = () => {
     // Track message sent event
     await trackAnalyticsEvent({
       chat_instance_id: chatInstance.id,
-      session_id: sessionId,
+      session_id: activeSessionId,
       event_type: "message_sent",
       metadata: {
         message_length: userMessage.content.length,
@@ -421,7 +433,7 @@ const Chat = () => {
         },
         {
           message: userMessage.content,
-          sessionId,
+          sessionId: activeSessionId,
           chatInstance: { id: chatInstance.id, slug: chatInstance.slug },
           metadataConfig,
         }
@@ -440,7 +452,7 @@ const Chat = () => {
       try {
         await supabase.from("chat_messages").insert({
           chat_instance_id: chatInstance.id,
-          session_id: sessionId,
+          session_id: activeSessionId,
           role: "assistant",
           content: assistantMessage.content,
         });
@@ -451,7 +463,7 @@ const Chat = () => {
       // Track message received event
       await trackAnalyticsEvent({
         chat_instance_id: chatInstance.id,
-        session_id: sessionId,
+        session_id: activeSessionId,
         event_type: "message_received",
         metadata: {
           response_length: assistantContent.length,
