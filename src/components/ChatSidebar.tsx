@@ -115,6 +115,18 @@ export function ChatSidebar({
           }
         });
 
+        // Ensure sessions with no messages yet are included (e.g., freshly created)
+        for (const id of visibleSessionIds) {
+          if (!sessionMap.has(id)) {
+            sessionMap.set(id, {
+              session_id: id,
+              first_message_time: new Date().toISOString(),
+              message_count: 0,
+              preview: "New conversation",
+            });
+          }
+        }
+
         const sessionList = Array.from(sessionMap.values()).sort(
           (a, b) =>
             new Date(b.first_message_time).getTime() -
@@ -152,7 +164,7 @@ export function ChatSidebar({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [chatInstanceId, userId, isOwner, routeId]);
+  }, [chatInstanceId, userId, isOwner, routeId, currentSessionId]);
 
   // Filter sessions based on search query
   const filteredSessions = sessions.filter(session =>
