@@ -30,6 +30,7 @@ import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ChatUsersList } from "@/components/ChatUsersList";
 
 interface ChatInstance {
   id: string;
@@ -62,6 +63,8 @@ const Dashboard = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [usersListOpen, setUsersListOpen] = useState(false);
+  const [selectedChatForUsers, setSelectedChatForUsers] = useState<ChatInstance | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { plan, loading: planLoading } = useUserPlan();
@@ -238,6 +241,11 @@ const Dashboard = () => {
     } finally {
       setIsUpgrading(false);
     }
+  };
+
+  const handleViewUsers = (chat: ChatInstance) => {
+    setSelectedChatForUsers(chat);
+    setUsersListOpen(true);
   };
 
   if (loading) {
@@ -430,6 +438,16 @@ const Dashboard = () => {
                             <Users className="h-3 w-3" />
                             Users
                           </div>
+                          {selectedChat.chat_type === 'authenticated' && selectedChat.analytics.active_sessions > 0 && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="text-xs h-auto p-0 mt-1"
+                              onClick={() => handleViewUsers(selectedChat)}
+                            >
+                              View Users
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -615,6 +633,19 @@ const Dashboard = () => {
                                       <Users className="h-3 w-3" />
                                       Users
                                     </div>
+                                    {chat.chat_type === 'authenticated' && chat.analytics.active_sessions > 0 && (
+                                      <Button
+                                        variant="link"
+                                        size="sm"
+                                        className="text-xs h-auto p-0 mt-0.5"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleViewUsers(chat);
+                                        }}
+                                      >
+                                        View
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -759,6 +790,16 @@ const Dashboard = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Users List Dialog */}
+        {selectedChatForUsers && (
+          <ChatUsersList
+            chatInstanceId={selectedChatForUsers.id}
+            chatName={selectedChatForUsers.name}
+            open={usersListOpen}
+            onOpenChange={setUsersListOpen}
+          />
+        )}
       </div>
     </SidebarProvider>
   );

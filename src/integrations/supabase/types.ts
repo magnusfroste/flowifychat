@@ -263,6 +263,18 @@ export type Database = {
     }
     Functions: {
       generate_slug_from_name: { Args: { name: string }; Returns: string }
+      get_chat_users: {
+        Args: { chat_instance_id_param: string }
+        Returns: {
+          avatar_url: string
+          claimed_at: string
+          display_name: string
+          email: string
+          last_active: string
+          total_messages: number
+          user_id: string
+        }[]
+      }
       get_user_plan: {
         Args: { user_id_param: string }
         Returns: {
