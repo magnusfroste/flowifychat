@@ -16,7 +16,7 @@ import { Form } from "@/components/ui/form";
 import { ChatConfigurationTabs } from "@/components/ChatConfigurationTabs";
 import { ChatConfigurationPreview } from "@/components/ChatConfigurationPreview";
 import { BrandingTemplate } from "@/components/BrandingTemplates";
-import { generateSlug } from "@/lib/slugUtils";
+import { generateSlug, generateRandomChatName } from "@/lib/slugUtils";
 import type { ChatFormValues } from "@/types/chatConfiguration";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -111,7 +111,55 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
 
   const form = useForm<ChatFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: mode === 'create' ? {
+      name: generateRandomChatName(),
+      slug: "",
+      webhookUrl: "",
+      welcomeMessage: "",
+      chatTitle: "Welcome",
+      primaryColor: "#6366f1",
+      accentColor: "#8b5cf6",
+      secondaryColor: "#64748b",
+      quickStartPrompts: [
+        { id: 'prompt-1', text: 'Tell me a story', enabled: true },
+        { id: 'prompt-2', text: 'Help me brainstorm', enabled: true },
+        { id: 'prompt-3', text: 'Explain a concept', enabled: true },
+      ],
+      quickStartPromptsAutoSend: false,
+      welcomeScreenEnabled: false,
+      inputPlaceholder: "Type your message...",
+      useLandingPageMode: true,
+      backgroundStyle: 'solid',
+      backgroundColor: "#ffffff",
+      layoutStyle: 'centered',
+      fontFamily: 'Inter',
+      messageBubbleStyle: 'rounded',
+      messageDensity: 'comfortable',
+      showTimestamps: 'hover',
+      buttonStyle: 'filled',
+      inputStyle: 'outline',
+      borderRadius: 8,
+      userMessageColor: "#6366f1",
+      botMessageColor: "#f1f5f9",
+      colorMode: 'light',
+      messageAlignment: 'left',
+      maxMessageWidth: 800,
+      showAvatars: true,
+      avatarSize: 'medium',
+      avatarPosition: 'center',
+      showSidebar: true,
+      allowAnonymousHistory: true,
+      headerStyle: 'standard',
+      inputPosition: 'sticky-bottom',
+      inputSize: 'comfortable',
+      sendButtonStyle: 'icon',
+      messageSpacing: 'normal',
+      animationSpeed: 'normal',
+      messageActions: 'inline',
+      showCopyButton: true,
+      showRegenerateButton: true,
+      chatType: 'authenticated',
+    } : {
       name: "",
       slug: "",
       webhookUrl: "",
@@ -197,6 +245,16 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
       loadChatData();
     }
   }, [mode, id]);
+
+  // Auto-generate slug from random name on mount (create mode only)
+  useEffect(() => {
+    if (mode === 'create') {
+      const initialName = form.getValues('name');
+      if (initialName) {
+        handleNameChange(initialName);
+      }
+    }
+  }, [mode]);
 
   const loadChatData = async () => {
     if (!id) return;

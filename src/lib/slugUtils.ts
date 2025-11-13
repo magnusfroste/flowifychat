@@ -92,3 +92,29 @@ export async function isSlugAvailable(slug: string, excludeId?: string): Promise
 export function getShareableUrl(slug: string): string {
   return `${window.location.origin}/${slug}`;
 }
+
+/**
+ * Generate a random, friendly chat name
+ * Returns names like "Happy Dolphin 4832" or "Bright Ocean 7291"
+ */
+export function generateRandomChatName(): string {
+  const adjectives = [
+    'Happy', 'Bright', 'Sunny', 'Swift', 'Calm', 'Clear', 
+    'Fresh', 'Quick', 'Smart', 'Bold', 'Kind', 'Gentle',
+    'Wise', 'Brave', 'Noble', 'Pure', 'Warm', 'Cool'
+  ];
+  
+  const nouns = [
+    'Dolphin', 'Mountain', 'Ocean', 'River', 'Forest', 'Cloud',
+    'Breeze', 'Thunder', 'Phoenix', 'Eagle', 'Tiger', 'Panda',
+    'Wave', 'Storm', 'Star', 'Moon', 'Sun', 'Sky'
+  ];
+  
+  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  
+  // Add timestamp for guaranteed uniqueness
+  const timestamp = Date.now().toString().slice(-4);
+  
+  return `${adjective} ${noun} ${timestamp}`;
+}
