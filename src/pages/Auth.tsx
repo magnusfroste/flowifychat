@@ -52,11 +52,27 @@ const Auth = () => {
 
         if (error) throw error;
         
-        toast({
-          title: "Account created!",
-          description: "You can now log in with your credentials.",
+        // Auto-login after successful signup
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        setIsLogin(true);
+
+        if (signInError) {
+          // Fallback: Show manual login message
+          toast({
+            title: "Account created!",
+            description: "Please log in to continue.",
+          });
+          setIsLogin(true);
+        } else {
+          // Success: Auto-logged in, redirect to chat
+          toast({
+            title: "Welcome!",
+            description: "Your account has been created.",
+          });
+          navigate(returnTo);
+        }
       }
     } catch (error: any) {
       toast({
