@@ -5,8 +5,9 @@
 
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Loader2, Link as LinkIcon, Copy, Check, Palette, MessageSquare, Zap, Settings } from "lucide-react";
+import { Loader2, Link as LinkIcon, Copy, Check, Palette, MessageSquare, Zap, Settings, Lock, Globe, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   FormControl,
   FormDescription,
@@ -705,6 +706,65 @@ export function ChatConfigurationTabs({
 
       {/* TAB 3: SETTINGS */}
       <TabsContent value="settings" className="space-y-6">
+        {/* Chat Type Selector */}
+        <div className="rounded-lg border p-4 bg-muted/30">
+          <FormField
+            control={form.control}
+            name="chatType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">Chat Type</FormLabel>
+                <FormDescription className="mb-4">
+                  Choose how users interact with this chat interface
+                </FormDescription>
+                <FormControl>
+                  <RadioGroup 
+                    value={field.value} 
+                    onValueChange={field.onChange} 
+                    className="grid gap-3"
+                  >
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="authenticated" id="authenticated" className="mt-1" />
+                      <div className="flex-1">
+                        <label htmlFor="authenticated" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <Lock className="h-4 w-4" />
+                          Authenticated Chat
+                        </label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Requires login • Saves conversation history • Session management • Analytics tracking
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="public" id="public" className="mt-1" />
+                      <div className="flex-1">
+                        <label htmlFor="public" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                          <Globe className="h-4 w-4" />
+                          Public Chat
+                        </label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          No login required • Stateless • GDPR-compliant • Direct webhook only
+                        </p>
+                      </div>
+                    </div>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('chatType') === 'public' && (
+            <Alert className="mt-4 border-amber-500/50 bg-amber-500/10">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>Public Mode:</strong> No conversation history or user data is stored. Messages are sent directly to your webhook. No session tracking or analytics available.
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+
         {/* Chat Name */}
         <FormField
           control={form.control}
