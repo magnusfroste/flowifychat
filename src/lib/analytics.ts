@@ -74,6 +74,24 @@ export const buildWebhookPayload = (
 };
 
 /**
+ * Get count of signed-up users for a chat instance
+ */
+export const getChatUserCount = async (chatInstanceId: string) => {
+  try {
+    const { count, error } = await supabase
+      .from("user_sessions")
+      .select("*", { count: 'exact', head: true })
+      .eq("chat_instance_id", chatInstanceId);
+
+    if (error) throw error;
+    return count || 0;
+  } catch (error) {
+    console.error("Failed to fetch user count:", error);
+    return 0;
+  }
+};
+
+/**
  * Get analytics summary for a chat instance
  */
 export const getChatAnalytics = async (chatInstanceId: string) => {

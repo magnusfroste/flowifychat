@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getChatAnalytics } from "@/lib/analytics";
+import { getChatAnalytics, getChatUserCount } from "@/lib/analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,13 +134,20 @@ const Dashboard = () => {
       const instancesWithAnalytics = await Promise.all(
         (data || []).map(async (instance) => {
           const analytics = await getChatAnalytics(instance.id);
+          
+          // For authenticated chats, get actual user count from user_sessions
+          // For public chats, use active_sessions from analytics
+          const userCount = instance.chat_type === 'authenticated'
+            ? await getChatUserCount(instance.id)
+            : analytics.active_sessions || 0;
+          
           return {
             ...instance,
             analytics: {
               total_views: analytics.total_views || 0,
               unique_views: analytics.unique_views || 0,
               total_messages: analytics.total_messages || 0,
-              active_sessions: analytics.active_sessions || 0,
+              active_sessions: userCount,
             },
           };
         })
@@ -421,7 +428,7 @@ const Dashboard = () => {
                           </div>
                           <div className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
                             <Users className="h-3 w-3" />
-                            Sessions
+                            Users
                           </div>
                         </div>
                       </div>
@@ -606,7 +613,7 @@ const Dashboard = () => {
                                     </div>
                                     <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                                       <Users className="h-3 w-3" />
-                                      Sessions
+                                      Users
                                     </div>
                                   </div>
                                 </div>
