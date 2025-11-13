@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, Plus, Settings, ChevronRight, Trash2, Activity } from "lucide-react";
+import { MessageSquare, Plus, Settings, ChevronRight, Trash2, Activity, Lock, Globe } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +45,7 @@ interface ChatInstance {
   webhook_url: string;
   is_active: boolean;
   created_at: string;
+  chat_type?: 'public' | 'authenticated';
   custom_branding: {
     primaryColor: string;
     chatTitle: string;
@@ -503,7 +504,14 @@ export function AppSidebar({
                             {sidebarOpen && (
                               <>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">{chat.name}</p>
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="text-sm font-medium truncate">{chat.name}</p>
+                                    {chat.chat_type === 'public' ? (
+                                      <Globe className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    ) : (
+                                      <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    )}
+                                  </div>
                                   {chat.analytics && (
                                     <p className="text-xs text-muted-foreground">
                                       {chat.analytics.total_messages} message{chat.analytics.total_messages !== 1 ? "s" : ""}

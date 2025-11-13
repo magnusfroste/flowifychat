@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, MoreVertical, Trash2, Eye, Loader2, Copy, Check, Share2, Activity, Users, Plus, Edit, Lock, Sparkles, Globe } from "lucide-react";
 import { getShareableUrl } from "@/lib/slugUtils";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -38,6 +38,7 @@ interface ChatInstance {
   webhook_url: string;
   is_active: boolean;
   created_at: string;
+  chat_type?: 'public' | 'authenticated';
   custom_branding: {
     primaryColor: string;
     chatTitle: string;
@@ -317,7 +318,14 @@ const Dashboard = () => {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-2xl mb-2">{selectedChat.name}</CardTitle>
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="text-2xl">{selectedChat.name}</CardTitle>
+                        {selectedChat.chat_type === 'public' ? (
+                          <Globe className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <Lock className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
                       <CardDescription className="text-base">
                         {(selectedChat.custom_branding as ChatInstance["custom_branding"]).chatTitle}
                       </CardDescription>
@@ -495,7 +503,14 @@ const Dashboard = () => {
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <CardTitle className="truncate text-lg mb-2">{chat.name}</CardTitle>
+                              <div className="flex items-center gap-2 mb-2">
+                                <CardTitle className="truncate text-lg">{chat.name}</CardTitle>
+                                {chat.chat_type === 'public' ? (
+                                  <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+                                ) : (
+                                  <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                                )}
+                              </div>
                               <CardDescription className="text-sm">{branding.chatTitle}</CardDescription>
                             </div>
                             <DropdownMenu>
