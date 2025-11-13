@@ -141,7 +141,7 @@ const Chat = () => {
           const { data: { session } } = await supabase.auth.getSession();
           
           if (!session) {
-            navigate("/auth");
+            navigate(`/auth?returnTo=${encodeURIComponent(window.location.pathname)}`);
             return;
           }
 
@@ -168,7 +168,7 @@ const Chat = () => {
         // AUTHENTICATED MODE: Require login
         const { data: { session: authSession } } = await supabase.auth.getSession();
         if (!authSession) {
-          navigate("/auth");
+          navigate(`/auth?returnTo=${encodeURIComponent(window.location.pathname)}`);
           return;
         }
         

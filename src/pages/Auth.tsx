@@ -18,6 +18,10 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Get return URL from query params (defaults to /dashboard)
+  const searchParams = new URLSearchParams(window.location.search);
+  const returnTo = searchParams.get('returnTo') || '/dashboard';
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,13 +40,13 @@ const Auth = () => {
           title: "Welcome back!",
           description: "Successfully logged in.",
         });
-        navigate("/dashboard");
+        navigate(returnTo);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}${returnTo}`,
           },
         });
 
@@ -71,7 +75,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}${returnTo}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
