@@ -58,7 +58,6 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     chatTitle = 'Chat Preview',
     inputStyle = 'outline',
     buttonStyle = 'filled',
-    colorMode = 'light',
     messageActions = 'inline',
     showCopyButton = true,
     showRegenerateButton = true,
@@ -127,22 +126,14 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     return brightness > 128 ? '#000000' : '#ffffff';
   };
 
-  // Determine if we're in dark mode
+  // Determine if background is dark for light text
   const isDarkFromColor = backgroundColor && getTextColor(backgroundColor, false) === '#ffffff';
-  const isDark = colorMode === 'auto' 
-    ? resolvedTheme === 'dark'
-    : colorMode === 'dark' || isDarkFromColor;
+  const isDark = isDarkFromColor;
 
-  // Background style - respect theme when colorMode is 'auto'
+  // Background style
   const getBackgroundStyles = () => {
     if (backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd) {
       return { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` };
-    }
-    
-    if (colorMode === 'auto') {
-      return isDark 
-        ? { backgroundColor: '#212121' } // ChatGPT's dark mode background
-        : { backgroundColor: '#ffffff' };
     }
     
     return { backgroundColor };

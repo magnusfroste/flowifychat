@@ -678,30 +678,6 @@ export function ChatConfigurationTabs({
           )}
         />
 
-        {/* Color Mode */}
-        <FormField
-          control={form.control}
-          name="colorMode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Color Mode</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="auto">Auto (System)</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>Color scheme for the chat interface</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </TabsContent>
 
       {/* TAB 3: SETTINGS */}
