@@ -13,7 +13,6 @@ import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { ChatInput } from "@/components/ChatInput";
 import { MessageList } from "@/components/MessageList";
 import { TypingIndicator } from "@/components/TypingIndicator";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Message {
   id: string;
@@ -178,8 +177,10 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
       >
         <header className="border-b backdrop-blur-sm sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-end">
-              <ThemeToggle />
+            <div className="flex items-center justify-center">
+              <h1 className="font-semibold text-xl">
+                {branding?.chatTitle || chatInstance.name}
+              </h1>
             </div>
           </div>
         </header>
@@ -216,11 +217,10 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     >
       <header className="border-b backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center">
             <h1 className="font-semibold text-xl">
               {branding?.chatTitle || chatInstance.name}
             </h1>
-            <ThemeToggle />
           </div>
         </div>
       </header>
