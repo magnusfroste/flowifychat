@@ -66,8 +66,6 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     showCopyButton: false,
     showRegenerateButton: false,
   };
-  const colorMode = branding?.colorMode || 'light';
-  const isDark = colorMode === 'auto' ? resolvedTheme === 'dark' : colorMode === 'dark';
   const inputStyle = branding?.inputStyle || 'outline';
   const buttonStyle = branding?.buttonStyle || 'filled';
   const inputSize = branding?.inputSize || 'comfortable';
@@ -169,8 +167,6 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
 
   const bgStyles = branding?.backgroundStyle === 'gradient' && branding?.backgroundGradientStart && branding?.backgroundGradientEnd
     ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
-    : colorMode === 'auto'
-    ? { backgroundColor: isDark ? '#212121' : '#ffffff' }
     : branding?.backgroundColor ? { backgroundColor: branding.backgroundColor } : {};
 
   // Landing page mode
@@ -234,7 +230,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
           <MessageList
             messages={messages}
             theme={resolvedTheme}
-            isDark={isDark}
+            isDark={false}
             branding={branding}
             layoutConfig={layoutConfig}
             behaviorConfig={behaviorConfig}
@@ -260,7 +256,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
             inputStyle={inputStyle as any}
             buttonStyle={buttonStyle as any}
             inputSize={inputSize === 'compact' ? 'compact' : inputSize === 'large' ? 'large' : 'standard'}
-            isDark={isDark}
+            isDark={false}
             primaryColor={primaryColor}
           />
         </div>

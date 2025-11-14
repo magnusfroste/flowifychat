@@ -65,7 +65,6 @@ export function ChatConfigurationPreview({
     buttonStyle: formValues.buttonStyle || 'filled',
     inputStyle: formValues.inputStyle || 'outline',
     borderRadius: formValues.borderRadius ?? 8,
-    colorMode: formValues.colorMode || 'light',
     
     // Layout Controls
     messageAlignment: formValues.messageAlignment || 'left',

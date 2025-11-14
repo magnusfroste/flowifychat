@@ -141,7 +141,6 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
       borderRadius: 8,
       userMessageColor: "#6366f1",
       botMessageColor: "#f1f5f9",
-      colorMode: 'light',
       messageAlignment: 'left',
       maxMessageWidth: 800,
       showAvatars: true,

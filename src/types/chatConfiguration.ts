@@ -108,7 +108,6 @@ export interface ChatBranding {
   secondaryColor?: string;
   userMessageColor?: string;
   botMessageColor?: string;
-  colorMode?: 'light' | 'dark' | 'auto';
   
   // Layout Controls
   messageAlignment?: 'left' | 'center' | 'full-width';

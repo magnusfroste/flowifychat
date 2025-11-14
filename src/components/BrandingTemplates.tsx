@@ -28,7 +28,6 @@ export interface BrandingTemplate {
     borderRadius: number;
     buttonStyle: 'filled' | 'outline' | 'ghost';
     inputStyle: 'outline' | 'filled' | 'underline';
-    colorMode: 'light' | 'dark' | 'auto';
     
     // Layout Controls
     messageAlignment: 'left' | 'center' | 'full-width';
@@ -76,7 +75,6 @@ export const templates: BrandingTemplate[] = [
       borderRadius: 8,
       buttonStyle: 'filled',
       inputStyle: 'outline',
-      colorMode: 'light',
       
       messageAlignment: 'center',
       maxMessageWidth: 768,
@@ -118,7 +116,6 @@ export const templates: BrandingTemplate[] = [
       borderRadius: 12,
       buttonStyle: 'ghost',
       inputStyle: 'outline',
-      colorMode: 'light',
       
       messageAlignment: 'center',
       maxMessageWidth: 700,
@@ -143,30 +140,29 @@ export const templates: BrandingTemplate[] = [
   },
   {
     name: "Grok Style",
-    description: "xAI-inspired dark interface",
+    description: "xAI-inspired clean interface",
     icon: Zap,
     values: {
-      primaryColor: "#ffffff",
+      primaryColor: "#1a1a1a",
       accentColor: "#34d399",
-      secondaryColor: "#9ca3af",
-      userMessageColor: "#2d2d2d",
-      botMessageColor: "#1a1a1a",
-      backgroundColor: "#0f0f0f",
+      secondaryColor: "#6b7280",
+      userMessageColor: "#f3f4f6",
+      botMessageColor: "#ffffff",
+      backgroundColor: "#ffffff",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Inter',
       messageBubbleStyle: 'rounded',
-      messageDensity: 'spacious',
+      messageDensity: 'comfortable',
       borderRadius: 24,
       buttonStyle: 'filled',
-      inputStyle: 'filled',
-      colorMode: 'dark',
+      inputStyle: 'outline',
       
       messageAlignment: 'left',
-      maxMessageWidth: 700,
-      showAvatars: false,
-      avatarSize: 'small',
-      avatarPosition: 'top',
+      maxMessageWidth: 900,
+      showAvatars: true,
+      avatarSize: 'medium',
+      avatarPosition: 'center',
       showSidebar: false,
       headerStyle: 'minimal',
       
@@ -180,7 +176,7 @@ export const templates: BrandingTemplate[] = [
       
       messageActions: 'hover',
       showCopyButton: true,
-      showRegenerateButton: true,
+      showRegenerateButton: false,
     },
   },
   {
@@ -204,7 +200,6 @@ export const templates: BrandingTemplate[] = [
       borderRadius: 20,
       buttonStyle: 'filled',
       inputStyle: 'filled',
-      colorMode: 'light',
       
       messageAlignment: 'left',
       maxMessageWidth: 750,

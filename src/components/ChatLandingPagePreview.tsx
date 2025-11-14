@@ -30,7 +30,6 @@ export function ChatLandingPagePreview({
   const inputSize = branding.inputSize || 'comfortable';
   const inputStyle = branding.inputStyle || 'outline';
   const buttonStyle = branding.buttonStyle || 'filled';
-  const colorMode = branding.colorMode || 'light';
   
   const getTextColor = (bgColor: string) => {
     const hex = bgColor.replace('#', '');
@@ -41,11 +40,9 @@ export function ChatLandingPagePreview({
     return brightness > 128 ? '#000000' : '#ffffff';
   };
   
-  const isDark = colorMode === 'dark' || (branding.backgroundColor && getTextColor(branding.backgroundColor) === '#ffffff');
-  
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10';
+      return 'bg-black/5 border-black/10';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -77,7 +74,7 @@ export function ChatLandingPagePreview({
         <h1 className="text-4xl font-semibold mb-2" style={{ color: branding.primaryColor }}>
           {branding.chatTitle}
         </h1>
-        <p className="text-lg opacity-70" style={{ color: isDark ? '#ffffff' : '#666666' }}>
+        <p className="text-lg opacity-70 text-muted-foreground">
           {branding.landingTagline || 'Ready when you are.'}
         </p>
       </div>
@@ -90,11 +87,10 @@ export function ChatLandingPagePreview({
             placeholder={inputPlaceholder}
             className={`${getInputHeight()} ${getInputStyleClasses()} shadow-lg border ${
               inputSize === 'compact' ? 'pr-10 pl-4' : inputSize === 'large' ? 'pr-16 pl-6' : 'pr-14 pl-5'
-            } ${isDark && inputStyle === 'filled' ? 'placeholder:text-white/40' : ''}`}
+            }`}
             style={{ 
               borderColor: inputStyle === 'filled' ? 'transparent' : `${branding.primaryColor}20`,
               borderRadius: `${borderRadius}px`,
-              color: isDark && inputStyle === 'filled' ? '#ffffff' : undefined,
             }}
             disabled
             readOnly
