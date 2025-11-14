@@ -13,7 +13,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface ChatHeaderProps {
   isOwner: boolean;
@@ -71,8 +70,6 @@ export function ChatHeader({ isOwner, chatTitle, headerStyle, isDark }: ChatHead
               </h1>
             )}
           </div>
-          
-          <ThemeToggle />
         </div>
       </div>
     </header>
