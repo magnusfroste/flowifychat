@@ -326,7 +326,7 @@ export function ChatSidebar({
                           </div>
                         )}
                       </SidebarMenuButton>
-                      {isOwner && (
+                      {(isOwner || userId) && (
                         <Button
                           variant="ghost"
                           size="icon"

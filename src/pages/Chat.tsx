@@ -1039,7 +1039,7 @@ const Chat = () => {
               currentSessionId={sessionId}
               onSessionSelect={handleSessionSelect}
               onNewSession={handleNewSession}
-              isOwner={false}
+              isOwner={isOwner}
               userId={user?.id}
               routeId={id}
               chatSlug={chatInstance.slug}
