@@ -32,12 +32,16 @@ export function ChatLandingPagePreview({
   const buttonStyle = branding.buttonStyle || 'filled';
   
   const getTextColor = (bgColor: string) => {
+    if (bgColor === 'transparent') {
+      return 'hsl(var(--foreground))';
+    }
+    
     const hex = bgColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#ffffff';
+    return brightness > 128 ? 'hsl(var(--foreground))' : 'hsl(var(--background))';
   };
   
   const getInputStyleClasses = () => {
