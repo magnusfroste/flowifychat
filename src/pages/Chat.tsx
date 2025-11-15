@@ -779,6 +779,7 @@ const Chat = () => {
   const layoutConfig = getLayoutConfig(branding);
   const behaviorConfig = getMessageBehaviorConfig(branding);
   const interactiveConfig = getInteractiveConfig(branding);
+  const uxConfig = getUXConfig(branding);
 
   // Landing page mode - no header, just centered input
   if (chatMode === 'landing') {
@@ -1061,6 +1062,7 @@ const Chat = () => {
             chatTitle={chatInstance.name}
             headerStyle={layoutConfig.headerStyle}
             user={user}
+            useLandingPageMode={uxConfig.useLandingPageMode}
           />
 
           {/* Main Content */}
