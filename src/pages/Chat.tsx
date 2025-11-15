@@ -1058,7 +1058,7 @@ const Chat = () => {
         >
           <ChatHeader
             isOwner={isOwner}
-            chatTitle={chatInstance.custom_branding.chatTitle}
+            chatTitle={chatInstance.name}
             headerStyle={layoutConfig.headerStyle}
             user={user}
           />
