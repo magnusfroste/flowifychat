@@ -7,8 +7,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { sendToWebhookViaEdge } from "@/lib/edgeWebhookService";
-import { getMetadataConfig, getQuickStartPromptsConfig, getInputConfig, getUXConfig } from "@/lib/chatConfig";
+import { getMetadataConfig, getQuickStartPromptsConfig, getInputConfig, getUXConfig, getLayoutConfig } from "@/lib/chatConfig";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
+import { ChatHeader } from "@/components/ChatHeader";
 import { ChatInput } from "@/components/ChatInput";
 import { MessageList } from "@/components/MessageList";
 import { TypingIndicator } from "@/components/TypingIndicator";
@@ -48,13 +49,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
   const uxConfig = getUXConfig(branding);
   const quickStartConfig = getQuickStartPromptsConfig(branding);
   const inputConfig = getInputConfig(branding);
-  const layoutConfig = { 
-    messageAlignment: branding?.messageAlignment || 'left',
-    maxMessageWidth: branding?.maxMessageWidth || 800,
-    showAvatars: branding?.showAvatars ?? true,
-    avatarSize: branding?.avatarSize || 'medium',
-    avatarPosition: branding?.avatarPosition || 'center',
-  };
+  const layoutConfig = getLayoutConfig(branding);
   const behaviorConfig = {
     messageSpacing: branding?.messageSpacing || 'normal',
   };
@@ -165,15 +160,13 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
         className="min-h-screen flex flex-col"
         style={bgStyles}
       >
-        <header className="border-b backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-center">
-              <h1 className="font-semibold text-xl">
-                {branding?.chatTitle || chatInstance.name}
-              </h1>
-            </div>
-          </div>
-        </header>
+        <ChatHeader
+          isOwner={false}
+          chatTitle={branding?.chatTitle || chatInstance.name}
+          headerStyle={layoutConfig.headerStyle}
+          showTitle={false}
+          transparent={true}
+        />
         
         <div className="flex-1">
           <ChatLandingPage
@@ -205,15 +198,13 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
       className="min-h-screen flex flex-col"
       style={bgStyles}
     >
-      <header className="border-b backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-center">
-            <h1 className="font-semibold text-xl">
-              {branding?.chatTitle || chatInstance.name}
-            </h1>
-          </div>
-        </div>
-      </header>
+      <ChatHeader
+        isOwner={false}
+        chatTitle={branding?.chatTitle || chatInstance.name}
+        headerStyle={layoutConfig.headerStyle}
+        showTitle={true}
+        transparent={false}
+      />
 
       <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
         <div className="flex-1 overflow-y-auto mb-4">

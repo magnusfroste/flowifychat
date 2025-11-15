@@ -18,9 +18,17 @@ interface ChatHeaderProps {
   isOwner: boolean;
   chatTitle: string;
   headerStyle: 'minimal' | 'standard' | 'prominent';
+  showTitle?: boolean;
+  transparent?: boolean;
 }
 
-export function ChatHeader({ isOwner, chatTitle, headerStyle }: ChatHeaderProps) {
+export function ChatHeader({ 
+  isOwner, 
+  chatTitle, 
+  headerStyle,
+  showTitle = true,
+  transparent = false
+}: ChatHeaderProps) {
   const navigate = useNavigate();
   
   const getHeaderClass = () => {
@@ -31,10 +39,10 @@ export function ChatHeader({ isOwner, chatTitle, headerStyle }: ChatHeaderProps)
 
   return (
     <header 
-      className={`border-b backdrop-blur-sm sticky top-0 z-10 ${getHeaderClass()}`}
+      className={`sticky top-0 z-10 ${getHeaderClass()} ${transparent ? '' : 'border-b backdrop-blur-sm'}`}
       style={{
-        backgroundColor: 'rgba(255,255,255,0.7)',
-        borderColor: 'rgba(0,0,0,0.1)',
+        backgroundColor: transparent ? 'transparent' : 'rgba(255,255,255,0.7)',
+        borderColor: transparent ? 'transparent' : 'rgba(0,0,0,0.1)',
         color: '#000000',
       }}
     >
@@ -63,7 +71,7 @@ export function ChatHeader({ isOwner, chatTitle, headerStyle }: ChatHeaderProps)
               </Breadcrumb>
             )}
             
-            {!isOwner && headerStyle !== 'minimal' && (
+            {!isOwner && showTitle && headerStyle !== 'minimal' && (
               <h1 className={`font-semibold ${headerStyle === 'prominent' ? 'text-2xl' : 'text-xl'}`}>
                 {chatTitle}
               </h1>
