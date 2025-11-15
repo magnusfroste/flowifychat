@@ -61,14 +61,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build webhook payload
+    // Build webhook payload in n8n Chat Trigger compatible format
     const webhookPayload = {
-      message: sanitizedMessage,
-      sessionId: sessionId,
+      chatInput: sanitizedMessage,        // n8n expects 'chatInput' not 'message'
+      sessionId: sessionId,                // This matches n8n's session field
+      action: 'sendMessage',               // Standard n8n chat action
+      // Additional data for custom workflows
       chatInstanceId: chatInstance.id,
       slug: chatInstance.slug,
       timestamp: new Date().toISOString(),
-      metadata: metadata || {}
+      metadata: metadata || {},
+      // Legacy support (in case some workflows still use 'message')
+      message: sanitizedMessage
     };
 
     // Prepare headers
