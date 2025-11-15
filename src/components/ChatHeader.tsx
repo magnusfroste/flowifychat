@@ -17,6 +17,7 @@ import {
 interface ChatHeaderProps {
   isOwner: boolean;
   chatTitle: string;
+  displayTitle?: string;
   headerStyle: 'minimal' | 'standard' | 'prominent';
   showTitle?: boolean;
   transparent?: boolean;
@@ -26,7 +27,8 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ 
   isOwner, 
-  chatTitle, 
+  chatTitle,
+  displayTitle,
   headerStyle,
   showTitle = true,
   transparent = false,
@@ -83,7 +85,7 @@ export function ChatHeader({
                 headerStyle === 'minimal' ? 'text-base' : 
                 'text-xl'
               }`}>
-                {chatTitle}
+                {displayTitle || chatTitle}
               </h1>
             )}
           </div>
