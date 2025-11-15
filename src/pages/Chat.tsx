@@ -1032,8 +1032,8 @@ const Chat = () => {
             canCreateMore={userPlan.plan?.can_create_more_chats ?? false}
           />
         ) : (
-          /* Public Chat Sidebar - for visitors */
-          layoutConfig.showSidebar && layoutConfig.allowAnonymousHistory && (
+          /* ChatSidebar for authenticated visitors OR anonymous users if allowed */
+          (user || (layoutConfig.showSidebar && layoutConfig.allowAnonymousHistory)) && (
             <ChatSidebar
               chatInstanceId={chatInstance.id}
               currentSessionId={sessionId}
@@ -1060,6 +1060,7 @@ const Chat = () => {
             isOwner={isOwner}
             chatTitle={chatInstance.custom_branding.chatTitle}
             headerStyle={layoutConfig.headerStyle}
+            user={user}
           />
 
           {/* Main Content */}

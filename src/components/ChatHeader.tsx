@@ -20,6 +20,7 @@ interface ChatHeaderProps {
   headerStyle: 'minimal' | 'standard' | 'prominent';
   showTitle?: boolean;
   transparent?: boolean;
+  user?: any;
 }
 
 export function ChatHeader({ 
@@ -27,7 +28,8 @@ export function ChatHeader({
   chatTitle, 
   headerStyle,
   showTitle = true,
-  transparent = false
+  transparent = false,
+  user
 }: ChatHeaderProps) {
   const navigate = useNavigate();
   
@@ -49,16 +51,18 @@ export function ChatHeader({
       <div className="px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {isOwner && (
+            {(isOwner || (user && !isOwner)) && (
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigate(isOwner ? "/dashboard" : "/dashboard")}
                       className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
                     >
                       <Home className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Dashboard</span>
+                      <span className="hidden sm:inline">
+                        {isOwner ? "Dashboard" : "My Chats"}
+                      </span>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
@@ -71,7 +75,7 @@ export function ChatHeader({
               </Breadcrumb>
             )}
             
-            {!isOwner && showTitle && (
+            {!user && !isOwner && showTitle && (
               <h1 className={`font-semibold ${
                 headerStyle === 'prominent' ? 'text-2xl' : 
                 headerStyle === 'minimal' ? 'text-base' : 
