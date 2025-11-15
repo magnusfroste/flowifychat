@@ -47,6 +47,13 @@ export type Database = {
             referencedRelation: "chat_instances"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_analytics_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_instances: {
@@ -130,6 +137,13 @@ export type Database = {
             referencedRelation: "chat_instances"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_messages_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -159,6 +173,51 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action_type: string
+          chat_instance_id: string | null
+          count: number | null
+          created_at: string | null
+          id: string
+          identifier: string
+          window_start: string | null
+        }
+        Insert: {
+          action_type: string
+          chat_instance_id?: string | null
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier: string
+          window_start?: string | null
+        }
+        Update: {
+          action_type?: string
+          chat_instance_id?: string | null
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier?: string
+          window_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_limits_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_limits_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_sessions: {
         Row: {
           chat_instance_id: string
@@ -187,6 +246,13 @@ export type Database = {
             columns: ["chat_instance_id"]
             isOneToOne: false
             referencedRelation: "chat_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_sessions_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances_public"
             referencedColumns: ["id"]
           },
         ]
@@ -258,10 +324,58 @@ export type Database = {
             referencedRelation: "chat_instances"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_analytics_chat_instance_id_fkey"
+            columns: ["chat_instance_id"]
+            isOneToOne: false
+            referencedRelation: "chat_instances_public"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      chat_instances_public: {
+        Row: {
+          chat_type: string | null
+          created_at: string | null
+          custom_branding: Json | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+          slug: string | null
+        }
+        Insert: {
+          chat_type?: string | null
+          created_at?: string | null
+          custom_branding?: Json | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          slug?: string | null
+        }
+        Update: {
+          chat_type?: string | null
+          created_at?: string | null
+          custom_branding?: Json | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          slug?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_chat_instance_id: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       generate_slug_from_name: { Args: { name: string }; Returns: string }
       get_chat_users: {
         Args: { chat_instance_id_param: string }

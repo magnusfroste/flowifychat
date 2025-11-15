@@ -38,8 +38,15 @@ const formSchema = z.object({
   name: z.string().min(1, "Chat name is required"),
   slug: z.string().min(1, "Slug is required"),
   webhookUrl: z.string().optional().refine(
-    (val) => !val || val === '' || z.string().url().safeParse(val).success,
-    { message: "Must be a valid URL or leave empty" }
+    (val) => {
+      if (!val || val === '') return true;
+      const parsed = z.string().url().safeParse(val);
+      if (!parsed.success) return false;
+      if (!val.startsWith('https://')) return false;
+      if (val.length > 2048) return false;
+      return true;
+    },
+    { message: "Must be a valid HTTPS URL (max 2048 characters)" }
   ),
   chatType: z.enum(['public', 'authenticated']).optional().default('authenticated'),
   welcomeMessage: z.string().optional(),

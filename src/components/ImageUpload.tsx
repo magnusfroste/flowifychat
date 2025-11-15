@@ -44,10 +44,11 @@ export function ImageUpload({
     }
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
       toast({
         title: "Invalid file type",
-        description: "Please upload an image file",
+        description: "Allowed: JPG, PNG, GIF, WEBP",
         variant: "destructive",
       });
       return;
