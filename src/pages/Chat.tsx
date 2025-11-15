@@ -1060,6 +1060,7 @@ const Chat = () => {
           <ChatHeader
             isOwner={isOwner}
             chatTitle={chatInstance.name}
+            displayTitle={chatInstance.custom_branding.chatTitle}
             headerStyle={layoutConfig.headerStyle}
             user={user}
             useLandingPageMode={uxConfig.useLandingPageMode}
