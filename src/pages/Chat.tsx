@@ -901,24 +901,14 @@ const Chat = () => {
               ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
             }}
           >
-            {/* Header with theme toggle */}
-            <header 
-              className="border-b backdrop-blur-sm sticky top-0 z-10"
-              style={{
-                backgroundColor: bgStyles.backgroundColor ? `${bgStyles.backgroundColor}cc` : 'hsl(var(--background) / 0.8)',
-                borderColor: 'hsl(var(--border))',
-              }}
-            >
-              <div className="max-w-4xl mx-auto px-4 py-3">
-                <div className="flex items-center justify-between">
-                  {layoutConfig.headerStyle !== 'minimal' && (
-                    <h1 className="font-semibold text-xl">
-                      {chatInstance.custom_branding.chatTitle}
-                    </h1>
-                  )}
-                </div>
-              </div>
-            </header>
+            {/* Header with transparent style */}
+            <ChatHeader
+              isOwner={false}
+              chatTitle={chatInstance.custom_branding.chatTitle}
+              headerStyle={layoutConfig.headerStyle}
+              showTitle={false}
+              transparent={true}
+            />
             
             {/* Landing Page Content */}
             <div className="flex-1">
