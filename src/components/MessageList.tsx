@@ -48,7 +48,7 @@ export function MessageList({
 }: MessageListProps) {
   const getTextColor = (bgColor: string) => {
     if (bgColor === 'transparent') {
-      return '#000000';
+      return 'hsl(var(--foreground))';
     }
     
     const hex = bgColor.replace('#', '');
@@ -56,7 +56,7 @@ export function MessageList({
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#ffffff';
+    return brightness > 128 ? 'hsl(var(--foreground))' : 'hsl(var(--background))';
   };
 
   const getBubbleRadius = () => {
@@ -135,7 +135,7 @@ export function MessageList({
                     ? getTextColor(userMessageColor)
                     : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
                     ? getTextColor(botMessageColor)
-                    : '#000000',
+                    : 'hsl(var(--foreground))',
                 }}
               >
                 <div 
@@ -145,7 +145,7 @@ export function MessageList({
                       ? getTextColor(userMessageColor)
                       : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
                       ? getTextColor(botMessageColor)
-                      : '#000000'
+                      : 'hsl(var(--foreground))'
                   }}
                 >
                   <ReactMarkdown
@@ -155,6 +155,7 @@ export function MessageList({
                         const match = /language-(\w+)/.exec(className || "");
                         const codeContent = String(children).replace(/\n$/, "");
                         const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
+                        const isDarkMode = document.documentElement.classList.contains('dark');
                         
                         return !inline && match ? (
                           <div className="relative group/code">
@@ -172,7 +173,7 @@ export function MessageList({
                               )}
                             </Button>
                             <SyntaxHighlighter
-                              style={oneLight}
+                              style={isDarkMode ? oneDark : oneLight}
                               language={match[1]}
                               PreTag="div"
                               {...props}
@@ -193,16 +194,9 @@ export function MessageList({
                 </div>
                 {showTimestamps !== 'never' && (
                   <p 
-                    className={`text-xs mt-2 transition-opacity ${
+                    className={`text-xs mt-2 text-muted-foreground transition-opacity ${
                       showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-70' : 'opacity-70'
                     }`}
-                    style={{
-                      color: message.role === "user" && userMessageColor 
-                        ? getTextColor(userMessageColor)
-                        : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                        ? getTextColor(botMessageColor)
-                        : '#666666'
-                    }}
                   >
                     {message.timestamp.toLocaleTimeString()}
                   </p>
