@@ -71,8 +71,12 @@ export function ChatHeader({
               </Breadcrumb>
             )}
             
-            {!isOwner && showTitle && headerStyle !== 'minimal' && (
-              <h1 className={`font-semibold ${headerStyle === 'prominent' ? 'text-2xl' : 'text-xl'}`}>
+            {!isOwner && showTitle && (
+              <h1 className={`font-semibold ${
+                headerStyle === 'prominent' ? 'text-2xl' : 
+                headerStyle === 'minimal' ? 'text-base' : 
+                'text-xl'
+              }`}>
                 {chatTitle}
               </h1>
             )}
