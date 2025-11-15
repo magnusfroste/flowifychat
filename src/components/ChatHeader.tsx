@@ -53,43 +53,45 @@ export function ChatHeader({
       }}
     >
       <div className="px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {(isOwner || (user && !isOwner)) && (
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink
-                      onClick={() => navigate(isOwner ? "/dashboard" : "/dashboard")}
-                      className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
-                    >
-                      <Home className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">
-                        {isOwner ? "Dashboard" : "My Chats"}
-                      </span>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="font-medium max-w-[200px] sm:max-w-none truncate">
-                      {chatTitle}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            )}
-            
-            {((user && !isOwner && !useLandingPageMode) || (!user && !isOwner)) && showTitle && (
-              <h1 className={`font-semibold ${
-                headerStyle === 'prominent' ? 'text-2xl' : 
-                headerStyle === 'minimal' ? 'text-base' : 
-                'text-xl'
-              }`}>
-                {displayTitle || chatTitle}
-              </h1>
-            )}
+        {/* Show breadcrumb for owners or authenticated non-owners */}
+        {(isOwner || (user && !isOwner)) && (
+          <div className="flex items-center justify-between">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => navigate(isOwner ? "/dashboard" : "/dashboard")}
+                    className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors"
+                  >
+                    <Home className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">
+                      {isOwner ? "Dashboard" : "My Chats"}
+                    </span>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="font-medium max-w-[200px] sm:max-w-none truncate">
+                    {chatTitle}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
-        </div>
+        )}
+        
+        {/* Show centered title for non-owners when landing is off */}
+        {((user && !isOwner && !useLandingPageMode) || (!user && !isOwner)) && showTitle && (
+          <div className="flex justify-center">
+            <h1 className={`font-semibold ${
+              headerStyle === 'prominent' ? 'text-2xl' : 
+              headerStyle === 'minimal' ? 'text-base' : 
+              'text-xl'
+            }`}>
+              {displayTitle || chatTitle}
+            </h1>
+          </div>
+        )}
       </div>
     </header>
   );
