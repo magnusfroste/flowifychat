@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { sendToWebhook } from "@/lib/webhookService";
+import { sendToWebhookViaEdge } from "@/lib/edgeWebhookService";
 import { getMetadataConfig, getQuickStartPromptsConfig, getInputConfig, getUXConfig } from "@/lib/chatConfig";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { ChatInput } from "@/components/ChatInput";
@@ -124,20 +124,12 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     try {
       const metadataConfig = getMetadataConfig(branding);
       
-      const assistantContent = await sendToWebhook(
-        {
-          url: chatInstance.webhook_url,
-          authEnabled: chatInstance.n8n_auth_enabled,
-          username: chatInstance.n8n_auth_username,
-          password: chatInstance.n8n_auth_password,
-        },
-        {
-          message: userMessage.content,
-          sessionId: 'public', // Static identifier for public chats
-          chatInstance: { id: chatInstance.id, slug: chatInstance.slug },
-          metadataConfig,
-        }
-      );
+      const assistantContent = await sendToWebhookViaEdge({
+        message: userMessage.content,
+        sessionId: 'public',
+        chatInstanceId: chatInstance.id,
+        metadataConfig,
+      });
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
