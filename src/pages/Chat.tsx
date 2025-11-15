@@ -819,36 +819,14 @@ const Chat = () => {
                 ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
               }}
             >
-              {/* Header with breadcrumbs and theme toggle */}
-              <header 
-                className="border-b backdrop-blur-sm sticky top-0 z-10"
-                style={{
-                  backgroundColor: bgStyles.backgroundColor ? `${bgStyles.backgroundColor}cc` : 'hsl(var(--background) / 0.8)',
-                  borderColor: 'hsl(var(--border))',
-                }}
-              >
-                <div className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <Breadcrumb>
-                      <BreadcrumbList>
-                        <BreadcrumbItem>
-                          <BreadcrumbLink 
-                            href="/dashboard"
-                            className="flex items-center gap-1 hover:text-primary transition-colors"
-                          >
-                            <Home className="h-4 w-4" />
-                            <span className="hidden sm:inline">Dashboard</span>
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                          <BreadcrumbPage>{chatInstance.name}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                      </BreadcrumbList>
-                    </Breadcrumb>
-                  </div>
-                </div>
-              </header>
+              {/* Header with transparent styling for landing mode */}
+              <ChatHeader
+                isOwner={true}
+                chatTitle={chatInstance.name}
+                headerStyle={layoutConfig.headerStyle}
+                showTitle={false}
+                transparent={true}
+              />
               
               {/* Landing Page Content */}
               <div className="flex-1">
