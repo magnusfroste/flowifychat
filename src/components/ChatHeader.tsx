@@ -21,6 +21,7 @@ interface ChatHeaderProps {
   showTitle?: boolean;
   transparent?: boolean;
   user?: any;
+  useLandingPageMode?: boolean;
 }
 
 export function ChatHeader({ 
@@ -29,7 +30,8 @@ export function ChatHeader({
   headerStyle,
   showTitle = true,
   transparent = false,
-  user
+  user,
+  useLandingPageMode = true
 }: ChatHeaderProps) {
   const navigate = useNavigate();
   
@@ -75,7 +77,7 @@ export function ChatHeader({
               </Breadcrumb>
             )}
             
-            {!user && !isOwner && showTitle && (
+            {((user && !isOwner && !useLandingPageMode) || (!user && !isOwner)) && showTitle && (
               <h1 className={`font-semibold ${
                 headerStyle === 'prominent' ? 'text-2xl' : 
                 headerStyle === 'minimal' ? 'text-base' : 
