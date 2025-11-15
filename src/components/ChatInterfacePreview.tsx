@@ -8,7 +8,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TypingIndicator } from "@/components/TypingIndicator";
-import { useTheme } from "next-themes";
 import type { ChatBranding } from "@/types/chatConfiguration";
 import {
   DropdownMenu,
@@ -24,7 +23,6 @@ interface ChatInterfacePreviewProps {
 }
 
 export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your message..." }: ChatInterfacePreviewProps) {
-  const { resolvedTheme } = useTheme();
   const [copiedMessageId, setCopiedMessageId] = useState<number | null>(null);
   
   const mockMessages = [
@@ -112,10 +110,9 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   };
 
   // Determine text color based on background brightness
-  const getTextColor = (bgColor: string, currentIsDark: boolean) => {
-    // Handle transparent - defer to theme
+  const getTextColor = (bgColor: string) => {
     if (bgColor === 'transparent') {
-      return currentIsDark ? '#ffffff' : '#000000';
+      return '#000000';
     }
     
     const hex = bgColor.replace('#', '');
@@ -125,10 +122,6 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     return brightness > 128 ? '#000000' : '#ffffff';
   };
-
-  // Determine if background is dark for light text
-  const isDarkFromColor = backgroundColor && getTextColor(backgroundColor, false) === '#ffffff';
-  const isDark = isDarkFromColor;
 
   // Background style
   const getBackgroundStyles = () => {
@@ -140,14 +133,14 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   };
   
   const backgroundStyles = getBackgroundStyles();
-  const headerBg = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.7)';
-  const headerTextColor = isDark ? '#ffffff' : '#000000';
-  const inputAreaBg = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.7)';
+  const headerBg = 'rgba(255, 255, 255, 0.7)';
+  const headerTextColor = '#000000';
+  const inputAreaBg = 'rgba(255, 255, 255, 0.7)';
 
   // Input style classes
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-black/5 border-black/10';
+      return 'bg-black/5 border-black/10';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -170,7 +163,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
       {headerStyle !== 'minimal' && (
         <div 
           className="border-b backdrop-blur px-4 py-3 flex items-center gap-3"
-          style={{ backgroundColor: headerBg, color: headerTextColor, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+          style={{ backgroundColor: headerBg, color: headerTextColor, borderColor: 'rgba(0,0,0,0.1)' }}
         >
           {avatarUrl && (
             <Avatar className="h-8 w-8">
@@ -227,7 +220,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     }`}
                     style={{ 
                       backgroundColor: messageColor,
-                      color: messageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(messageColor, isDark),
+                      color: messageColor === 'transparent' ? '#000000' : getTextColor(messageColor),
                       borderRadius: getBubbleBorderRadius(),
                     }}
                   >
@@ -240,7 +233,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                       className={`text-xs mt-1 px-2 transition-opacity ${
                         branding.showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-100' : 'opacity-60'
                       }`}
-                      style={{ color: isDark ? '#ffffff' : '#666666' }}
+                      style={{ color: '#666666' }}
                     >
                       {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -368,11 +361,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
               className={`${densityClasses[messageDensity]}`}
               style={{ 
                 backgroundColor: botMessageColor,
-                color: botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor, isDark),
+                color: botMessageColor === 'transparent' ? '#000000' : getTextColor(botMessageColor),
                 borderRadius: getBubbleBorderRadius(),
               }}
             >
-              <TypingIndicator dotColor={botMessageColor === 'transparent' ? (isDark ? '#ffffff' : '#000000') : getTextColor(botMessageColor, isDark)} />
+              <TypingIndicator dotColor={botMessageColor === 'transparent' ? '#000000' : getTextColor(botMessageColor)} />
             </div>
           </div>
         </div>
@@ -385,7 +378,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
         }`}
         style={{ 
           backgroundColor: inputAreaBg, 
-          borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' 
+          borderColor: 'rgba(0,0,0,0.1)' 
         }}
       >
         <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
@@ -403,7 +396,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             style={buttonStyle === 'filled' ? {
               backgroundColor: primaryColor,
               borderRadius: `${borderRadius}px`,
-              color: getTextColor(primaryColor, isDark),
+              color: getTextColor(primaryColor),
             } : {
               borderRadius: `${borderRadius}px`,
               borderColor: primaryColor,
