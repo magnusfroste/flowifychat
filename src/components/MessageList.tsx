@@ -21,8 +21,6 @@ interface Message {
 
 interface MessageListProps {
   messages: Message[];
-  theme: string | undefined;
-  isDark: boolean;
   branding: any;
   layoutConfig: any;
   behaviorConfig: any;
@@ -37,8 +35,6 @@ interface MessageListProps {
 
 export function MessageList({
   messages,
-  theme,
-  isDark,
   branding,
   layoutConfig,
   behaviorConfig,
@@ -50,9 +46,9 @@ export function MessageList({
   onRegenerate,
   sending,
 }: MessageListProps) {
-  const getTextColor = (bgColor: string, currentIsDark: boolean) => {
+  const getTextColor = (bgColor: string) => {
     if (bgColor === 'transparent') {
-      return currentIsDark ? '#ffffff' : '#000000';
+      return '#000000';
     }
     
     const hex = bgColor.replace('#', '');
@@ -136,20 +132,20 @@ export function MessageList({
                     ? userMessageColor || 'hsl(var(--muted) / 0.3)'
                     : botMessageColor || 'transparent',
                   color: message.role === "user" && userMessageColor 
-                    ? getTextColor(userMessageColor, isDark)
+                    ? getTextColor(userMessageColor)
                     : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                    ? getTextColor(botMessageColor, isDark)
-                    : isDark ? '#ffffff' : '#000000',
+                    ? getTextColor(botMessageColor)
+                    : '#000000',
                 }}
               >
                 <div 
                   className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
                   style={{
                     color: message.role === "user" && userMessageColor 
-                      ? getTextColor(userMessageColor, isDark)
+                      ? getTextColor(userMessageColor)
                       : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                      ? getTextColor(botMessageColor, isDark)
-                      : isDark ? '#ffffff' : '#000000'
+                      ? getTextColor(botMessageColor)
+                      : '#000000'
                   }}
                 >
                   <ReactMarkdown
@@ -176,7 +172,7 @@ export function MessageList({
                               )}
                             </Button>
                             <SyntaxHighlighter
-                              style={theme === "dark" ? oneDark : oneLight}
+                              style={oneLight}
                               language={match[1]}
                               PreTag="div"
                               {...props}
@@ -202,10 +198,10 @@ export function MessageList({
                     }`}
                     style={{
                       color: message.role === "user" && userMessageColor 
-                        ? getTextColor(userMessageColor, isDark)
+                        ? getTextColor(userMessageColor)
                         : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                        ? getTextColor(botMessageColor, isDark)
-                        : isDark ? '#ffffff' : '#666666'
+                        ? getTextColor(botMessageColor)
+                        : '#666666'
                     }}
                   >
                     {message.timestamp.toLocaleTimeString()}

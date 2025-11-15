@@ -5,7 +5,6 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { useTheme } from "next-themes";
 import { Loader2 } from "lucide-react";
 import { sendToWebhook } from "@/lib/webhookService";
 import { getMetadataConfig, getQuickStartPromptsConfig, getInputConfig, getUXConfig } from "@/lib/chatConfig";
@@ -37,7 +36,6 @@ interface PublicChatProps {
 }
 
 export function PublicChat({ chatInstance }: PublicChatProps) {
-  const { resolvedTheme } = useTheme();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -229,8 +227,6 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
         <div className="flex-1 overflow-y-auto mb-4">
           <MessageList
             messages={messages}
-            theme={resolvedTheme}
-            isDark={false}
             branding={branding}
             layoutConfig={layoutConfig}
             behaviorConfig={behaviorConfig}
@@ -256,7 +252,6 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
             inputStyle={inputStyle as any}
             buttonStyle={buttonStyle as any}
             inputSize={inputSize === 'compact' ? 'compact' : inputSize === 'large' ? 'large' : 'standard'}
-            isDark={false}
             primaryColor={primaryColor}
           />
         </div>

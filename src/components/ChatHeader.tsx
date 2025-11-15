@@ -18,10 +18,9 @@ interface ChatHeaderProps {
   isOwner: boolean;
   chatTitle: string;
   headerStyle: 'minimal' | 'standard' | 'prominent';
-  isDark: boolean;
 }
 
-export function ChatHeader({ isOwner, chatTitle, headerStyle, isDark }: ChatHeaderProps) {
+export function ChatHeader({ isOwner, chatTitle, headerStyle }: ChatHeaderProps) {
   const navigate = useNavigate();
   
   const getHeaderClass = () => {
@@ -34,9 +33,9 @@ export function ChatHeader({ isOwner, chatTitle, headerStyle, isDark }: ChatHead
     <header 
       className={`border-b backdrop-blur-sm sticky top-0 z-10 ${getHeaderClass()}`}
       style={{
-        backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.7)',
-        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-        color: isDark ? '#ffffff' : '#000000',
+        backgroundColor: 'rgba(255,255,255,0.7)',
+        borderColor: 'rgba(0,0,0,0.1)',
+        color: '#000000',
       }}
     >
       <div className="px-6 py-3">

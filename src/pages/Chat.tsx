@@ -15,8 +15,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { useTheme } from "next-themes";
 import { trackAnalyticsEvent } from "@/lib/analytics";
 import { sendToWebhook } from "@/lib/webhookService";
 import { ChatHeader } from "@/components/ChatHeader";
@@ -77,7 +75,6 @@ const Chat = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { theme, resolvedTheme } = useTheme();
   const [chatInstances, setChatInstances] = useState<ChatInstance[]>([]);
   
   const [user, setUser] = useState<any>(null);
@@ -724,10 +721,9 @@ const Chat = () => {
   };
 
   // Utility: Calculate text color based on background brightness
-  const getTextColor = (bgColor: string, currentIsDark: boolean) => {
-    // Handle transparent - defer to theme
+  const getTextColor = (bgColor: string) => {
     if (bgColor === 'transparent') {
-      return currentIsDark ? '#ffffff' : '#000000';
+      return '#000000';
     }
     
     const hex = bgColor.replace('#', '');
@@ -790,15 +786,8 @@ const Chat = () => {
 
   // Landing page mode - no header, just centered input
   if (chatMode === 'landing') {
-    const landingColorMode = branding?.colorMode || 'light';
-    const landingIsDark = landingColorMode === 'auto' 
-      ? resolvedTheme === 'dark'
-      : landingColorMode === 'dark';
-    
     const bgStyles = branding?.backgroundStyle === 'gradient' && branding?.backgroundGradientStart && branding?.backgroundGradientEnd
       ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
-      : landingColorMode === 'auto'
-      ? { backgroundColor: landingIsDark ? '#212121' : '#ffffff' }
       : branding?.backgroundColor ? { backgroundColor: branding.backgroundColor } : {};
       
     // ADMIN/OWNER VIEW: Expanded sidebar (Grok pattern)
@@ -861,7 +850,6 @@ const Chat = () => {
                         </BreadcrumbItem>
                       </BreadcrumbList>
                     </Breadcrumb>
-                    <ThemeToggle />
                   </div>
                 </div>
               </header>
@@ -932,9 +920,6 @@ const Chat = () => {
                       {chatInstance.custom_branding.chatTitle}
                     </h1>
                   )}
-                  <div className={layoutConfig.headerStyle === 'minimal' ? 'ml-auto' : ''}>
-                    <ThemeToggle />
-                  </div>
                 </div>
               </div>
             </header>
@@ -980,23 +965,11 @@ const Chat = () => {
   const backgroundGradientEnd = branding?.backgroundGradientEnd;
   const inputStyle = branding?.inputStyle || 'outline';
   const buttonStyle = branding?.buttonStyle || 'filled';
-  const colorMode = branding?.colorMode || 'light';
   
-  // Determine if we're in dark mode - respect theme when colorMode is 'auto'
-  const isDark = colorMode === 'auto' 
-    ? resolvedTheme === 'dark'
-    : colorMode === 'dark' || (backgroundColor && getTextColor(backgroundColor, colorMode === 'dark') === '#ffffff');
-  
-  // Background styles - respect theme when colorMode is 'auto'
+  // Background styles
   const getBackgroundStyles = () => {
     if (backgroundStyle === 'gradient' && backgroundGradientStart && backgroundGradientEnd) {
       return { background: `linear-gradient(135deg, ${backgroundGradientStart}, ${backgroundGradientEnd})` };
-    }
-    
-    if (colorMode === 'auto') {
-      return isDark 
-        ? { backgroundColor: '#212121' } // ChatGPT's dark mode background
-        : { backgroundColor: '#ffffff' };
     }
     
     return backgroundColor ? { backgroundColor } : {};
@@ -1054,7 +1027,7 @@ const Chat = () => {
 
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10';
+      return 'bg-black/5 border-black/10';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -1123,7 +1096,6 @@ const Chat = () => {
             isOwner={isOwner}
             chatTitle={chatInstance.custom_branding.chatTitle}
             headerStyle={layoutConfig.headerStyle}
-            isDark={isDark}
           />
 
           {/* Main Content */}
@@ -1149,8 +1121,6 @@ const Chat = () => {
             
             <MessageList
               messages={messages}
-              theme={theme}
-              isDark={isDark}
               branding={branding}
               layoutConfig={layoutConfig}
               behaviorConfig={behaviorConfig}
@@ -1166,7 +1136,7 @@ const Chat = () => {
               <div className="flex justify-start animate-fade-in">
                 <Card style={{ backgroundColor: botMessageColor || 'transparent' }}>
                   <div className="p-4">
-                    <TypingIndicator dotColor={botMessageColor && botMessageColor !== 'transparent' ? getTextColor(botMessageColor, isDark) : isDark ? '#ffffff' : '#000000'} />
+                    <TypingIndicator dotColor={botMessageColor && botMessageColor !== 'transparent' ? getTextColor(botMessageColor) : '#000000'} />
                   </div>
                 </Card>
               </div>
@@ -1194,8 +1164,8 @@ const Chat = () => {
                   : 'fixed bottom-0'
               }`}
               style={{
-                backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.7)',
-                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                backgroundColor: 'rgba(255,255,255,0.7)',
+                borderColor: 'rgba(0,0,0,0.1)',
               }}
             >
               <div 
@@ -1211,7 +1181,6 @@ const Chat = () => {
                   inputStyle={inputStyle}
                   buttonStyle={buttonStyle}
                   inputSize={behaviorConfig.inputSize}
-                  isDark={isDark}
                   primaryColor={chatInstance.custom_branding.primaryColor}
                 />
               </div>

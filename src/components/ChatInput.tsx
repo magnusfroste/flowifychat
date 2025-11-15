@@ -16,7 +16,6 @@ interface ChatInputProps {
   inputStyle: 'outline' | 'filled' | 'underline';
   buttonStyle: 'filled' | 'ghost' | 'outline';
   inputSize: 'compact' | 'standard' | 'large';
-  isDark: boolean;
   primaryColor: string;
 }
 
@@ -29,7 +28,6 @@ export function ChatInput({
   inputStyle,
   buttonStyle,
   inputSize,
-  isDark,
   primaryColor,
 }: ChatInputProps) {
   const getInputSize = () => {
@@ -40,7 +38,7 @@ export function ChatInput({
 
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10';
+      return 'bg-black/5 border-black/10';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -73,7 +71,7 @@ export function ChatInput({
         disabled={sending}
         className={`flex-1 ${getInputSize()} ${getInputStyleClasses()}`}
         style={{
-          color: isDark ? '#ffffff' : '#000000',
+          color: '#000000',
         }}
       />
       <Button

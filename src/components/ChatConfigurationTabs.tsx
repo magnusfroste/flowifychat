@@ -734,7 +734,7 @@ export function ChatConfigurationTabs({
           {form.watch('chatType') === 'public' && (
             <Alert className="mt-4 border-amber-500/50 bg-amber-500/10">
               <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
+              <AlertDescription className="text-sm text-amber-800">
                 <strong>Public Mode:</strong> No conversation history or user data is stored. Messages are sent directly to your webhook. No session tracking or analytics available.
               </AlertDescription>
             </Alert>
