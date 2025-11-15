@@ -64,9 +64,9 @@ export const templates: BrandingTemplate[] = [
       primaryColor: "#10a37f",
       accentColor: "#1a7f64",
       secondaryColor: "#8e8ea0",
-      userMessageColor: "#ECECF1",
+      userMessageColor: "hsl(var(--muted))",
       botMessageColor: "transparent",
-      backgroundColor: "#ffffff",
+      backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Inter',
@@ -105,9 +105,9 @@ export const templates: BrandingTemplate[] = [
       primaryColor: "#d97757",
       accentColor: "#cc6b47",
       secondaryColor: "#6b6b6b",
-      userMessageColor: "#f5f5f5",
-      botMessageColor: "#ffffff",
-      backgroundColor: "#ffffff",
+      userMessageColor: "hsl(var(--muted))",
+      botMessageColor: "hsl(var(--card))",
+      backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Inter',
@@ -146,9 +146,9 @@ export const templates: BrandingTemplate[] = [
       primaryColor: "#1a1a1a",
       accentColor: "#34d399",
       secondaryColor: "#6b7280",
-      userMessageColor: "#f3f4f6",
-      botMessageColor: "#ffffff",
-      backgroundColor: "#ffffff",
+      userMessageColor: "hsl(var(--muted))",
+      botMessageColor: "hsl(var(--card))",
+      backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Inter',
@@ -188,11 +188,11 @@ export const templates: BrandingTemplate[] = [
       accentColor: "#f59e0b",
       secondaryColor: "#8b5cf6",
       userMessageColor: "#ec4899",
-      botMessageColor: "#fef3c7",
-      backgroundColor: "#fdf4ff",
+      botMessageColor: "hsl(var(--muted))",
+      backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'gradient',
-      backgroundGradientStart: "#fdf4ff",
-      backgroundGradientEnd: "#fef3c7",
+      backgroundGradientStart: "hsl(var(--background))",
+      backgroundGradientEnd: "hsl(var(--muted))",
       layoutStyle: 'centered',
       fontFamily: 'Poppins',
       messageBubbleStyle: 'pill',
@@ -249,7 +249,7 @@ export function BrandingTemplates({ onApplyTemplate }: BrandingTemplatesProps) {
                   className="w-12 h-12 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: template.values.primaryColor }}
                 >
-                  <Icon className="w-6 h-6 text-white" />
+                  <Icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
                   <div className="font-medium text-sm">{template.name}</div>

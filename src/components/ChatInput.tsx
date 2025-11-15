@@ -38,7 +38,7 @@ export function ChatInput({
 
   const getInputStyleClasses = () => {
     if (inputStyle === 'filled') {
-      return 'bg-black/5 border-black/10';
+      return 'bg-muted/50 border-muted';
     } else if (inputStyle === 'underline') {
       return 'border-0 border-b rounded-none';
     }
@@ -47,9 +47,9 @@ export function ChatInput({
 
   const getButtonClasses = () => {
     if (buttonStyle === 'ghost') {
-      return 'bg-transparent hover:bg-white/10 border-0';
+      return 'bg-transparent hover:bg-muted border-0';
     } else if (buttonStyle === 'outline') {
-      return 'bg-transparent hover:bg-white/10 border';
+      return 'bg-transparent hover:bg-muted border';
     }
     return '';
   };
