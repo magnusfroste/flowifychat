@@ -112,7 +112,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   // Determine text color based on background brightness
   const getTextColor = (bgColor: string) => {
     if (bgColor === 'transparent') {
-      return '#000000';
+      return 'hsl(var(--foreground))';
     }
     
     const hex = bgColor.replace('#', '');
@@ -120,7 +120,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#ffffff';
+    return brightness > 128 ? 'hsl(var(--foreground))' : 'hsl(var(--background))';
   };
 
   // Background style
@@ -133,9 +133,6 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   };
   
   const backgroundStyles = getBackgroundStyles();
-  const headerBg = 'rgba(255, 255, 255, 0.7)';
-  const headerTextColor = '#000000';
-  const inputAreaBg = 'rgba(255, 255, 255, 0.7)';
 
   // Input style classes
   const getInputStyleClasses = () => {
@@ -162,8 +159,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
       {/* Header */}
       {headerStyle !== 'minimal' && (
         <div 
-          className="border-b backdrop-blur px-4 py-3 flex items-center gap-3"
-          style={{ backgroundColor: headerBg, color: headerTextColor, borderColor: 'rgba(0,0,0,0.1)' }}
+          className="border-b backdrop-blur px-4 py-3 flex items-center gap-3 bg-background/70 text-foreground border-border/10"
         >
           {avatarUrl && (
             <Avatar className="h-8 w-8">
@@ -200,7 +196,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     {isUser ? (
                       <>
                         <AvatarFallback style={{ backgroundColor: primaryColor }}>
-                          <User className="h-3 w-3 text-white" />
+                          <User className="h-3 w-3 text-primary-foreground" />
                         </AvatarFallback>
                       </>
                     ) : (
@@ -220,7 +216,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     }`}
                     style={{ 
                       backgroundColor: messageColor,
-                      color: messageColor === 'transparent' ? '#000000' : getTextColor(messageColor),
+                      color: messageColor === 'transparent' ? 'hsl(var(--foreground))' : getTextColor(messageColor),
                       borderRadius: getBubbleBorderRadius(),
                     }}
                   >
@@ -230,10 +226,9 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   {/* Timestamp */}
                   {branding.showTimestamps !== 'never' && (
                     <div 
-                      className={`text-xs mt-1 px-2 transition-opacity ${
+                      className={`text-xs mt-1 px-2 transition-opacity text-muted-foreground ${
                         branding.showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-100' : 'opacity-60'
                       }`}
-                      style={{ color: '#666666' }}
                     >
                       {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -361,11 +356,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
               className={`${densityClasses[messageDensity]}`}
               style={{ 
                 backgroundColor: botMessageColor,
-                color: botMessageColor === 'transparent' ? '#000000' : getTextColor(botMessageColor),
+                color: botMessageColor === 'transparent' ? 'hsl(var(--foreground))' : getTextColor(botMessageColor),
                 borderRadius: getBubbleBorderRadius(),
               }}
             >
-              <TypingIndicator dotColor={botMessageColor === 'transparent' ? '#000000' : getTextColor(botMessageColor)} />
+              <TypingIndicator dotColor={botMessageColor === 'transparent' ? 'hsl(var(--foreground))' : getTextColor(botMessageColor)} />
             </div>
           </div>
         </div>
@@ -373,13 +368,9 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
 
       {/* Input Area */}
       <div 
-        className={`border-t backdrop-blur p-4 ${
+        className={`border-t backdrop-blur p-4 bg-background/70 border-border/10 ${
           inputPosition === 'floating' ? 'mx-4 mb-4 rounded-lg border shadow-lg' : ''
         }`}
-        style={{ 
-          backgroundColor: inputAreaBg, 
-          borderColor: 'rgba(0,0,0,0.1)' 
-        }}
       >
         <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
           <Input
