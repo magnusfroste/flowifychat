@@ -1,4 +1,8 @@
 /**
+ * @deprecated Use edgeWebhookService.ts instead for production
+ * This file is kept for testing and reference purposes only
+ * Direct webhook calls expose credentials client-side
+ * 
  * Service: Webhook Communication
  * Handles sending messages to webhook and processing responses
  */

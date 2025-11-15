@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { trackAnalyticsEvent } from "@/lib/analytics";
-import { sendToWebhook } from "@/lib/webhookService";
+import { sendToWebhookViaEdge } from "@/lib/edgeWebhookService";
 import { ChatHeader } from "@/components/ChatHeader";
 import { MessageList } from "@/components/MessageList";
 import { ChatInput } from "@/components/ChatInput";
@@ -433,20 +433,12 @@ const Chat = () => {
       const branding = chatInstance.custom_branding as any;
       const metadataConfig = getMetadataConfig(branding);
       
-      const assistantContent = await sendToWebhook(
-        {
-          url: chatInstance.webhook_url,
-          authEnabled: chatInstance.n8n_auth_enabled,
-          username: chatInstance.n8n_auth_username,
-          password: chatInstance.n8n_auth_password,
-        },
-        {
-          message: userMessage.content,
-          sessionId: activeSessionId,
-          chatInstance: { id: chatInstance.id, slug: chatInstance.slug },
-          metadataConfig,
-        }
-      );
+      const assistantContent = await sendToWebhookViaEdge({
+        message: userMessage.content,
+        sessionId: activeSessionId,
+        chatInstanceId: chatInstance.id,
+        metadataConfig,
+      });
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -558,20 +550,12 @@ const Chat = () => {
     const metadataConfig = getMetadataConfig(branding);
 
     try {
-      const assistantContent = await sendToWebhook(
-        {
-          url: chatInstance.webhook_url,
-          authEnabled: chatInstance.n8n_auth_enabled,
-          username: chatInstance.n8n_auth_username,
-          password: chatInstance.n8n_auth_password,
-        },
-        {
-          message: userMessage.content,
-          sessionId,
-          chatInstance: { id: chatInstance.id, slug: chatInstance.slug },
-          metadataConfig,
-        }
-      );
+      const assistantContent = await sendToWebhookViaEdge({
+        message: userMessage.content,
+        sessionId,
+        chatInstanceId: chatInstance.id,
+        metadataConfig,
+      });
 
       const newAssistantMessage: Message = {
         id: Date.now().toString(),
