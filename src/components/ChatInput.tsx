@@ -61,33 +61,44 @@ export function ChatInput({
     }
   };
 
+  const charCount = value.length;
+  const maxChars = 10000;
+  const isNearLimit = charCount > maxChars * 0.9;
+
   return (
-    <div className="flex gap-2 items-center">
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyPress}
-        placeholder={placeholder}
-        disabled={sending}
-        className={`flex-1 ${getInputSize()} ${getInputStyleClasses()}`}
-        style={{
-          color: '#000000',
-        }}
-      />
-      <Button
-        onClick={onSend}
-        disabled={sending || !value.trim()}
-        className={getButtonClasses()}
-        style={{
-          backgroundColor: buttonStyle === 'filled' ? primaryColor : undefined,
-        }}
-      >
-        {sending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Send className="h-4 w-4" />
-        )}
-      </Button>
+    <div className="space-y-1">
+      <div className="flex gap-2 items-center">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value.slice(0, maxChars))}
+          onKeyDown={handleKeyPress}
+          placeholder={placeholder}
+          disabled={sending}
+          className={`flex-1 ${getInputSize()} ${getInputStyleClasses()}`}
+          style={{
+            color: '#000000',
+          }}
+        />
+        <Button
+          onClick={onSend}
+          disabled={sending || !value.trim()}
+          className={getButtonClasses()}
+          style={{
+            backgroundColor: buttonStyle === 'filled' ? primaryColor : undefined,
+          }}
+        >
+          {sending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+      {isNearLimit && (
+        <p className="text-xs text-muted-foreground text-right">
+          {charCount}/{maxChars} characters
+        </p>
+      )}
     </div>
   );
 }

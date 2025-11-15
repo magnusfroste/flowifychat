@@ -24,8 +24,19 @@ export async function sendToWebhook(
   config: WebhookConfig,
   options: WebhookPayloadOptions
 ): Promise<string> {
+  // Validate webhook URL
+  if (!config.url.startsWith('https://')) {
+    throw new Error("Webhook URL must use HTTPS");
+  }
+  if (config.url.length > 2048) {
+    throw new Error("Webhook URL too long");
+  }
+
+  // Sanitize message (max 10000 chars)
+  const sanitizedMessage = options.message.slice(0, 10000);
+
   const payload = buildWebhookPayload(
-    options.message,
+    sanitizedMessage,
     options.sessionId,
     options.chatInstance,
     options.metadataConfig
@@ -40,15 +51,23 @@ export async function sendToWebhook(
     headers["Authorization"] = `Basic ${credentials}`;
   }
 
-  const response = await fetch(config.url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
+  // Add timeout controller
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-  if (!response.ok) {
-    throw new Error("Failed to send message to webhook");
-  }
+  try {
+    const response = await fetch(config.url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error("Failed to send message to webhook");
+    }
 
   const text = await response.text();
   let assistantContent = '';
@@ -83,5 +102,12 @@ export async function sendToWebhook(
     }
   }
 
-  return assistantContent || "I received your message!";
+    return assistantContent || "I received your message!";
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error("Request timeout - webhook took too long to respond");
+    }
+    throw error;
+  }
 }

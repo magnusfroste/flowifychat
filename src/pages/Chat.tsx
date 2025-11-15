@@ -125,16 +125,14 @@ const Chat = () => {
             setChatInstances(allChats as unknown as ChatInstance[]);
           }
         }
-        // Try loading by UUID first (for owner access)
-        let query = supabase
-          .from("chat_instances")
-          .select("*");
-
+        // Try loading by ID (UUID or slug)
         // Check if id is a valid UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
+        let data, error;
+
         if (isUUID) {
-          // Load by UUID (owner view - requires authentication)
+          // Owner access - use full table with auth (includes webhook credentials)
           const { data: { session } } = await supabase.auth.getSession();
           
           if (!session) {
@@ -143,13 +141,27 @@ const Chat = () => {
           }
 
           setUser(session.user);
-          query = query.eq("id", id).eq("user_id", session.user.id);
+          
+          const result = await supabase
+            .from("chat_instances")
+            .select("*")
+            .eq("id", id)
+            .eq("user_id", session.user.id)
+            .single();
+          
+          data = result.data;
+          error = result.error;
         } else {
-          // Load by slug (public view - no authentication required)
-          query = query.eq("slug", id);
+          // Public access - use view with safe columns only (no webhook credentials)
+          const result = await supabase
+            .from("chat_instances_public")
+            .select("*")
+            .eq("slug", id)
+            .single();
+          
+          data = result.data;
+          error = result.error;
         }
-
-        const { data, error } = await query.single();
 
         if (error) throw error;
 
