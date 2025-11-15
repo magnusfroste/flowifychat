@@ -233,7 +233,7 @@ const Chat = () => {
     loadChatInstance();
 
     return () => subscription.unsubscribe();
-  }, [id, navigate, toast, sessionId, viewTracked]);
+  }, [id, navigate, toast, viewTracked]);
 
   // Load messages from database for this session
   useEffect(() => {
