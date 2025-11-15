@@ -45,12 +45,11 @@ export function ChatHeader({
 
   return (
     <header 
-      className={`sticky top-0 z-10 ${getHeaderClass()} ${transparent ? '' : 'border-b backdrop-blur-sm'}`}
-      style={{
-        backgroundColor: transparent ? 'transparent' : 'rgba(255,255,255,0.7)',
-        borderColor: transparent ? 'transparent' : 'rgba(0,0,0,0.1)',
-        color: '#000000',
-      }}
+      className={`sticky top-0 z-10 ${getHeaderClass()} ${
+        transparent 
+          ? '' 
+          : 'border-b backdrop-blur-sm bg-background/70 text-foreground'
+      }`}
     >
       <div className="px-6 py-3">
         {/* Show breadcrumb for owners or authenticated non-owners */}

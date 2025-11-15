@@ -74,10 +74,7 @@ export function ChatInput({
           onKeyDown={handleKeyPress}
           placeholder={placeholder}
           disabled={sending}
-          className={`flex-1 ${getInputSize()} ${getInputStyleClasses()}`}
-          style={{
-            color: '#000000',
-          }}
+          className={`flex-1 ${getInputSize()} ${getInputStyleClasses()} text-foreground`}
         />
         <Button
           onClick={onSend}
