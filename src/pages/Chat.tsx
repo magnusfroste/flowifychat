@@ -1126,15 +1126,11 @@ const Chat = () => {
 
             {/* Input Area */}
             <div 
-              className={`left-0 right-0 border-t backdrop-blur-sm ${
+              className={`left-0 right-0 border-t border-border/10 bg-background/80 backdrop-blur-sm ${
                 behaviorConfig.inputPosition === 'floating' 
                   ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
                   : 'fixed bottom-0'
               }`}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.7)',
-                borderColor: 'rgba(0,0,0,0.1)',
-              }}
             >
               <div 
                 className="mx-auto px-4 sm:px-6 lg:px-8 py-4"
