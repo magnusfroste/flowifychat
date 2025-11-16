@@ -58,11 +58,11 @@ export interface BrandingTemplate {
 export const templates: BrandingTemplate[] = [
   {
     name: "OpenAI Style",
-    description: "ChatGPT-inspired interface",
+    description: "Clean, spacious ChatGPT design",
     icon: Zap,
     values: {
       primaryColor: "#10a37f",
-      accentColor: "#1a7f64",
+      accentColor: "#0d8a6a",
       secondaryColor: "#8e8ea0",
       userMessageColor: "hsl(var(--muted))",
       botMessageColor: "transparent",
@@ -81,29 +81,29 @@ export const templates: BrandingTemplate[] = [
       showAvatars: false,
       avatarSize: 'small',
       avatarPosition: 'top',
-      showSidebar: true,
+      showSidebar: false,
       headerStyle: 'minimal',
       
       inputPosition: 'sticky-bottom',
       inputSize: 'large',
       sendButtonStyle: 'icon',
       
-      messageSpacing: 'normal',
+      messageSpacing: 'relaxed',
       animationSpeed: 'normal',
-      showTimestamps: 'hover',
+      showTimestamps: 'never',
       
-      messageActions: 'inline',
+      messageActions: 'hover',
       showCopyButton: true,
       showRegenerateButton: true,
     },
   },
   {
     name: "Claude Style",
-    description: "Anthropic-inspired clean design",
+    description: "Warm, thoughtful Anthropic design",
     icon: Minimize2,
     values: {
       primaryColor: "#d97757",
-      accentColor: "#cc6b47",
+      accentColor: "#c06a4a",
       secondaryColor: "#6b6b6b",
       userMessageColor: "hsl(var(--muted))",
       botMessageColor: "hsl(var(--card))",
@@ -125,9 +125,9 @@ export const templates: BrandingTemplate[] = [
       showSidebar: false,
       headerStyle: 'minimal',
       
-      inputPosition: 'floating',
+      inputPosition: 'sticky-bottom',
       inputSize: 'large',
-      sendButtonStyle: 'icon-text',
+      sendButtonStyle: 'icon',
       
       messageSpacing: 'relaxed',
       animationSpeed: 'slow',
@@ -140,7 +140,7 @@ export const templates: BrandingTemplate[] = [
   },
   {
     name: "Grok Style",
-    description: "xAI-inspired clean interface",
+    description: "Bold, modern xAI interface",
     icon: Zap,
     values: {
       primaryColor: "#1a1a1a",
@@ -154,7 +154,7 @@ export const templates: BrandingTemplate[] = [
       fontFamily: 'Inter',
       messageBubbleStyle: 'rounded',
       messageDensity: 'comfortable',
-      borderRadius: 24,
+      borderRadius: 16,
       buttonStyle: 'filled',
       inputStyle: 'outline',
       
@@ -176,28 +176,28 @@ export const templates: BrandingTemplate[] = [
       
       messageActions: 'hover',
       showCopyButton: true,
-      showRegenerateButton: false,
+      showRegenerateButton: true,
     },
   },
   {
     name: "Playful",
-    description: "Bright and fun",
+    description: "Vibrant, energetic design",
     icon: Sparkles,
     values: {
       primaryColor: "#ec4899",
-      accentColor: "#f59e0b",
-      secondaryColor: "#8b5cf6",
+      accentColor: "#f472b6",
+      secondaryColor: "#a855f7",
       userMessageColor: "#ec4899",
       botMessageColor: "hsl(var(--muted))",
       backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'gradient',
-      backgroundGradientStart: "hsl(var(--background))",
-      backgroundGradientEnd: "hsl(var(--muted))",
+      backgroundGradientStart: "#fefefe",
+      backgroundGradientEnd: "#fdf4f8",
       layoutStyle: 'centered',
       fontFamily: 'Poppins',
       messageBubbleStyle: 'pill',
       messageDensity: 'spacious',
-      borderRadius: 20,
+      borderRadius: 24,
       buttonStyle: 'filled',
       inputStyle: 'filled',
       
@@ -207,15 +207,15 @@ export const templates: BrandingTemplate[] = [
       avatarSize: 'large',
       avatarPosition: 'top',
       showSidebar: false,
-      headerStyle: 'prominent',
+      headerStyle: 'standard',
       
       inputPosition: 'sticky-bottom',
       inputSize: 'large',
-      sendButtonStyle: 'icon-text',
+      sendButtonStyle: 'icon',
       
       messageSpacing: 'relaxed',
       animationSpeed: 'fast',
-      showTimestamps: 'always',
+      showTimestamps: 'hover',
       
       messageActions: 'inline',
       showCopyButton: true,
