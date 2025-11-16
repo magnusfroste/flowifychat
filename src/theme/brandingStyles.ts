@@ -139,3 +139,52 @@ export const getButtonVariant = (style?: string): "default" | "outline" | "ghost
       return 'default';
   }
 };
+
+/**
+ * Get input shadow classes (theme-aware)
+ */
+export const getInputShadow = (inputStyle?: string, theme?: string): string => {
+  if (inputStyle === 'outline' && theme === 'openai') {
+    return 'shadow-sm hover:shadow-md transition-shadow';
+  }
+  return '';
+};
+
+/**
+ * Get typography classes based on branding preset
+ */
+export const getTypographyClasses = (branding?: {
+  fontWeight?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+}): string => {
+  const weight = branding?.fontWeight === 'medium' ? 'font-medium' : 
+                 branding?.fontWeight === 'semibold' ? 'font-semibold' : 
+                 'font-normal';
+  
+  const leading = branding?.lineHeight === 'tight' ? 'leading-tight' :
+                  branding?.lineHeight === 'loose' ? 'leading-loose' :
+                  branding?.lineHeight === 'relaxed' ? 'leading-relaxed' :
+                  'leading-normal';
+  
+  const tracking = branding?.letterSpacing === 'tight' ? 'tracking-tight' :
+                   branding?.letterSpacing === 'wide' ? 'tracking-wide' :
+                   'tracking-normal';
+  
+  return `${weight} ${leading} ${tracking}`;
+};
+
+/**
+ * Get transition speed classes
+ */
+export const getTransitionSpeed = (animationSpeed?: string): string => {
+  switch (animationSpeed) {
+    case 'fast':
+      return 'transition-all duration-150';
+    case 'slow':
+      return 'transition-all duration-300';
+    case 'normal':
+    default:
+      return 'transition-all duration-200';
+  }
+};

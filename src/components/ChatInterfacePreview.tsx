@@ -23,7 +23,10 @@ import {
   getInputSize,
   getInputClasses,
   getButtonClasses,
-  getAvatarSize
+  getAvatarSize,
+  getTypographyClasses,
+  getInputShadow,
+  getTransitionSpeed,
 } from "@/theme/brandingStyles";
 
 interface ChatInterfacePreviewProps {
@@ -91,6 +94,9 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   const inputSizeClass = getInputSize(inputSize);
   const inputClasses = getInputClasses(inputStyle);
   const buttonClasses = getButtonClasses(buttonStyle);
+  const typographyClasses = getTypographyClasses(branding);
+  const inputShadow = getInputShadow(inputStyle, chatTitle?.toLowerCase());
+  const transitionSpeed = getTransitionSpeed(branding.animationSpeed);
 
   // Background style
   const getBackgroundStyles = () => {
@@ -170,12 +176,13 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                 {/* Message Bubble with Timestamp and Actions */}
                 <div className={messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}>
                   <div
-                    className={`${densityClass} ${
+                    className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
                       messageAlignment === 'full-width' ? 'w-full' : ''
-                    } ${isUser ? 'bg-muted text-foreground' : 'bg-card text-card-foreground'}`}
+                    } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]'}`}
                     style={{ 
                       backgroundColor: messageColor || undefined,
                       borderRadius: bubbleRadiusStyle,
+                      color: !isUser && branding.textColor ? branding.textColor : undefined,
                     }}
                   >
                     {message.content}
@@ -332,7 +339,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
         <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
           <Input
             placeholder={inputPlaceholder}
-            className={`${inputSizeClass} ${inputClasses} ${
+            className={`${inputSizeClass} ${inputClasses} ${inputShadow} ${
               inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
             }`}
             style={{ borderRadius: `${borderRadius}px` }}

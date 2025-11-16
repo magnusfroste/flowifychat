@@ -73,26 +73,48 @@ export function ChatThemeProvider({ branding, children }: ChatThemeProviderProps
     
     // Set user message bubble colors
     if (branding.userMessageColor) {
-      vars['--bubble-user'] = branding.userMessageColor;
-      vars['--bubble-user-foreground'] = getContrastColor(branding.userMessageColor);
+      vars['--bubble-user'] = branding.userMessageColor.startsWith('#') ? hexToHsl(branding.userMessageColor) : branding.userMessageColor;
+      vars['--bubble-user-foreground'] = branding.userMessageColor.startsWith('#') ? getContrastColor(branding.userMessageColor) : getContrastColor('#000000');
     }
     
     // Set bot message bubble colors
     if (branding.botMessageColor) {
-      vars['--bubble-bot'] = branding.botMessageColor;
-      vars['--bubble-bot-foreground'] = getContrastColor(branding.botMessageColor);
+      vars['--bubble-bot'] = branding.botMessageColor.startsWith('#') ? hexToHsl(branding.botMessageColor) : branding.botMessageColor;
+      vars['--bubble-bot-foreground'] = branding.botMessageColor.startsWith('#') ? getContrastColor(branding.botMessageColor) : getContrastColor('#000000');
     }
     
-    // Set gradient background if configured
-    if (branding.backgroundColor?.startsWith('linear-gradient')) {
+    // Set background color if specified
+    if (branding.backgroundColor) {
       vars['--chat-bg'] = branding.backgroundColor;
+    }
+
+    // Set text color if specified (for Claude's warm dark brown)
+    if (branding.textColor) {
+      vars['--text-color'] = branding.textColor;
+    }
+
+    // Set font weight
+    if (branding.fontWeight) {
+      const weightMap = { normal: '400', medium: '500', semibold: '600' };
+      vars['--font-weight'] = weightMap[branding.fontWeight as keyof typeof weightMap] || '400';
+    }
+
+    // Set line height
+    if (branding.lineHeight) {
+      const heightMap = { tight: '1.25', normal: '1.5', relaxed: '1.625', loose: '1.7' };
+      vars['--line-height'] = heightMap[branding.lineHeight as keyof typeof heightMap] || '1.5';
     }
     
     return vars;
   }, [branding]);
   
+  // Get font family class
+  const fontClass = branding.fontFamily 
+    ? `font-${branding.fontFamily.toLowerCase().replace(/\s+/g, '-').replace('dm-sans', 'chatgpt').replace('plus-jakarta-sans', 'claude')}`
+    : '';
+
   return (
-    <div style={cssVars as React.CSSProperties}>
+    <div style={cssVars as React.CSSProperties} className={fontClass}>
       {children}
     </div>
   );

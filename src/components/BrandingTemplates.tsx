@@ -23,6 +23,10 @@ export interface BrandingTemplate {
     backgroundGradientEnd?: string;
     layoutStyle: 'centered' | 'left-visual' | 'compact';
     fontFamily: string;
+    fontWeight?: 'normal' | 'medium' | 'semibold';
+    lineHeight?: 'tight' | 'normal' | 'relaxed' | 'loose';
+    letterSpacing?: 'tight' | 'normal' | 'wide';
+    textColor?: string;
     messageBubbleStyle: 'rounded' | 'sharp' | 'pill';
     messageDensity: 'compact' | 'comfortable' | 'spacious';
     borderRadius: number;
@@ -64,12 +68,15 @@ export const templates: BrandingTemplate[] = [
       primaryColor: "#10a37f",
       accentColor: "#0d8a6a",
       secondaryColor: "#8e8ea0",
-      userMessageColor: "hsl(var(--muted))",
+      userMessageColor: "#F7F7F8",
       botMessageColor: "transparent",
       backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
-      fontFamily: 'Inter',
+      fontFamily: 'DM Sans',
+      fontWeight: 'normal',
+      lineHeight: 'relaxed',
+      letterSpacing: 'normal',
       messageBubbleStyle: 'rounded',
       messageDensity: 'spacious',
       borderRadius: 8,
@@ -102,15 +109,19 @@ export const templates: BrandingTemplate[] = [
     description: "Warm, thoughtful Anthropic design",
     icon: Minimize2,
     values: {
-      primaryColor: "#d97757",
-      accentColor: "#c06a4a",
+      primaryColor: "#CC785C",
+      accentColor: "#CC785C",
       secondaryColor: "#6b6b6b",
       userMessageColor: "hsl(var(--muted))",
-      botMessageColor: "#fef6f3",
-      backgroundColor: "hsl(var(--background))",
+      botMessageColor: "#FEF6F3",
+      backgroundColor: "#FFFCF9",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
-      fontFamily: 'Inter',
+      fontFamily: 'Plus Jakarta Sans',
+      fontWeight: 'normal',
+      lineHeight: 'loose',
+      letterSpacing: 'normal',
+      textColor: '#191514',
       messageBubbleStyle: 'rounded',
       messageDensity: 'spacious',
       borderRadius: 12,
@@ -143,15 +154,18 @@ export const templates: BrandingTemplate[] = [
     description: "Bold, modern xAI interface",
     icon: Zap,
     values: {
-      primaryColor: "#1a1a1a",
-      accentColor: "#34d399",
-      secondaryColor: "#9ca3af",
+      primaryColor: "#34D399",
+      accentColor: "#10B981",
+      secondaryColor: "#4B5563",
       userMessageColor: "#e8fdf3",
       botMessageColor: "#f8f8f8",
       backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Inter',
+      fontWeight: 'medium',
+      lineHeight: 'normal',
+      letterSpacing: 'tight',
       messageBubbleStyle: 'rounded',
       messageDensity: 'comfortable',
       borderRadius: 16,
@@ -195,6 +209,9 @@ export const templates: BrandingTemplate[] = [
       backgroundGradientEnd: "#f3f0ff",
       layoutStyle: 'centered',
       fontFamily: 'Poppins',
+      fontWeight: 'medium',
+      lineHeight: 'relaxed',
+      letterSpacing: 'wide',
       messageBubbleStyle: 'pill',
       messageDensity: 'spacious',
       borderRadius: 24,
