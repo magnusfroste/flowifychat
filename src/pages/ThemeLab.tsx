@@ -11,6 +11,7 @@ import { ChatLandingPagePreview } from '@/components/ChatLandingPagePreview';
 import { templates } from '@/components/BrandingTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatBranding } from '@/types/chatConfiguration';
+import { ChatThemeProvider } from '@/theme/ChatThemeProvider';
 
 export default function ThemeLab() {
   const [inputStyle, setInputStyle] = useState<'outline' | 'filled' | 'underline'>('outline');
@@ -140,16 +141,20 @@ export default function ThemeLab() {
 
                   <TabsContent value="chat" className="p-0 m-0">
                     <div className="h-[600px] overflow-hidden">
-                      <ChatInterfacePreview branding={testBranding} />
+                      <ChatThemeProvider branding={testBranding}>
+                        <ChatInterfacePreview branding={testBranding} />
+                      </ChatThemeProvider>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="landing" className="p-0 m-0">
                     <div className="h-[600px] overflow-hidden">
-                      <ChatLandingPagePreview 
-                        branding={testBranding}
-                        inputPlaceholder="Type your message..."
-                      />
+                      <ChatThemeProvider branding={testBranding}>
+                        <ChatLandingPagePreview 
+                          branding={testBranding}
+                          inputPlaceholder="Type your message..."
+                        />
+                      </ChatThemeProvider>
                     </div>
                   </TabsContent>
                 </Tabs>
