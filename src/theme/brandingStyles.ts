@@ -39,17 +39,16 @@ export const getDensityPadding = (density?: string): string => {
 /**
  * Get spacing classes between messages
  */
-export const getMessageSpacing = (spacing?: string): string => {
+export function getMessageSpacing(spacing?: string): string {
   switch (spacing) {
     case 'tight':
-      return 'space-y-2';
+      return 'space-y-1';
     case 'relaxed':
-      return 'space-y-6';
-    case 'normal':
+      return 'space-y-8';
     default:
       return 'space-y-4';
   }
-};
+}
 
 /**
  * Get input size classes
@@ -87,12 +86,12 @@ export const getInputClasses = (inputStyle?: string): string => {
 export const getButtonClasses = (buttonStyle?: string): string => {
   switch (buttonStyle) {
     case 'ghost':
-      return 'bg-transparent hover:bg-muted border-0';
+      return 'bg-transparent hover:bg-primary/10 border-0 text-primary';
     case 'outline':
-      return 'bg-transparent hover:bg-muted border border-border';
+      return 'bg-transparent hover:bg-primary/5 border-2 border-primary/30 text-primary';
     case 'filled':
     default:
-      return 'bg-primary text-primary-foreground hover:bg-primary/90';
+      return 'bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--primary-foreground)] border-0';
   }
 };
 

@@ -151,7 +151,17 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                     ) : (
                       <>
                         <AvatarImage src={avatarUrl} />
-                        <AvatarFallback><Bot className="h-3 w-3" /></AvatarFallback>
+                        <AvatarFallback 
+                          className={
+                            branding.primaryColor === '#34d399' 
+                              ? 'bg-[#34d399] text-white' 
+                              : branding.primaryColor === '#ec4899'
+                              ? 'bg-gradient-to-br from-[#ec4899] to-[#a855f7] text-white'
+                              : ''
+                          }
+                        >
+                          <Bot className="h-3 w-3" />
+                        </AvatarFallback>
                       </>
                     )}
                   </Avatar>
