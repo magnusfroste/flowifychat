@@ -15,7 +15,9 @@ import {
   getBubbleRadius, 
   getDensityPadding, 
   getMessageSpacing,
-  getAvatarSize
+  getAvatarSize,
+  getTypographyClasses,
+  getTransitionSpeed,
 } from "@/theme/brandingStyles";
 
 interface Message {
@@ -62,6 +64,8 @@ export function MessageList({
   const densityClass = getDensityPadding(branding?.messageDensity);
   const spacingClass = getMessageSpacing(behaviorConfig.messageSpacing);
   const avatarSizeClass = getAvatarSize(layoutConfig.avatarSize);
+  const typographyClasses = getTypographyClasses(branding);
+  const transitionSpeed = getTransitionSpeed(behaviorConfig?.animationSpeed);
 
   const showTimestamps = branding?.showTimestamps || 'hover';
   const userMessageColor = branding?.userMessageColor;
@@ -95,14 +99,15 @@ export function MessageList({
 
             <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
               <div
-                className={`${densityClass} ${
-                  message.role === "user" ? 'bg-muted text-foreground' : 'bg-card text-card-foreground'
+                className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
+                  message.role === "user" ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]'
                 }`}
                 style={{
                   borderRadius: bubbleRadiusStyle,
                   backgroundColor: message.role === "user" 
                     ? userMessageColor || undefined
                     : botMessageColor || undefined,
+                  color: message.role === "assistant" && branding?.textColor ? branding.textColor : undefined,
                 }}
               >
                 <div 

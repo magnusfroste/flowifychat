@@ -128,6 +128,12 @@ export interface ChatBranding {
   messageSpacing?: 'tight' | 'normal' | 'relaxed';
   animationSpeed?: 'fast' | 'normal' | 'slow';
   
+  // Typography
+  fontWeight?: 'normal' | 'medium' | 'semibold';
+  lineHeight?: 'tight' | 'normal' | 'relaxed' | 'loose';
+  letterSpacing?: 'tight' | 'normal' | 'wide';
+  textColor?: string;
+  
   // Interactive Elements
   messageActions?: 'inline' | 'hover' | 'menu';
   showCopyButton?: boolean;

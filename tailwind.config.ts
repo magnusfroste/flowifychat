@@ -13,6 +13,12 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'chatgpt': ['DM Sans', 'Segoe UI', 'system-ui', 'sans-serif'],
+        'claude': ['Plus Jakarta Sans', 'Outfit', 'system-ui', 'sans-serif'],
+        'grok': ['Inter', 'system-ui', 'sans-serif'],
+        'playful': ['Poppins', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
