@@ -16,6 +16,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { 
+  getBubbleRadius, 
+  getDensityPadding, 
+  getMessageSpacing,
+  getInputSize,
+  getInputClasses,
+  getButtonClasses,
+  getAvatarSize
+} from "@/theme/brandingStyles";
 
 interface ChatInterfacePreviewProps {
   branding: ChatBranding;
@@ -67,41 +76,6 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     setTimeout(() => setCopiedMessageId(null), 2000);
   };
 
-  // Avatar size classes
-  const avatarSizeClasses = {
-    small: 'h-6 w-6',
-    medium: 'h-8 w-8',
-    large: 'h-10 w-10',
-  };
-
-  // Get border radius for message bubbles
-  const getBubbleBorderRadius = () => {
-    if (messageBubbleStyle === 'pill') return '9999px';
-    if (messageBubbleStyle === 'sharp') return '0px';
-    return `${borderRadius}px`;
-  };
-
-  // Message density classes
-  const densityClasses = {
-    compact: 'px-3 py-1.5 text-sm',
-    comfortable: 'px-4 py-2.5',
-    spacious: 'px-5 py-4',
-  };
-
-  // Message spacing classes
-  const spacingClasses = {
-    tight: 'gap-2',
-    normal: 'gap-4',
-    relaxed: 'gap-6',
-  };
-
-  // Input size classes
-  const inputSizeClasses = {
-    compact: 'h-9 text-sm',
-    comfortable: 'h-10',
-    large: 'h-12 text-base',
-  };
-
   // Message alignment
   const alignmentClasses = {
     left: 'max-w-full',
@@ -109,19 +83,14 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     'full-width': 'w-full max-w-full',
   };
 
-  // Determine text color based on background brightness
-  const getTextColor = (bgColor: string) => {
-    if (bgColor === 'transparent') {
-      return 'hsl(var(--foreground))';
-    }
-    
-    const hex = bgColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? 'hsl(var(--foreground))' : 'hsl(var(--background))';
-  };
+  // Calculate style classes using brandingStyles utilities
+  const bubbleRadiusStyle = getBubbleRadius(messageBubbleStyle, borderRadius);
+  const densityClass = getDensityPadding(messageDensity);
+  const spacingClass = getMessageSpacing(messageSpacing);
+  const avatarSizeClass = getAvatarSize(avatarSize);
+  const inputSizeClass = getInputSize(inputSize);
+  const inputClasses = getInputClasses(inputStyle);
+  const buttonClasses = getButtonClasses(buttonStyle);
 
   // Background style
   const getBackgroundStyles = () => {
@@ -133,26 +102,6 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   };
   
   const backgroundStyles = getBackgroundStyles();
-
-  // Input style classes
-  const getInputStyleClasses = () => {
-    if (inputStyle === 'filled') {
-      return 'bg-black/5 border-black/10';
-    } else if (inputStyle === 'underline') {
-      return 'border-0 border-b rounded-none';
-    }
-    return ''; // outline is default
-  };
-
-  // Button style based on buttonStyle prop
-  const getButtonClasses = () => {
-    if (buttonStyle === 'ghost') {
-      return 'bg-transparent hover:bg-white/10 text-white border-0';
-    } else if (buttonStyle === 'outline') {
-      return 'bg-transparent hover:bg-white/10 border';
-    }
-    return ''; // filled is handled by inline styles
-  };
 
   return (
     <div className="h-full flex flex-col" style={backgroundStyles}>
@@ -174,7 +123,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4">
         <div 
-          className={`flex flex-col ${spacingClasses[messageSpacing]}`}
+          className={`flex flex-col ${spacingClass}`}
           style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined }}
         >
           {mockMessages.map((message, index) => {
@@ -192,7 +141,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
               >
                 {/* Avatar */}
                 {showAvatars && (
-                  <Avatar className={avatarSizeClasses[avatarSize]}>
+                  <Avatar className={avatarSizeClass}>
                     {isUser ? (
                       <>
                         <AvatarFallback style={{ backgroundColor: primaryColor }}>
@@ -211,13 +160,12 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                 {/* Message Bubble with Timestamp and Actions */}
                 <div className={messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}>
                   <div
-                    className={`${densityClasses[messageDensity]} ${
+                    className={`${densityClass} ${
                       messageAlignment === 'full-width' ? 'w-full' : ''
-                    }`}
+                    } ${isUser ? 'bg-muted text-foreground' : 'bg-card text-card-foreground'}`}
                     style={{ 
-                      backgroundColor: messageColor,
-                      color: messageColor === 'transparent' ? 'hsl(var(--foreground))' : getTextColor(messageColor),
-                      borderRadius: getBubbleBorderRadius(),
+                      backgroundColor: messageColor || undefined,
+                      borderRadius: bubbleRadiusStyle,
                     }}
                   >
                     {message.content}
@@ -347,20 +295,19 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
           {/* Typing Indicator */}
           <div className={`flex gap-3 items-start ${alignmentClasses[messageAlignment]}`}>
             {showAvatars && (
-              <Avatar className={avatarSizeClasses[avatarSize]}>
+              <Avatar className={avatarSizeClass}>
                 <AvatarImage src={avatarUrl} />
                 <AvatarFallback><Bot className="h-3 w-3" /></AvatarFallback>
               </Avatar>
             )}
             <div
-              className={`${densityClasses[messageDensity]}`}
+              className={`${densityClass} bg-card text-card-foreground`}
               style={{ 
-                backgroundColor: botMessageColor,
-                color: botMessageColor === 'transparent' ? 'hsl(var(--foreground))' : getTextColor(botMessageColor),
-                borderRadius: getBubbleBorderRadius(),
+                backgroundColor: botMessageColor || undefined,
+                borderRadius: bubbleRadiusStyle,
               }}
             >
-              <TypingIndicator dotColor={botMessageColor === 'transparent' ? 'hsl(var(--foreground))' : getTextColor(botMessageColor)} />
+              <TypingIndicator />
             </div>
           </div>
         </div>
@@ -375,7 +322,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
         <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
           <Input
             placeholder={inputPlaceholder}
-            className={`${inputSizeClasses[inputSize]} ${getInputStyleClasses()} ${
+            className={`${inputSizeClass} ${inputClasses} ${
               inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
             }`}
             style={{ borderRadius: `${borderRadius}px` }}
@@ -387,13 +334,12 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             style={buttonStyle === 'filled' ? {
               backgroundColor: primaryColor,
               borderRadius: `${borderRadius}px`,
-              color: getTextColor(primaryColor),
             } : {
               borderRadius: `${borderRadius}px`,
               borderColor: primaryColor,
               color: primaryColor,
             }}
-            className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${getButtonClasses()}`}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${buttonClasses}`}
             disabled
           >
             {sendButtonStyle === 'icon' && <Send className="h-4 w-4" />}

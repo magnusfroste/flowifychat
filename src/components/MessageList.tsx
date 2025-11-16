@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check, RotateCw } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
+import { 
+  getBubbleRadius, 
+  getDensityPadding, 
+  getMessageSpacing,
+  getAvatarSize
+} from "@/theme/brandingStyles";
 
 interface Message {
   id: string;
@@ -46,52 +52,16 @@ export function MessageList({
   onRegenerate,
   sending,
 }: MessageListProps) {
-  const getTextColor = (bgColor: string) => {
-    if (bgColor === 'transparent') {
-      return 'hsl(var(--foreground))';
-    }
-    
-    const hex = bgColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? 'hsl(var(--foreground))' : 'hsl(var(--background))';
-  };
-
-  const getBubbleRadius = () => {
-    const messageBubbleStyle = branding?.messageBubbleStyle || 'rounded';
-    const borderRadius = branding?.borderRadius || 8;
-    
-    if (messageBubbleStyle === 'sharp') return '4px';
-    if (messageBubbleStyle === 'pill') return '24px';
-    return `${borderRadius}px`;
-  };
-
-  const getDensityPadding = () => {
-    const messageDensity = branding?.messageDensity || 'comfortable';
-    if (messageDensity === 'compact') return 'py-2 px-3';
-    if (messageDensity === 'spacious') return 'py-4 px-5';
-    return 'py-3 px-4';
-  };
-
-  const getMessageSpacing = () => {
-    if (behaviorConfig.messageSpacing === 'tight') return 'mb-4';
-    if (behaviorConfig.messageSpacing === 'relaxed') return 'mb-8';
-    return 'mb-6';
-  };
-
   const getMessageAlignment = () => {
     if (layoutConfig.messageAlignment === 'center') return 'mx-auto';
     if (layoutConfig.messageAlignment === 'full-width') return 'max-w-full';
     return '';
   };
 
-  const getAvatarSize = () => {
-    if (layoutConfig.avatarSize === 'small') return 'h-6 w-6';
-    if (layoutConfig.avatarSize === 'large') return 'h-12 w-12';
-    return 'h-8 w-8';
-  };
+  const bubbleRadiusStyle = getBubbleRadius(branding?.messageBubbleStyle, branding?.borderRadius);
+  const densityClass = getDensityPadding(branding?.messageDensity);
+  const spacingClass = getMessageSpacing(behaviorConfig.messageSpacing);
+  const avatarSizeClass = getAvatarSize(layoutConfig.avatarSize);
 
   const showTimestamps = branding?.showTimestamps || 'hover';
   const userMessageColor = branding?.userMessageColor;
@@ -125,28 +95,18 @@ export function MessageList({
 
             <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
               <div
-                className={getDensityPadding()}
+                className={`${densityClass} ${
+                  message.role === "user" ? 'bg-muted text-foreground' : 'bg-card text-card-foreground'
+                }`}
                 style={{
-                  borderRadius: getBubbleRadius(),
+                  borderRadius: bubbleRadiusStyle,
                   backgroundColor: message.role === "user" 
-                    ? userMessageColor || 'hsl(var(--muted) / 0.3)'
-                    : botMessageColor || 'transparent',
-                  color: message.role === "user" && userMessageColor 
-                    ? getTextColor(userMessageColor)
-                    : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                    ? getTextColor(botMessageColor)
-                    : 'hsl(var(--foreground))',
+                    ? userMessageColor || undefined
+                    : botMessageColor || undefined,
                 }}
               >
                 <div 
                   className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
-                  style={{
-                    color: message.role === "user" && userMessageColor 
-                      ? getTextColor(userMessageColor)
-                      : message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent'
-                      ? getTextColor(botMessageColor)
-                      : 'hsl(var(--foreground))'
-                  }}
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}

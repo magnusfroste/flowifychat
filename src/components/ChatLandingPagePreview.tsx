@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import type { ChatBranding, QuickStartPrompt } from "@/types/chatConfiguration";
+import { getInputSize, getInputClasses, getButtonClasses, getButtonVariant } from "@/theme/brandingStyles";
 
 interface ChatLandingPagePreviewProps {
   branding: ChatBranding;
@@ -31,42 +32,10 @@ export function ChatLandingPagePreview({
   const inputStyle = branding.inputStyle || 'outline';
   const buttonStyle = branding.buttonStyle || 'filled';
   
-  const getTextColor = (bgColor: string) => {
-    if (bgColor === 'transparent') {
-      return 'hsl(var(--foreground))';
-    }
-    
-    const hex = bgColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? 'hsl(var(--foreground))' : 'hsl(var(--background))';
-  };
-  
-  const getInputStyleClasses = () => {
-    if (inputStyle === 'filled') {
-      return 'bg-black/5 border-black/10';
-    } else if (inputStyle === 'underline') {
-      return 'border-0 border-b rounded-none';
-    }
-    return 'bg-background';
-  };
-
-  const getButtonClasses = () => {
-    if (buttonStyle === 'ghost') {
-      return 'bg-transparent hover:bg-white/10 border-0';
-    } else if (buttonStyle === 'outline') {
-      return 'bg-transparent hover:bg-white/10 border';
-    }
-    return '';
-  };
-
-  const getInputHeight = () => {
-    if (inputSize === 'compact') return 'h-10';
-    if (inputSize === 'large') return 'h-14 text-base';
-    return 'h-12';
-  };
+  const inputSizeClass = getInputSize(inputSize);
+  const inputStyleClasses = getInputClasses(inputStyle);
+  const buttonClasses = getButtonClasses(buttonStyle);
+  const buttonVariant = getButtonVariant(buttonStyle);
   
   return (
     <div className="h-full flex flex-col items-center justify-center px-4 py-8" style={{ ...bgStyle, fontFamily }}>
@@ -89,7 +58,7 @@ export function ChatLandingPagePreview({
           <Input
             value=""
             placeholder={inputPlaceholder}
-            className={`${getInputHeight()} ${getInputStyleClasses()} shadow-lg border ${
+            className={`${inputSizeClass} ${inputStyleClasses} shadow-lg border ${
               inputSize === 'compact' ? 'pr-10 pl-4' : inputSize === 'large' ? 'pr-16 pl-6' : 'pr-14 pl-5'
             }`}
             style={{ 
@@ -102,10 +71,10 @@ export function ChatLandingPagePreview({
           <Button
             disabled
             size="icon"
+            variant={buttonVariant}
             style={buttonStyle === 'filled' ? { 
               backgroundColor: branding.primaryColor,
               borderRadius: `${Math.min(borderRadius, 20)}px`,
-              color: getTextColor(branding.primaryColor),
             } : {
               borderRadius: `${Math.min(borderRadius, 20)}px`,
               borderColor: branding.primaryColor,
@@ -113,7 +82,7 @@ export function ChatLandingPagePreview({
             }}
             className={`absolute ${
               inputSize === 'large' ? 'right-2 top-1/2 -translate-y-1/2 h-10 w-10' : 'right-2 top-1/2 -translate-y-1/2 h-9 w-9'
-            } shadow-lg ${getButtonClasses()}`}
+            } shadow-lg ${buttonClasses}`}
           >
             <Send className={inputSize === 'large' ? 'h-5 w-5' : 'h-4 w-4'} />
           </Button>
