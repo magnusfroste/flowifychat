@@ -12,12 +12,13 @@ import Pricing from "./pages/Pricing";
 import Chat from "./pages/Chat";
 import ChatConfiguration from "./pages/ChatConfiguration";
 import NotFound from "./pages/NotFound";
+import ThemeLab from "./pages/ThemeLab";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -31,6 +32,8 @@ const App = () => (
             <Route path="/chat/new" element={<ChatConfiguration mode="create" />} />
             <Route path="/chat/:id/edit" element={<ChatConfiguration mode="edit" />} />
             <Route path="/chat/:id" element={<Chat />} />
+            {/* Development Tools */}
+            <Route path="/dev/theme-lab" element={<ThemeLab />} />
             {/* Public slug route - must come last before catch-all */}
             <Route path="/:id" element={<Chat />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

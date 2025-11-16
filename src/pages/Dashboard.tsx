@@ -319,7 +319,6 @@ const Dashboard = () => {
                         : "Enterprise"}
                     </Badge>
                   )}
-                  <ThemeToggle />
                 </div>
               </div>
             </div>

@@ -43,6 +43,15 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SignInPrompt } from "@/components/SignInPrompt";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
+import { ChatThemeProvider } from "@/theme/ChatThemeProvider";
+import {
+  getInputClasses,
+  getButtonClasses,
+  getInputSize as getInputSizeClass,
+  getButtonVariant,
+  getButtonSizeVariant,
+  getAvatarSize,
+} from "@/theme/brandingStyles";
 
 interface ChatInstance {
   id: string;
@@ -717,19 +726,6 @@ const Chat = () => {
   };
 
   // Utility: Calculate text color based on background brightness
-  const getTextColor = (bgColor: string) => {
-    if (bgColor === 'transparent') {
-      return '#000000';
-    }
-    
-    const hex = bgColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#ffffff';
-  };
-
   // Utility: Determine button style variant based on template
   const getButtonStyleVariant = () => {
     const branding = chatInstance?.custom_branding as any;
@@ -978,36 +974,6 @@ const Chat = () => {
     return '';
   };
 
-  const getAvatarSize = () => {
-    if (layoutConfig.avatarSize === 'small') return 'h-6 w-6';
-    if (layoutConfig.avatarSize === 'large') return 'h-12 w-12';
-    return 'h-8 w-8';
-  };
-
-  const getInputSize = () => {
-    if (behaviorConfig.inputSize === 'compact') return 'h-10';
-    if (behaviorConfig.inputSize === 'large') return 'h-14 text-base';
-    return 'h-12';
-  };
-
-  const getInputStyleClasses = () => {
-    if (inputStyle === 'filled') {
-      return 'bg-black/5 border-black/10';
-    } else if (inputStyle === 'underline') {
-      return 'border-0 border-b rounded-none';
-    }
-    return '';
-  };
-
-  const getButtonClasses = () => {
-    if (buttonStyle === 'ghost') {
-      return 'bg-transparent hover:bg-white/10 border-0';
-    } else if (buttonStyle === 'outline') {
-      return 'bg-transparent hover:bg-white/10 border';
-    }
-    return '';
-  };
-  
   return (
     <SidebarProvider defaultOpen={isOwner}>
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
@@ -1102,9 +1068,9 @@ const Chat = () => {
             />
             {sending && (
               <div className="flex justify-start animate-fade-in">
-                <Card style={{ backgroundColor: botMessageColor || 'transparent' }}>
+                <Card className="bg-card">
                   <div className="p-4">
-                    <TypingIndicator dotColor={botMessageColor && botMessageColor !== 'transparent' ? getTextColor(botMessageColor) : '#000000'} />
+                    <TypingIndicator />
                   </div>
                 </Card>
               </div>

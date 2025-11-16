@@ -112,11 +112,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
-      {/* Header */}
-      <header className="absolute top-0 right-0 z-20 p-4">
-        <ThemeToggle />
-      </header>
-      
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">

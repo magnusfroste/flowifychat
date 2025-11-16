@@ -279,14 +279,13 @@ const Settings = () => {
         <SidebarInset className="flex-1">
           {/* Header */}
           <header className="border-b bg-card sticky top-0 z-10">
-            <div className="px-6 py-4 flex items-center justify-between">
+            <div className="px-6 py-4">
               <div>
                 <h1 className="text-2xl font-bold">Settings</h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   Manage your account settings and preferences
                 </p>
               </div>
-              <ThemeToggle />
             </div>
           </header>
 

@@ -112,7 +112,6 @@ const Pricing = () => {
                 <span className="text-xl font-bold">Flowify</span>
               </div>
             </div>
-            <ThemeToggle />
           </div>
         </div>
       </header>
