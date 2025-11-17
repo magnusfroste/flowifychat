@@ -233,7 +233,7 @@ export function ChatSidebar({
           <img 
             src={logoUrl || avatarUrl || ''} 
             alt={chatTitle || "Chat"} 
-            className="h-8 w-8 rounded-lg object-cover flex-shrink-0"
+            className="h-10 w-auto max-w-[120px] rounded-lg object-contain flex-shrink-0"
           />
         )}
         <SidebarTrigger className={!sidebarOpen ? "mx-auto" : ""} />
