@@ -975,7 +975,7 @@ const Chat = () => {
   };
 
   return (
-    <SidebarProvider defaultOpen={isOwner}>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
         {/* Unified Admin Sidebar - for owners */}
         {isOwner ? (
