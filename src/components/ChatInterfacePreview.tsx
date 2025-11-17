@@ -3,7 +3,7 @@
  * Shows realistic chat interface with mock messages
  */
 
-import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical } from "lucide-react";
+import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical, Sparkles, Zap } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ import {
   getTypographyClasses,
   getInputShadow,
   getTransitionSpeed,
+  getFontWeight,
 } from "@/theme/brandingStyles";
 
 interface ChatInterfacePreviewProps {
@@ -109,22 +110,61 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
   
   const backgroundStyles = getBackgroundStyles();
 
-  return (
-    <div className="h-full flex flex-col" style={backgroundStyles}>
-      {/* Header */}
-      {headerStyle !== 'minimal' && (
-        <div 
-          className="border-b backdrop-blur px-4 py-3 flex items-center gap-3 bg-background/70 text-foreground border-border/10"
-        >
-          {avatarUrl && (
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
-            </Avatar>
-          )}
-          <h2 className="font-semibold">{chatTitle}</h2>
+  // Determine header based on preset
+  const getHeaderContent = () => {
+    if (headerStyle === 'minimal') return null;
+    
+    // Claude style - warm header
+    if (branding.fontFamily === 'Plus Jakarta Sans') {
+      return (
+        <div className="border-b bg-[#FFF8F0] px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-[#CC785C]" />
+            <h2 className="text-lg font-light text-[#191514]">Claude</h2>
+          </div>
         </div>
-      )}
+      );
+    }
+    
+    // Grok style - bold green header
+    if (branding.fontFamily === 'Inter') {
+      return (
+        <div className="border-b border-emerald-200 bg-gradient-to-r from-emerald-50 to-white px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-emerald-500" />
+            <h2 className="text-base font-semibold text-gray-900">Grok</h2>
+          </div>
+        </div>
+      );
+    }
+    
+    // Playful style
+    if (headerStyle === 'prominent') {
+      return (
+        <div className="border-b bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-4">
+          <h2 className="text-lg font-semibold">{chatTitle}</h2>
+        </div>
+      );
+    }
+    
+    // Standard header
+    return (
+      <div className="border-b backdrop-blur px-4 py-3 flex items-center gap-3 bg-background/70 text-foreground border-border/10">
+        {avatarUrl && (
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={avatarUrl} />
+            <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
+          </Avatar>
+        )}
+        <h2 className="font-semibold">{chatTitle}</h2>
+      </div>
+    );
+  };
+
+  return (
+    <div className={`h-full flex flex-col ${getFontWeight(branding.fontWeight)}`} style={backgroundStyles}>
+      {/* Header */}
+      {getHeaderContent()}
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -178,7 +218,7 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   <div
                     className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
                       messageAlignment === 'full-width' ? 'w-full' : ''
-                    } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]'}`}
+                    } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]'} ${branding.fontFamily === 'Inter' ? 'border border-gray-200' : ''}`}
                     style={{ 
                       backgroundColor: messageColor || undefined,
                       borderRadius: bubbleRadiusStyle,
@@ -342,7 +382,11 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
             className={`${inputSizeClass} ${inputClasses} ${inputShadow} ${
               inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
             }`}
-            style={{ borderRadius: `${borderRadius}px` }}
+            style={{ 
+              borderRadius: `${borderRadius}px`,
+              borderColor: branding.fontFamily === 'Plus Jakarta Sans' ? '#CC785C' : 
+                          branding.fontFamily === 'Inter' ? '#34D399' : undefined,
+            }}
             disabled
           />
           <Button

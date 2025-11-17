@@ -44,7 +44,7 @@ export function getMessageSpacing(spacing?: string): string {
     case 'tight':
       return 'space-y-1';
     case 'relaxed':
-      return 'space-y-8';
+      return 'space-y-10';
     default:
       return 'space-y-4';
   }
@@ -103,10 +103,30 @@ export const getAvatarSize = (size?: string): string => {
     case 'small':
       return 'h-6 w-6';
     case 'large':
-      return 'h-10 w-10';
+      return 'h-12 w-12';
     case 'medium':
     default:
       return 'h-8 w-8';
+  }
+};
+
+/**
+ * Get font weight classes
+ */
+export const getFontWeight = (weight?: string): string => {
+  switch (weight) {
+    case 'light':
+      return 'font-light';
+    case 'normal':
+      return 'font-normal';
+    case 'medium':
+      return 'font-medium';
+    case 'semibold':
+      return 'font-semibold';
+    case 'bold':
+      return 'font-bold';
+    default:
+      return 'font-normal';
   }
 };
 

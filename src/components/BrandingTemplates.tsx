@@ -23,7 +23,7 @@ export interface BrandingTemplate {
     backgroundGradientEnd?: string;
     layoutStyle: 'centered' | 'left-visual' | 'compact';
     fontFamily: string;
-    fontWeight?: 'normal' | 'medium' | 'semibold';
+    fontWeight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
     lineHeight?: 'tight' | 'normal' | 'relaxed' | 'loose';
     letterSpacing?: 'tight' | 'normal' | 'wide';
     textColor?: string;
@@ -113,12 +113,12 @@ export const templates: BrandingTemplate[] = [
       accentColor: "#CC785C",
       secondaryColor: "#6b6b6b",
       userMessageColor: "hsl(var(--muted))",
-      botMessageColor: "#FEF6F3",
-      backgroundColor: "#FFFCF9",
+      botMessageColor: "#FFEEE0",
+      backgroundColor: "#FFF8F0",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Plus Jakarta Sans',
-      fontWeight: 'normal',
+      fontWeight: 'light',
       lineHeight: 'loose',
       letterSpacing: 'normal',
       textColor: '#191514',
@@ -163,7 +163,7 @@ export const templates: BrandingTemplate[] = [
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Inter',
-      fontWeight: 'medium',
+      fontWeight: 'semibold',
       lineHeight: 'normal',
       letterSpacing: 'tight',
       messageBubbleStyle: 'rounded',
@@ -175,7 +175,7 @@ export const templates: BrandingTemplate[] = [
       messageAlignment: 'left',
       maxMessageWidth: 900,
       showAvatars: true,
-      avatarSize: 'medium',
+      avatarSize: 'large',
       avatarPosition: 'center',
       showSidebar: false,
       headerStyle: 'minimal',
@@ -184,7 +184,7 @@ export const templates: BrandingTemplate[] = [
       inputSize: 'large',
       sendButtonStyle: 'icon',
       
-      messageSpacing: 'normal',
+      messageSpacing: 'tight',
       animationSpeed: 'fast',
       showTimestamps: 'never',
       

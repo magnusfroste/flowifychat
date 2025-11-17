@@ -129,7 +129,7 @@ export interface ChatBranding {
   animationSpeed?: 'fast' | 'normal' | 'slow';
   
   // Typography
-  fontWeight?: 'normal' | 'medium' | 'semibold';
+  fontWeight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
   lineHeight?: 'tight' | 'normal' | 'relaxed' | 'loose';
   letterSpacing?: 'tight' | 'normal' | 'wide';
   textColor?: string;
