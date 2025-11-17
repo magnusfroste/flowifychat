@@ -47,6 +47,9 @@ interface ChatSidebarProps {
   userId?: string;
   routeId?: string;
   chatSlug?: string | null;
+  logoUrl?: string | null;
+  avatarUrl?: string | null;
+  chatTitle?: string;
 }
 
 export function ChatSidebar({
@@ -58,6 +61,9 @@ export function ChatSidebar({
   userId,
   routeId,
   chatSlug,
+  logoUrl,
+  avatarUrl,
+  chatTitle,
 }: ChatSidebarProps) {
   const navigate = useNavigate();
   const { open: sidebarOpen } = useSidebar();
@@ -221,6 +227,25 @@ export function ChatSidebar({
 
   return (
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
+      {/* Branded Header - Always visible for authenticated users */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        {sidebarOpen && (
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {(logoUrl || avatarUrl) && (
+              <img 
+                src={logoUrl || avatarUrl || ''} 
+                alt={chatTitle || "Chat"} 
+                className="h-8 w-8 rounded-lg object-cover flex-shrink-0"
+              />
+            )}
+            <span className="text-base font-semibold truncate">
+              {chatTitle || "Chat"}
+            </span>
+          </div>
+        )}
+        <SidebarTrigger className={!sidebarOpen ? "mx-auto" : ""} />
+      </div>
+
       {isOwner && sidebarOpen && (
         <div className="p-2 border-b">
           <Button
@@ -235,9 +260,7 @@ export function ChatSidebar({
         </div>
       )}
       
-      
-      <div className="flex items-center justify-between p-2 border-b">
-        <SidebarTrigger />
+      <div className="flex items-center justify-end p-2 border-b">
         {sidebarOpen && (
           <Button
             size="sm"
