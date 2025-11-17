@@ -6,6 +6,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { sendToWebhookViaEdge } from "@/lib/edgeWebhookService";
 import { getMetadataConfig, getQuickStartPromptsConfig, getInputConfig, getUXConfig, getLayoutConfig } from "@/lib/chatConfig";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
@@ -26,6 +27,7 @@ interface ChatInstance {
   name: string;
   slug: string | null;
   webhook_url: string;
+  user_id: string;
   n8n_auth_enabled?: boolean;
   n8n_auth_username?: string;
   n8n_auth_password?: string;
@@ -42,6 +44,8 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
   const [sending, setSending] = useState(false);
   const [chatMode, setChatMode] = useState<'landing' | 'chat'>('landing');
   const [isTypingPrompt, setIsTypingPrompt] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isOwner, setIsOwner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -62,6 +66,18 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
   const buttonStyle = branding?.buttonStyle || 'filled';
   const inputSize = branding?.inputSize || 'comfortable';
   const primaryColor = branding?.primaryColor || '#6366f1';
+
+  // Check if current user is the owner
+  useEffect(() => {
+    const checkOwnership = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        setIsOwner(session.user.id === chatInstance.user_id);
+      }
+    };
+    checkOwnership();
+  }, [chatInstance.user_id]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -161,11 +177,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
         style={bgStyles}
       >
         <ChatHeader
-          isOwner={false}
-          chatTitle={branding?.chatTitle || chatInstance.name}
+          isOwner={isOwner}
+          chatTitle={chatInstance.name}
+          displayTitle={branding?.chatTitle}
           headerStyle={layoutConfig.headerStyle}
           showTitle={false}
           transparent={true}
+          user={user}
+          useLandingPageMode={uxConfig.useLandingPageMode}
         />
         
         <div className="flex-1">
@@ -199,11 +218,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
       style={bgStyles}
     >
       <ChatHeader
-        isOwner={false}
-        chatTitle={branding?.chatTitle || chatInstance.name}
+        isOwner={isOwner}
+        chatTitle={chatInstance.name}
+        displayTitle={branding?.chatTitle}
         headerStyle={layoutConfig.headerStyle}
         showTitle={true}
         transparent={false}
+        user={user}
+        useLandingPageMode={uxConfig.useLandingPageMode}
       />
 
       <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
