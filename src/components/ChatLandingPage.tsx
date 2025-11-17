@@ -54,7 +54,7 @@ export function ChatLandingPage({
   const buttonSize = getButtonSizeVariant(inputSize);
   
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 animate-fade-in" style={{ ...bgStyle, fontFamily }}>
+    <div className="h-full w-full flex flex-col items-center justify-center px-4 py-8 animate-fade-in" style={{ ...bgStyle, fontFamily }}>
       {branding.logoUrl && (
         <img src={branding.logoUrl} alt="Logo" className="h-16 mb-6 animate-scale-in" />
       )}
