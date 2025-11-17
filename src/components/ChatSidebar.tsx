@@ -229,19 +229,12 @@ export function ChatSidebar({
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
       {/* Branded Header - Always visible for authenticated users */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        {sidebarOpen && (
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {(logoUrl || avatarUrl) && (
-              <img 
-                src={logoUrl || avatarUrl || ''} 
-                alt={chatTitle || "Chat"} 
-                className="h-8 w-8 rounded-lg object-cover flex-shrink-0"
-              />
-            )}
-            <span className="text-base font-semibold truncate">
-              {chatTitle || "Chat"}
-            </span>
-          </div>
+        {sidebarOpen && (logoUrl || avatarUrl) && (
+          <img 
+            src={logoUrl || avatarUrl || ''} 
+            alt={chatTitle || "Chat"} 
+            className="h-8 w-8 rounded-lg object-cover flex-shrink-0"
+          />
         )}
         <SidebarTrigger className={!sidebarOpen ? "mx-auto" : ""} />
       </div>
