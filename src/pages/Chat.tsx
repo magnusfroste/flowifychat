@@ -826,7 +826,7 @@ const Chat = () => {
               />
               
               {/* Landing Page Content */}
-              <div className="flex-1">
+              <div className="flex-1 flex flex-col">
                 <ChatLandingPage
                   branding={branding}
                   quickStartPrompts={quickStartConfig.prompts}
@@ -889,7 +889,7 @@ const Chat = () => {
             />
             
             {/* Landing Page Content */}
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col">
               <ChatLandingPage
                 branding={branding}
                 quickStartPrompts={quickStartConfig.prompts}
