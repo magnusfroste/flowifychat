@@ -253,17 +253,16 @@ export function ChatSidebar({
         </div>
       )}
       
-      <div className="flex items-center justify-end p-2 border-b">
-        {sidebarOpen && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onNewSession}
-            title="New conversation"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        )}
+      <div className="px-4 py-3 border-b">
+        <Button
+          onClick={onNewSession}
+          className="w-full justify-start"
+          variant="default"
+          size={sidebarOpen ? "default" : "icon"}
+        >
+          <Plus className={sidebarOpen ? "mr-2 h-4 w-4" : "h-4 w-4"} />
+          {sidebarOpen && "New Conversation"}
+        </Button>
       </div>
 
       {sidebarOpen && (
