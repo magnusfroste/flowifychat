@@ -814,6 +814,7 @@ const Chat = () => {
                 ...bgStyles,
                 ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
                 ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
+                marginLeft: 'var(--sidebar-width)',
               }}
             >
               {/* Header with transparent styling for landing mode */}
@@ -877,6 +878,7 @@ const Chat = () => {
               ...bgStyles,
               ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
               ['--chat-accent' as any]: chatInstance.custom_branding.accentColor,
+              marginLeft: 'var(--sidebar-width)',
             }}
           >
             {/* Header with transparent style */}
