@@ -97,12 +97,15 @@ const FixedInputContainer = ({
   
   return (
     <div 
-      className={`right-0 border-t border-border/10 bg-background/80 backdrop-blur-sm ${
+      className={`right-0 border-t border-border/20 bg-background/80 backdrop-blur-sm pb-safe-or-4 transition-all duration-200 ${
         isFloating 
           ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
           : 'fixed bottom-0'
       }`}
-      style={{ left: leftOffset }}
+      style={{ 
+        left: leftOffset,
+        ['--input-bar-height' as any]: '6rem'
+      }}
     >
       {children}
     </div>
@@ -839,7 +842,7 @@ const Chat = () => {
             
             {/* Main content area with landing page */}
             <main 
-              className="flex-1 flex flex-col transition-all duration-200"
+              className="flex-1 flex flex-col transition-all duration-200 ml-[var(--sidebar-width)]"
               style={{
                 ...bgStyles,
                 ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
@@ -902,7 +905,7 @@ const Chat = () => {
           
           {/* Main content area with landing page */}
           <main 
-            className="flex-1 flex flex-col transition-all duration-200"
+            className="flex-1 flex flex-col transition-all duration-200 ml-[var(--sidebar-width-icon)]"
             style={{
               ...bgStyles,
               ['--chat-primary' as any]: chatInstance.custom_branding.primaryColor,
@@ -1121,7 +1124,7 @@ const Chat = () => {
             {showScrollButton && (
               <Button
                 onClick={scrollToBottom}
-                className="fixed bottom-24 right-8 rounded-full h-12 w-12 shadow-lg animate-fade-in z-50"
+                className="fixed bottom-[calc(var(--input-bar-height,6rem)+1rem)] right-8 rounded-full h-12 w-12 shadow-lg animate-fade-in z-50"
                 size="icon"
                 variant="secondary"
               >
