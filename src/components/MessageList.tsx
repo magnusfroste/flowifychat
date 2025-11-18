@@ -72,7 +72,7 @@ export function MessageList({
   const botMessageColor = branding?.botMessageColor;
 
   return (
-    <div className={`space-y-6 mb-32 ${getMessageAlignment()}`}>
+    <div className={`space-y-6 pb-[var(--input-bar-height,8rem)] ${getMessageAlignment()}`}>
       {messages.map((message, index) => {
         const isLastAssistantMessage = 
           message.role === "assistant" && 
