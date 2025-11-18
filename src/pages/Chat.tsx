@@ -39,7 +39,7 @@ import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { ChatSidebar } from "@/components/ChatSidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { SignInPrompt } from "@/components/SignInPrompt";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { createCheckoutSession } from "@/lib/stripe";
@@ -78,6 +78,36 @@ interface Message {
   content: string;
   timestamp: Date;
 }
+
+// Helper component to dynamically offset the fixed input bar based on sidebar state
+const FixedInputContainer = ({ 
+  isFloating, 
+  hasSidebar, 
+  children 
+}: { 
+  isFloating: boolean; 
+  hasSidebar: boolean; 
+  children: React.ReactNode;
+}) => {
+  const { open: sidebarOpen, isMobile } = useSidebar();
+  
+  const leftOffset = !isFloating && hasSidebar && !isMobile
+    ? (sidebarOpen ? 'var(--sidebar-width)' : 'var(--sidebar-width-icon)')
+    : '0';
+  
+  return (
+    <div 
+      className={`right-0 border-t border-border/10 bg-background/80 backdrop-blur-sm ${
+        isFloating 
+          ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
+          : 'fixed bottom-0'
+      }`}
+      style={{ left: leftOffset }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const Chat = () => {
   const { id } = useParams<{ id: string }>();
@@ -977,6 +1007,9 @@ const Chat = () => {
     return '';
   };
 
+  // Determine if sidebar is visible
+  const hasSidebar = isOwner || !!(user || (layoutConfig.showSidebar && layoutConfig.allowAnonymousHistory));
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full" style={{ fontFamily }}>
@@ -1097,12 +1130,9 @@ const Chat = () => {
             )}
 
             {/* Input Area */}
-            <div 
-              className={`left-0 right-0 border-t border-border/10 bg-background/80 backdrop-blur-sm ${
-                behaviorConfig.inputPosition === 'floating' 
-                  ? 'relative max-w-3xl mx-auto rounded-t-xl shadow-lg' 
-                  : 'fixed bottom-0'
-              }`}
+            <FixedInputContainer 
+              isFloating={behaviorConfig.inputPosition === 'floating'}
+              hasSidebar={hasSidebar}
             >
               <div 
                 className="mx-auto px-4 sm:px-6 lg:px-8 py-4"
@@ -1120,7 +1150,7 @@ const Chat = () => {
                   primaryColor={chatInstance.custom_branding.primaryColor}
                 />
               </div>
-            </div>
+            </FixedInputContainer>
           </>
         )}
         </div>
