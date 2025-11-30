@@ -29,7 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 
 interface Session {
   session_id: string;
@@ -74,14 +73,21 @@ export function ChatSidebar({
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [creatingSession, setCreatingSession] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const abortController = new AbortController();
 
     const loadSessions = async () => {
+      // Guard: userId is required for session management
+      if (!userId) {
+        if (isMounted) setLoading(false);
+        return;
+      }
+      
       try {
-        const sessionManager = new SessionManager(chatInstanceId, userId!);
+        const sessionManager = new SessionManager(chatInstanceId, userId);
         const visibleSessionIds = await sessionManager.getAllSessions();
         
         if (!isMounted) return;
@@ -266,13 +272,25 @@ export function ChatSidebar({
       
       <div className="px-4 py-3 border-b">
         <Button
-          onClick={onNewSession}
+          onClick={async () => {
+            setCreatingSession(true);
+            try {
+              await onNewSession();
+            } finally {
+              setCreatingSession(false);
+            }
+          }}
           className="w-full justify-start"
           variant="default"
           size={sidebarOpen ? "default" : "icon"}
+          disabled={creatingSession}
         >
-          <Plus className={sidebarOpen ? "mr-2 h-4 w-4" : "h-4 w-4"} />
-          {sidebarOpen && "New Conversation"}
+          {creatingSession ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+          ) : (
+            <Plus className={sidebarOpen ? "mr-2 h-4 w-4" : "h-4 w-4"} />
+          )}
+          {sidebarOpen && (creatingSession ? "Creating..." : "New Conversation")}
         </Button>
       </div>
 
@@ -291,10 +309,11 @@ export function ChatSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 min-h-[32px] min-w-[32px]"
                 onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
               >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -356,11 +375,11 @@ export function ChatSidebar({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 min-h-[32px] min-w-[32px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                           onClick={(e) => handleDeleteClick(session.session_id, e)}
-                          title="Delete conversation"
+                          aria-label="Delete conversation"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
