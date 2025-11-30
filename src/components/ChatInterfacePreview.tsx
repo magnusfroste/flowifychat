@@ -3,7 +3,7 @@
  * Shows realistic chat interface with mock messages
  */
 
-import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical, Sparkles, Zap } from "lucide-react";
+import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical, Sparkles, Zap, ThumbsUp, ThumbsDown, Share2, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +72,8 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     messageActions = 'inline',
     showCopyButton = true,
     showRegenerateButton = true,
+    showThumbsButtons = false,
+    showShareButton = false,
   } = branding;
 
   const handleCopyMessage = (messageId: number, content: string) => {
@@ -218,9 +220,9 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   <div
                     className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
                       messageAlignment === 'full-width' ? 'w-full' : ''
-                    } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]'} ${branding.fontFamily === 'Inter' ? 'border border-gray-200' : ''}`}
+                    } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (messageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')} ${branding.fontFamily === 'Inter' ? 'border border-gray-200' : ''}`}
                     style={{ 
-                      backgroundColor: messageColor || undefined,
+                      backgroundColor: messageColor === 'transparent' ? 'transparent' : (messageColor || undefined),
                       borderRadius: bubbleRadiusStyle,
                       color: !isUser && branding.textColor ? branding.textColor : undefined,
                     }}
@@ -242,6 +244,63 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   {/* Action Buttons - Only for assistant messages */}
                   {!isUser && (
                     <>
+                      {/* OpenAI-style always-visible action row */}
+                      {messageActions === 'openai-row' && (
+                        <div className="flex items-center gap-1 mt-2">
+                          {showCopyButton && (
+                            <button
+                              onClick={() => handleCopyMessage(message.id, message.content)}
+                              className="p-1.5 rounded hover:bg-muted transition-colors"
+                              title="Copy"
+                            >
+                              {copiedMessageId === message.id ? (
+                                <Check className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Copy className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </button>
+                          )}
+                          {showThumbsButtons && (
+                            <>
+                              <button
+                                className="p-1.5 rounded hover:bg-muted transition-colors"
+                                title="Good response"
+                              >
+                                <ThumbsUp className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                              <button
+                                className="p-1.5 rounded hover:bg-muted transition-colors"
+                                title="Bad response"
+                              >
+                                <ThumbsDown className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                            </>
+                          )}
+                          {showShareButton && (
+                            <button
+                              className="p-1.5 rounded hover:bg-muted transition-colors"
+                              title="Share"
+                            >
+                              <Share2 className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                          )}
+                          {showRegenerateButton && isLastMessage && (
+                            <button
+                              className="p-1.5 rounded hover:bg-muted transition-colors"
+                              title="Regenerate"
+                            >
+                              <RotateCw className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                          )}
+                          <button
+                            className="p-1.5 rounded hover:bg-muted transition-colors"
+                            title="More"
+                          >
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </div>
+                      )}
+
                       {messageActions === 'inline' && (
                         <div className="flex gap-2 mt-2">
                           {showCopyButton && (

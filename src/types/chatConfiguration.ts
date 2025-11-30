@@ -135,9 +135,11 @@ export interface ChatBranding {
   textColor?: string;
   
   // Interactive Elements
-  messageActions?: 'inline' | 'hover' | 'menu';
+  messageActions?: 'inline' | 'hover' | 'menu' | 'openai-row';
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
+  showThumbsButtons?: boolean;
+  showShareButton?: boolean;
   
   // Welcome Screen (flat fields for form)
   welcomeScreenEnabled?: boolean;
@@ -217,9 +219,11 @@ export interface ChatFormValues {
   animationSpeed?: 'fast' | 'normal' | 'slow';
   
   // Interactive Elements
-  messageActions?: 'inline' | 'hover' | 'menu';
+  messageActions?: 'inline' | 'hover' | 'menu' | 'openai-row';
   showCopyButton?: boolean;
   showRegenerateButton?: boolean;
+  showThumbsButtons?: boolean;
+  showShareButton?: boolean;
   
   // n8n Authentication
   n8nAuthEnabled?: boolean;

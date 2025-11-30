@@ -53,9 +53,11 @@ export interface BrandingTemplate {
     showTimestamps: 'always' | 'hover' | 'never';
     
     // Interactive Elements
-    messageActions: 'inline' | 'hover' | 'menu';
+    messageActions: 'inline' | 'hover' | 'menu' | 'openai-row';
     showCopyButton: boolean;
     showRegenerateButton: boolean;
+    showThumbsButtons?: boolean;
+    showShareButton?: boolean;
   };
 }
 
@@ -99,9 +101,11 @@ export const templates: BrandingTemplate[] = [
       animationSpeed: 'normal',
       showTimestamps: 'never',
       
-      messageActions: 'hover',
+      messageActions: 'openai-row',
       showCopyButton: true,
       showRegenerateButton: true,
+      showThumbsButtons: true,
+      showShareButton: true,
     },
   },
   {

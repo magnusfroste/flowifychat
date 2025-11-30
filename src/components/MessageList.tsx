@@ -8,9 +8,8 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, RotateCw } from "lucide-react";
+import { Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Share2, MoreHorizontal, MoreVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
 import { 
   getBubbleRadius, 
   getDensityPadding, 
@@ -100,13 +99,13 @@ export function MessageList({
             <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
               <div
                 className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
-                  message.role === "user" ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]'
+                  message.role === "user" ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (botMessageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')
                 }`}
                 style={{
                   borderRadius: bubbleRadiusStyle,
                   backgroundColor: message.role === "user" 
                     ? userMessageColor || undefined
-                    : botMessageColor || undefined,
+                    : (botMessageColor === 'transparent' ? 'transparent' : (botMessageColor || undefined)),
                   color: message.role === "assistant" && branding?.textColor ? branding.textColor : undefined,
                 }}
               >
@@ -168,7 +167,67 @@ export function MessageList({
                 )}
               </div>
               
-              {interactiveConfig.showMessageActions && (
+              {/* OpenAI-style always-visible action row */}
+              {interactiveConfig.messageActions === 'openai-row' && message.role === 'assistant' && (
+                <div className="flex items-center gap-1 mt-2">
+                  {interactiveConfig.showCopyButton && (
+                    <button
+                      onClick={() => onCopyMessage(message.id, message.content)}
+                      className="p-1.5 rounded hover:bg-muted transition-colors"
+                      title="Copy"
+                    >
+                      {copiedMessageId === message.id ? (
+                        <Check className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  )}
+                  {interactiveConfig.showThumbsButtons && (
+                    <>
+                      <button
+                        className="p-1.5 rounded hover:bg-muted transition-colors"
+                        title="Good response"
+                      >
+                        <ThumbsUp className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <button
+                        className="p-1.5 rounded hover:bg-muted transition-colors"
+                        title="Bad response"
+                      >
+                        <ThumbsDown className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </>
+                  )}
+                  {interactiveConfig.showShareButton && (
+                    <button
+                      className="p-1.5 rounded hover:bg-muted transition-colors"
+                      title="Share"
+                    >
+                      <Share2 className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )}
+                  {interactiveConfig.showRegenerateButton && isLastAssistantMessage && (
+                    <button
+                      onClick={onRegenerate}
+                      disabled={sending}
+                      className="p-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50"
+                      title="Regenerate"
+                    >
+                      <RotateCw className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )}
+                  <button
+                    className="p-1.5 rounded hover:bg-muted transition-colors"
+                    title="More"
+                  >
+                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
+              )}
+              
+              {/* Default dropdown menu actions */}
+              {interactiveConfig.showMessageActions && interactiveConfig.messageActions !== 'openai-row' && (
                 <div className="absolute -right-2 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
