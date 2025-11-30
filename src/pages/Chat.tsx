@@ -234,12 +234,13 @@ const Chat = () => {
         const forceNew = searchParams.get("new") === "1";
         const manager = new SessionManager(instance.id, authSession.user.id);
         
+        let activeSessionId: string;
         if (forceNew) {
-          const newSessionId = await manager.createNewSession();
-          if (isMounted) setSessionId(newSessionId);
+          activeSessionId = await manager.createNewSession();
+          if (isMounted) setSessionId(activeSessionId);
         } else {
-          const currentSessionId = await manager.getLatestSession();
-          if (isMounted) setSessionId(currentSessionId || "");
+          activeSessionId = await manager.getLatestSession() || await manager.createNewSession();
+          if (isMounted) setSessionId(activeSessionId);
         }
         
         // Check if owner wants to hide branding
@@ -257,11 +258,11 @@ const Chat = () => {
           if (isMounted) setOwnerHidesBranding(profileData?.hide_branding_badge || false);
         }
         
-        // Track view event
-        if (!isUUID && !viewTracked && isMounted) {
+        // Track view event (use activeSessionId since sessionId state may not be updated yet)
+        if (!isUUID && !viewTracked && isMounted && activeSessionId) {
           await trackAnalyticsEvent({
             chat_instance_id: instance.id,
-            session_id: sessionId,
+            session_id: activeSessionId,
             event_type: "view",
           });
           setViewTracked(true);
@@ -594,15 +595,10 @@ const Chat = () => {
   };
 
   const handleRegenerate = async () => {
-    if (!chatInstance) return;
+    if (!chatInstance || !sessionId) return;
     
-    // Use functional update to get latest messages state
-    let currentMessages: Message[] = [];
-    setMessages(prev => {
-      currentMessages = prev;
-      return prev;
-    });
-    
+    // Get current messages directly from state ref pattern
+    const currentMessages = [...messages];
     if (currentMessages.length < 2) return;
     
     // Find the last assistant message (reverse iteration)
