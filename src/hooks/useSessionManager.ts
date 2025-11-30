@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { SessionManager } from "@/lib/SessionManager";
 
 /**
@@ -8,36 +8,51 @@ import { SessionManager } from "@/lib/SessionManager";
 export function useSessionManager(chatInstanceId: string, userId: string) {
   const [sessionManager] = useState(() => new SessionManager(chatInstanceId, userId));
   const [currentSessionId, setCurrentSessionId] = useState<string>("");
+  const isMountedRef = useRef(true);
 
   // Initialize session on mount
   useEffect(() => {
+    isMountedRef.current = true;
+    
     const initSession = async () => {
       const sessionId = await sessionManager.getOrCreateSession();
-      setCurrentSessionId(sessionId);
+      if (isMountedRef.current) {
+        setCurrentSessionId(sessionId);
+      }
     };
     initSession();
+    
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [sessionManager]);
 
-  const switchSession = (sessionId: string) => {
+  const switchSession = useCallback((sessionId: string) => {
     sessionManager.switchSession(sessionId);
-    setCurrentSessionId(sessionId);
-  };
+    if (isMountedRef.current) {
+      setCurrentSessionId(sessionId);
+    }
+  }, [sessionManager]);
 
-  const createNewSession = async () => {
+  const createNewSession = useCallback(async () => {
     const newSessionId = await sessionManager.createNewSession();
-    setCurrentSessionId(newSessionId);
+    if (isMountedRef.current) {
+      setCurrentSessionId(newSessionId);
+    }
     return newSessionId;
-  };
+  }, [sessionManager]);
 
-  const deleteSession = async (sessionId: string) => {
+  const deleteSession = useCallback(async (sessionId: string) => {
     await sessionManager.deleteSession(sessionId);
     // Create new session if deleted current one
-    if (sessionId === currentSessionId) {
+    if (sessionId === currentSessionId && isMountedRef.current) {
       const newSessionId = await sessionManager.createNewSession();
-      setCurrentSessionId(newSessionId);
+      if (isMountedRef.current) {
+        setCurrentSessionId(newSessionId);
+      }
       return newSessionId;
     }
-  };
+  }, [sessionManager, currentSessionId]);
 
   return {
     sessionManager,

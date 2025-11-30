@@ -76,10 +76,15 @@ export function ChatSidebar({
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+    const abortController = new AbortController();
+
     const loadSessions = async () => {
       try {
         const sessionManager = new SessionManager(chatInstanceId, userId!);
         const visibleSessionIds = await sessionManager.getAllSessions();
+        
+        if (!isMounted) return;
         
         if (visibleSessionIds.length === 0) {
           setLoading(false);
@@ -93,8 +98,7 @@ export function ChatSidebar({
           .in("session_id", visibleSessionIds)
           .order("created_at", { ascending: true });
 
-        
-
+        if (!isMounted) return;
         if (error) throw error;
 
         // Group messages by session_id
@@ -102,19 +106,17 @@ export function ChatSidebar({
         
         data?.forEach((msg) => {
           if (!sessionMap.has(msg.session_id)) {
-            // Initialize session - preview will be set later
             sessionMap.set(msg.session_id, {
               session_id: msg.session_id,
               first_message_time: msg.created_at,
               message_count: 1,
-              preview: "New conversation", // Default, will be replaced if user message found
+              preview: "New conversation",
             });
           } else {
             const session = sessionMap.get(msg.session_id)!;
             session.message_count += 1;
           }
           
-          // Always try to set preview from first user message
           const session = sessionMap.get(msg.session_id)!;
           if (msg.role === 'user' && session.preview === "New conversation") {
             session.preview = msg.content.substring(0, 50);
@@ -127,11 +129,17 @@ export function ChatSidebar({
             new Date(a.first_message_time).getTime()
         );
 
-        setSessions(sessionList);
+        if (isMounted) {
+          setSessions(sessionList);
+        }
       } catch (error) {
-        console.error("Error loading sessions:", error);
+        if (isMounted) {
+          console.error("Error loading sessions:", error);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -149,13 +157,16 @@ export function ChatSidebar({
           filter: `chat_instance_id=eq.${chatInstanceId}`
         },
         () => {
-          // New message inserted - reload sessions immediately
-          loadSessions();
+          if (isMounted) {
+            loadSessions();
+          }
         }
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
+      abortController.abort();
       supabase.removeChannel(channel);
     };
   }, [chatInstanceId, userId, isOwner, routeId, currentSessionId]);

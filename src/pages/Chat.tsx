@@ -140,10 +140,14 @@ const Chat = () => {
   const userPlan = useUserPlan();
 
   useEffect(() => {
+    let isMounted = true;
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null);
+        if (isMounted) {
+          setUser(session?.user ?? null);
+        }
       }
     );
 
@@ -156,25 +160,26 @@ const Chat = () => {
       try {
         // Load all chat instances for admin sidebar if user is authenticated
         const { data: { session: currentAuthSession } } = await supabase.auth.getSession();
-        if (currentAuthSession?.user) {
+        if (currentAuthSession?.user && isMounted) {
           const { data: allChats } = await supabase
             .from("chat_instances")
             .select("*")
             .eq("user_id", currentAuthSession.user.id)
             .order("created_at", { ascending: false });
           
-          if (allChats) {
+          if (allChats && isMounted) {
             setChatInstances(allChats as unknown as ChatInstance[]);
           }
         }
-        // Try loading by ID (UUID or slug)
+        
+        if (!isMounted) return;
+        
         // Check if id is a valid UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
         let data, error;
 
         if (isUUID) {
-          // Owner access - use full table with auth (includes webhook credentials)
           const { data: { session } } = await supabase.auth.getSession();
           
           if (!session) {
@@ -182,7 +187,7 @@ const Chat = () => {
             return;
           }
 
-          setUser(session.user);
+          if (isMounted) setUser(session.user);
           
           const result = await supabase
             .from("chat_instances")
@@ -194,7 +199,6 @@ const Chat = () => {
           data = result.data;
           error = result.error;
         } else {
-          // Public access - use view with safe columns only (no webhook credentials)
           const result = await supabase
             .from("chat_instances_public")
             .select("*")
@@ -205,6 +209,7 @@ const Chat = () => {
           error = result.error;
         }
 
+        if (!isMounted) return;
         if (error) throw error;
 
         const instance = data as unknown as ChatInstance;
@@ -212,7 +217,7 @@ const Chat = () => {
         
         // PUBLIC MODE: Skip all session/user logic
         if (instance.chat_type === 'public') {
-          setLoading(false);
+          if (isMounted) setLoading(false);
           return;
         }
         
@@ -223,22 +228,24 @@ const Chat = () => {
           return;
         }
         
+        if (!isMounted) return;
+        
         // Initialize session for authenticated user
         const forceNew = searchParams.get("new") === "1";
         const manager = new SessionManager(instance.id, authSession.user.id);
         
         if (forceNew) {
           const newSessionId = await manager.createNewSession();
-          setSessionId(newSessionId);
+          if (isMounted) setSessionId(newSessionId);
         } else {
           const currentSessionId = await manager.getLatestSession();
-          setSessionId(currentSessionId || ""); // Empty string if no sessions
+          if (isMounted) setSessionId(currentSessionId || "");
         }
         
-        // Check if owner wants to hide branding (for public viewers only)
+        // Check if owner wants to hide branding
         const { data: { session: ownerSession } } = await supabase.auth.getSession();
         const userIsOwner = ownerSession?.user?.id === instance.user_id;
-        setIsOwner(userIsOwner);
+        if (isMounted) setIsOwner(userIsOwner);
         
         if (!userIsOwner && instance.user_id) {
           const { data: profileData } = await supabase
@@ -247,11 +254,11 @@ const Chat = () => {
             .eq("id", instance.user_id)
             .maybeSingle();
           
-          setOwnerHidesBranding(profileData?.hide_branding_badge || false);
+          if (isMounted) setOwnerHidesBranding(profileData?.hide_branding_badge || false);
         }
         
-        // Track view event (only for public shared chats accessed via slug)
-        if (!isUUID && !viewTracked) {
+        // Track view event
+        if (!isUUID && !viewTracked && isMounted) {
           await trackAnalyticsEvent({
             chat_instance_id: instance.id,
             session_id: sessionId,
@@ -260,28 +267,35 @@ const Chat = () => {
           setViewTracked(true);
         }
       } catch (error: any) {
-        console.error("Error loading chat instance:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load chat instance",
-          variant: "destructive",
-        });
-        navigate("/dashboard");
+        if (isMounted) {
+          console.error("Error loading chat instance:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load chat instance",
+            variant: "destructive",
+          });
+          navigate("/dashboard");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadChatInstance();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [id, navigate, toast, viewTracked]);
 
   // Load messages from database for this session
   useEffect(() => {
+    let isMounted = true;
+    
     const loadMessages = async () => {
       if (!chatInstance) return;
-      if (!sessionId) return; // Don't load messages for empty session
+      if (!sessionId) return;
 
       try {
         const { data, error } = await supabase
@@ -291,10 +305,10 @@ const Chat = () => {
           .eq("session_id", sessionId)
           .order("created_at", { ascending: true });
 
+        if (!isMounted) return;
         if (error) throw error;
 
         if (data && data.length > 0) {
-          // Load existing messages from database
           const loadedMessages: Message[] = data.map((msg) => ({
             id: msg.id,
             role: msg.role as "user" | "assistant",
@@ -303,7 +317,6 @@ const Chat = () => {
           }));
           setMessages(loadedMessages);
         } else {
-          // No existing messages, show welcome message if not in landing mode
           const branding = chatInstance.custom_branding as any;
           const uxConfig = getUXConfig(branding);
           
@@ -314,9 +327,8 @@ const Chat = () => {
               content: branding?.welcomeMessage || "Hi! How can I help you today?",
               timestamp: new Date(),
             };
-            setMessages([welcomeMessage]);
+            if (isMounted) setMessages([welcomeMessage]);
             
-            // Save welcome message to DB
             await supabase.from("chat_messages").insert({
               chat_instance_id: chatInstance.id,
               session_id: sessionId,
@@ -326,11 +338,17 @@ const Chat = () => {
           }
         }
       } catch (error) {
-        console.error("Error loading messages:", error);
+        if (isMounted) {
+          console.error("Error loading messages:", error);
+        }
       }
     };
 
     loadMessages();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [chatInstance, sessionId]);
 
   // Determine chat mode based on configuration and message count
@@ -398,24 +416,39 @@ const Chat = () => {
 
   // Type out text gradually and then send
   const typeAndSend = async (text: string) => {
+    let cancelled = false;
     setIsTypingPrompt(true);
     setInput("");
     
     // Type out character by character
     for (let i = 0; i <= text.length; i++) {
-      await new Promise(resolve => {
-        typingTimeoutRef.current = setTimeout(resolve, 30); // 30ms per character
+      if (cancelled) return;
+      await new Promise<void>(resolve => {
+        typingTimeoutRef.current = setTimeout(() => {
+          if (!cancelled) {
+            setInput(text.slice(0, i));
+          }
+          resolve();
+        }, 30);
       });
-      setInput(text.slice(0, i));
     }
     
+    if (cancelled) return;
+    
     // Small pause before sending
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       typingTimeoutRef.current = setTimeout(resolve, 200);
     });
     
-    setIsTypingPrompt(false);
-    handleSend(text);
+    if (!cancelled) {
+      setIsTypingPrompt(false);
+      handleSend(text);
+    }
+    
+    // Cleanup function for unmount
+    return () => {
+      cancelled = true;
+    };
   };
 
   const handleSend = async (messageText?: string) => {
@@ -561,12 +594,21 @@ const Chat = () => {
   };
 
   const handleRegenerate = async () => {
-    if (!chatInstance || messages.length < 2) return;
+    if (!chatInstance) return;
+    
+    // Use functional update to get latest messages state
+    let currentMessages: Message[] = [];
+    setMessages(prev => {
+      currentMessages = prev;
+      return prev;
+    });
+    
+    if (currentMessages.length < 2) return;
     
     // Find the last assistant message (reverse iteration)
     let lastAssistantIndex = -1;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === "assistant") {
+    for (let i = currentMessages.length - 1; i >= 0; i--) {
+      if (currentMessages[i].role === "assistant") {
         lastAssistantIndex = i;
         break;
       }
@@ -575,16 +617,19 @@ const Chat = () => {
     if (lastAssistantIndex === -1) return;
     
     // Find the user message before it
-    const userMessage = messages
+    const userMessage = currentMessages
       .slice(0, lastAssistantIndex)
       .reverse()
       .find(m => m.role === "user");
     
     if (!userMessage) return;
     
-    // Remove the last assistant message
-    const messagesWithoutLastAssistant = messages.slice(0, lastAssistantIndex);
-    setMessages(messagesWithoutLastAssistant);
+    // Store original messages for rollback
+    const originalMessages = [...currentMessages];
+    const oldAssistantId = currentMessages[lastAssistantIndex]?.id;
+    
+    // Remove the last assistant message using functional update
+    setMessages(prev => prev.slice(0, lastAssistantIndex));
     
     // Resend the user message
     setSending(true);
@@ -606,15 +651,16 @@ const Chat = () => {
         timestamp: new Date(),
       };
 
-      setMessages([...messagesWithoutLastAssistant, newAssistantMessage]);
+      // Use functional update to append new message
+      setMessages(prev => [...prev, newAssistantMessage]);
 
       // Delete the old assistant message from database
-      if (messages[lastAssistantIndex]?.id) {
+      if (oldAssistantId) {
         try {
           await supabase
             .from("chat_messages")
             .delete()
-            .eq("id", messages[lastAssistantIndex].id);
+            .eq("id", oldAssistantId);
         } catch (error) {
           console.error("Error deleting old assistant message:", error);
         }
@@ -633,9 +679,14 @@ const Chat = () => {
           .select()
           .single();
 
-        // Update the message ID with the database ID
+        // Update the message ID with the database ID using functional update
         if (savedMessage) {
-          newAssistantMessage.id = savedMessage.id;
+          setMessages(prev => 
+            prev.map(m => m.id === newAssistantMessage.id 
+              ? { ...m, id: savedMessage.id } 
+              : m
+            )
+          );
         }
       } catch (error) {
         console.error("Error saving regenerated message:", error);
@@ -654,8 +705,8 @@ const Chat = () => {
         description: "Failed to regenerate response. Please try again.",
         variant: "destructive",
       });
-      // Restore the original assistant message on error
-      setMessages(messages);
+      // Restore the original assistant message on error using functional update
+      setMessages(originalMessages);
     } finally {
       setSending(false);
     }

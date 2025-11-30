@@ -222,7 +222,8 @@ const Auth = () => {
               </Button>
             </div>
 
-            {isLogin && (
+            {/* Demo account only available in development */}
+            {isLogin && import.meta.env.DEV && (
               <div className="mt-4">
                 <Button
                   type="button"
