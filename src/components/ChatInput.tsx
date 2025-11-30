@@ -1,11 +1,14 @@
 /**
  * View Component: Chat Input
  * Message input field with send button
+ * Includes input validation for security
  */
 
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2 } from "lucide-react";
+import { validateMessage } from "@/lib/inputValidation";
 
 interface ChatInputProps {
   value: string;
@@ -30,6 +33,8 @@ export function ChatInput({
   inputSize,
   primaryColor,
 }: ChatInputProps) {
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const getInputSize = () => {
     if (inputSize === 'compact') return 'h-10';
     if (inputSize === 'large') return 'h-14 text-base';
@@ -54,11 +59,33 @@ export function ChatInput({
     return '';
   };
 
+  const handleSend = () => {
+    // Clear previous error
+    setValidationError(null);
+    
+    // Validate input before sending
+    const validation = validateMessage(value);
+    if (!validation.success) {
+      setValidationError(validation.error || "Invalid message");
+      return;
+    }
+    
+    onSend();
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSend();
+      handleSend();
     }
+  };
+
+  const handleChange = (newValue: string) => {
+    // Clear error when user types
+    if (validationError) {
+      setValidationError(null);
+    }
+    onChange(newValue.slice(0, maxChars));
   };
 
   const charCount = value.length;
@@ -70,14 +97,14 @@ export function ChatInput({
       <div className="flex gap-2 items-center">
         <Input
           value={value}
-          onChange={(e) => onChange(e.target.value.slice(0, maxChars))}
+          onChange={(e) => handleChange(e.target.value)}
           onKeyDown={handleKeyPress}
           placeholder={placeholder}
           disabled={sending}
-          className={`flex-1 ${getInputSize()} ${getInputStyleClasses()} text-foreground`}
+          className={`flex-1 ${getInputSize()} ${getInputStyleClasses()} text-foreground ${validationError ? 'border-destructive' : ''}`}
         />
         <Button
-          onClick={onSend}
+          onClick={handleSend}
           disabled={sending || !value.trim()}
           className={getButtonClasses()}
           style={{
@@ -91,7 +118,10 @@ export function ChatInput({
           )}
         </Button>
       </div>
-      {isNearLimit && (
+      {validationError && (
+        <p className="text-xs text-destructive">{validationError}</p>
+      )}
+      {isNearLimit && !validationError && (
         <p className="text-xs text-muted-foreground text-right">
           {charCount}/{maxChars} characters
         </p>
