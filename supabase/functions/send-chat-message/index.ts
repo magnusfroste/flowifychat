@@ -12,6 +12,146 @@ interface WebhookPayload {
   metadata?: any;
 }
 
+// In-memory rate limit store (per edge function instance)
+// Note: For production scale, use Redis or database
+const ipRateLimits = new Map<string, { count: number; windowStart: number }>();
+
+const IP_RATE_LIMIT = 30; // requests per window
+const IP_RATE_WINDOW_MS = 60 * 1000; // 1 minute window
+
+/**
+ * Check IP-based rate limit
+ * Returns true if request should be allowed, false if rate limited
+ */
+function checkIpRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const existing = ipRateLimits.get(ip);
+
+  // Clean up old entries periodically
+  if (ipRateLimits.size > 10000) {
+    const cutoff = now - IP_RATE_WINDOW_MS;
+    for (const [key, value] of ipRateLimits.entries()) {
+      if (value.windowStart < cutoff) {
+        ipRateLimits.delete(key);
+      }
+    }
+  }
+
+  if (!existing || (now - existing.windowStart) > IP_RATE_WINDOW_MS) {
+    // New window
+    ipRateLimits.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+
+  if (existing.count >= IP_RATE_LIMIT) {
+    return false;
+  }
+
+  // Increment counter
+  existing.count++;
+  return true;
+}
+
+/**
+ * Get client IP from request headers
+ */
+function getClientIp(req: Request): string {
+  // Check common headers for real IP (set by proxies/load balancers)
+  const xForwardedFor = req.headers.get('x-forwarded-for');
+  if (xForwardedFor) {
+    // x-forwarded-for can contain multiple IPs, take the first (original client)
+    return xForwardedFor.split(',')[0].trim();
+  }
+  
+  const xRealIp = req.headers.get('x-real-ip');
+  if (xRealIp) {
+    return xRealIp.trim();
+  }
+
+  // Fallback - may not be accurate behind proxies
+  return 'unknown';
+}
+
+/**
+ * Validate and sanitize message content
+ */
+function validateMessage(message: string): { valid: boolean; sanitized: string; error?: string } {
+  if (!message || typeof message !== 'string') {
+    return { valid: false, sanitized: '', error: 'Message is required' };
+  }
+
+  const trimmed = message.trim();
+  
+  if (trimmed.length === 0) {
+    return { valid: false, sanitized: '', error: 'Message cannot be empty' };
+  }
+
+  if (trimmed.length > 10000) {
+    return { valid: false, sanitized: '', error: 'Message exceeds maximum length of 10,000 characters' };
+  }
+
+  // Basic sanitization - remove null bytes and control characters (except newlines/tabs)
+  const sanitized = trimmed
+    .replace(/\0/g, '')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  return { valid: true, sanitized };
+}
+
+/**
+ * Validate webhook URL
+ */
+function validateWebhookUrl(url: string): { valid: boolean; error?: string } {
+  if (!url || typeof url !== 'string') {
+    return { valid: false, error: 'Webhook URL is required' };
+  }
+
+  if (!url.startsWith('https://')) {
+    return { valid: false, error: 'Webhook URL must use HTTPS' };
+  }
+
+  if (url.length > 2048) {
+    return { valid: false, error: 'Webhook URL exceeds maximum length' };
+  }
+
+  // Block localhost and internal network URLs
+  const urlLower = url.toLowerCase();
+  const blockedPatterns = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '10.',
+    '172.16.',
+    '172.17.',
+    '172.18.',
+    '172.19.',
+    '172.20.',
+    '172.21.',
+    '172.22.',
+    '172.23.',
+    '172.24.',
+    '172.25.',
+    '172.26.',
+    '172.27.',
+    '172.28.',
+    '172.29.',
+    '172.30.',
+    '172.31.',
+    '192.168.',
+    '[::1]',
+    'metadata.google',
+    '169.254.',
+  ];
+
+  for (const pattern of blockedPatterns) {
+    if (urlLower.includes(pattern)) {
+      return { valid: false, error: 'Invalid webhook URL' };
+    }
+  }
+
+  return { valid: true };
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -19,18 +159,36 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // IP-based rate limiting
+    const clientIp = getClientIp(req);
+    if (!checkIpRateLimit(clientIp)) {
+      console.warn(`Rate limit exceeded for IP: ${clientIp}`);
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+      );
+    }
+
     const { message, sessionId, chatInstanceId, metadata }: WebhookPayload = await req.json();
 
-    // Validate input
-    if (!message || !sessionId || !chatInstanceId) {
+    // Validate required fields
+    if (!sessionId || !chatInstanceId) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Sanitize message (max 10000 chars)
-    const sanitizedMessage = message.slice(0, 10000);
+    // Validate and sanitize message
+    const messageValidation = validateMessage(message);
+    if (!messageValidation.valid) {
+      return new Response(
+        JSON.stringify({ error: messageValidation.error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const sanitizedMessage = messageValidation.sanitized;
 
     // Initialize Supabase client with service role key (has access to all data)
     const supabaseClient = createClient(
@@ -54,9 +212,11 @@ Deno.serve(async (req) => {
     }
 
     // Validate webhook URL
-    if (!chatInstance.webhook_url || !chatInstance.webhook_url.startsWith('https://')) {
+    const webhookValidation = validateWebhookUrl(chatInstance.webhook_url);
+    if (!webhookValidation.valid) {
+      console.error('Invalid webhook URL:', webhookValidation.error);
       return new Response(
-        JSON.stringify({ error: 'Invalid webhook URL' }),
+        JSON.stringify({ error: webhookValidation.error }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -90,7 +250,7 @@ Deno.serve(async (req) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
 
-    console.log(`Calling webhook for chat ${chatInstanceId}:`, chatInstance.webhook_url);
+    console.log(`Calling webhook for chat ${chatInstanceId} from IP ${clientIp}`);
 
     const response = await fetch(chatInstance.webhook_url, {
       method: 'POST',
@@ -168,7 +328,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
+      JSON.stringify({ error: 'An error occurred processing your request' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
