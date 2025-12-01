@@ -208,3 +208,37 @@ export const getTransitionSpeed = (animationSpeed?: string): string => {
       return 'transition-all duration-200';
   }
 };
+
+/**
+ * Get user avatar style classes
+ */
+export const getUserAvatarClasses = (style?: string): string => {
+  switch (style) {
+    case 'circle':
+      return 'rounded-full';
+    case 'none':
+      return 'hidden';
+    case 'rounded':
+    default:
+      return 'rounded-md';
+  }
+};
+
+/**
+ * Get user message style based on showUserBubble
+ */
+export const getUserMessageStyle = (
+  showBubble: boolean,
+  messageColor?: string
+): { className: string; backgroundColor?: string } => {
+  if (!showBubble) {
+    return {
+      className: 'text-right',
+      backgroundColor: 'transparent',
+    };
+  }
+  return {
+    className: 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]',
+    backgroundColor: messageColor || undefined,
+  };
+};

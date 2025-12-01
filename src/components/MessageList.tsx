@@ -69,6 +69,9 @@ export function MessageList({
   const showTimestamps = branding?.showTimestamps || 'hover';
   const userMessageColor = branding?.userMessageColor;
   const botMessageColor = branding?.botMessageColor;
+  const showUserBubble = branding?.showUserBubble ?? true;
+  const shouldShowBotAvatar = branding?.showBotAvatar ?? layoutConfig.showAvatars;
+  const shouldShowUserAvatar = branding?.showUserAvatar ?? false;
 
   return (
     <div className={`space-y-6 pb-[var(--input-bar-height,8rem)] ${getMessageAlignment()}`}>
@@ -86,7 +89,8 @@ export function MessageList({
                 : message.role === "user" ? "justify-end" : "justify-start"
             }`}
           >
-            {message.role === "assistant" && layoutConfig.showAvatars && branding.avatarUrl && (
+            {/* Bot Avatar */}
+            {message.role === "assistant" && shouldShowBotAvatar && branding.avatarUrl && (
               <div className={`${getAvatarSize()} rounded-full overflow-hidden mr-3 flex-shrink-0 ${layoutConfig.avatarPosition === 'top' ? 'mt-1' : 'self-center'}`}>
                 <img 
                   src={branding.avatarUrl} 
@@ -95,77 +99,99 @@ export function MessageList({
                 />
               </div>
             )}
+            
+            {/* User Avatar */}
+            {message.role === "user" && shouldShowUserAvatar && (
+              <div 
+                className={`${getAvatarSize()} rounded-full flex items-center justify-center text-white text-xs font-medium ml-3 flex-shrink-0 order-last`}
+                style={{ backgroundColor: branding.primaryColor }}
+              >
+                U
+              </div>
+            )}
 
             <div className={`relative ${layoutConfig.messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}`}>
-              <div
-                className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
-                  message.role === "user" ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (botMessageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')
-                }`}
-                style={{
-                  borderRadius: bubbleRadiusStyle,
-                  backgroundColor: message.role === "user" 
-                    ? userMessageColor || undefined
-                    : (botMessageColor === 'transparent' ? 'transparent' : (botMessageColor || undefined)),
-                  color: message.role === "assistant" && branding?.textColor ? branding.textColor : undefined,
-                }}
-              >
+              {/* User message: check showUserBubble */}
+              {message.role === "user" && !showUserBubble ? (
                 <div 
-                  className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
+                  className={`${densityClass} ${typographyClasses} ${transitionSpeed} text-right`}
+                  style={{ color: branding?.textColor || undefined }}
                 >
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      code({ node, inline, className, children, ...props }: any) {
-                        const match = /language-(\w+)/.exec(className || "");
-                        const codeContent = String(children).replace(/\n$/, "");
-                        const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
-                        const isDarkMode = document.documentElement.classList.contains('dark');
-                        
-                        return !inline && match ? (
-                          <div className="relative group/code">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onCopyCode(codeContent, blockId)}
-                              className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 z-10"
-                              title="Copy code"
-                            >
-                              {copiedCodeBlock === blockId ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <SyntaxHighlighter
-                              style={isDarkMode ? oneDark : oneLight}
-                              language={match[1]}
-                              PreTag="div"
-                              {...props}
-                            >
-                              {codeContent}
-                            </SyntaxHighlighter>
-                          </div>
-                        ) : (
-                          <code className={className} {...props}>
-                            {children}
-                          </code>
-                        );
-                      },
-                    }}
-                  >
+                  <div className="text-sm leading-relaxed">
                     {message.content}
-                  </ReactMarkdown>
+                  </div>
                 </div>
-                {showTimestamps !== 'never' && (
-                  <p 
-                    className={`text-xs mt-2 text-muted-foreground transition-opacity ${
-                      showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-70' : 'opacity-70'
-                    }`}
+              ) : (
+                <div
+                  className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
+                    message.role === "user" ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (botMessageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')
+                  }`}
+                  style={{
+                    borderRadius: bubbleRadiusStyle,
+                    backgroundColor: message.role === "user" 
+                      ? (showUserBubble ? (userMessageColor || undefined) : 'transparent')
+                      : (botMessageColor === 'transparent' ? 'transparent' : (botMessageColor || undefined)),
+                    color: message.role === "assistant" && branding?.textColor ? branding.textColor : undefined,
+                  }}
+                >
+                  <div 
+                    className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
                   >
-                    {message.timestamp.toLocaleTimeString()}
-                  </p>
-                )}
-              </div>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        code({ node, inline, className, children, ...props }: any) {
+                          const match = /language-(\w+)/.exec(className || "");
+                          const codeContent = String(children).replace(/\n$/, "");
+                          const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
+                          const isDarkMode = document.documentElement.classList.contains('dark');
+                          
+                          return !inline && match ? (
+                            <div className="relative group/code">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onCopyCode(codeContent, blockId)}
+                                className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 z-10"
+                                title="Copy code"
+                              >
+                                {copiedCodeBlock === blockId ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <SyntaxHighlighter
+                                style={isDarkMode ? oneDark : oneLight}
+                                language={match[1]}
+                                PreTag="div"
+                                {...props}
+                              >
+                                {codeContent}
+                              </SyntaxHighlighter>
+                            </div>
+                          ) : (
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
+                          );
+                        },
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                  {showTimestamps !== 'never' && (
+                    <p 
+                      className={`text-xs mt-2 text-muted-foreground transition-opacity ${
+                        showTimestamps === 'hover' ? 'opacity-0 group-hover:opacity-70' : 'opacity-70'
+                      }`}
+                    >
+                      {message.timestamp.toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
+              )}
               
               {/* OpenAI-style always-visible action row */}
               {interactiveConfig.messageActions === 'openai-row' && message.role === 'assistant' && (

@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Paperclip, Mic } from "lucide-react";
 import { validateMessage } from "@/lib/inputValidation";
 
 interface ChatInputProps {
@@ -20,6 +20,8 @@ interface ChatInputProps {
   buttonStyle: 'filled' | 'ghost' | 'outline';
   inputSize: 'compact' | 'standard' | 'large';
   primaryColor: string;
+  showAttachmentButton?: boolean;
+  showVoiceButton?: boolean;
 }
 
 export function ChatInput({
@@ -32,6 +34,8 @@ export function ChatInput({
   buttonStyle,
   inputSize,
   primaryColor,
+  showAttachmentButton = false,
+  showVoiceButton = false,
 }: ChatInputProps) {
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -95,6 +99,17 @@ export function ChatInput({
   return (
     <div className="space-y-1">
       <div className="flex gap-2 items-center">
+        {showAttachmentButton && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 text-muted-foreground hover:text-foreground"
+            title="Attach file"
+            disabled
+          >
+            <Paperclip className="h-5 w-5" />
+          </Button>
+        )}
         <Input
           value={value}
           onChange={(e) => handleChange(e.target.value)}
@@ -103,6 +118,17 @@ export function ChatInput({
           disabled={sending}
           className={`flex-1 ${getInputSize()} ${getInputStyleClasses()} text-foreground ${validationError ? 'border-destructive' : ''}`}
         />
+        {showVoiceButton && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 text-muted-foreground hover:text-foreground"
+            title="Voice input"
+            disabled
+          >
+            <Mic className="h-5 w-5" />
+          </Button>
+        )}
         <Button
           onClick={handleSend}
           disabled={sending || !value.trim()}

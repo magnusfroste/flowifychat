@@ -37,10 +37,18 @@ export interface BrandingTemplate {
     messageAlignment: 'left' | 'center' | 'full-width';
     maxMessageWidth: number;
     showAvatars: boolean;
+    showBotAvatar?: boolean;
+    showUserAvatar?: boolean;
+    showUserBubble?: boolean;
+    userAvatarStyle?: 'circle' | 'rounded' | 'none';
     avatarSize: 'small' | 'medium' | 'large';
     avatarPosition: 'top' | 'center';
     showSidebar: boolean;
     headerStyle: 'minimal' | 'standard' | 'prominent';
+    
+    // Input Accessories
+    showAttachmentButton?: boolean;
+    showVoiceButton?: boolean;
     
     // Input Controls
     inputPosition: 'floating' | 'sticky-bottom';
@@ -70,7 +78,7 @@ export const templates: BrandingTemplate[] = [
       primaryColor: "#10a37f",
       accentColor: "#0d8a6a",
       secondaryColor: "#8e8ea0",
-      userMessageColor: "#F7F7F8",
+      userMessageColor: "transparent",
       botMessageColor: "transparent",
       backgroundColor: "hsl(var(--background))",
       backgroundStyle: 'solid',
@@ -88,6 +96,10 @@ export const templates: BrandingTemplate[] = [
       messageAlignment: 'center',
       maxMessageWidth: 768,
       showAvatars: false,
+      showBotAvatar: false,
+      showUserAvatar: true,
+      showUserBubble: false,
+      userAvatarStyle: 'circle',
       avatarSize: 'small',
       avatarPosition: 'top',
       showSidebar: false,
@@ -96,6 +108,8 @@ export const templates: BrandingTemplate[] = [
       inputPosition: 'sticky-bottom',
       inputSize: 'large',
       sendButtonStyle: 'icon',
+      showAttachmentButton: true,
+      showVoiceButton: true,
       
       messageSpacing: 'relaxed',
       animationSpeed: 'normal',
@@ -113,12 +127,12 @@ export const templates: BrandingTemplate[] = [
     description: "Warm, thoughtful Anthropic design",
     icon: Minimize2,
     values: {
-      primaryColor: "#CC785C",
-      accentColor: "#CC785C",
-      secondaryColor: "#6b6b6b",
-      userMessageColor: "hsl(var(--muted))",
-      botMessageColor: "#FFEEE0",
-      backgroundColor: "#FFF8F0",
+      primaryColor: "#C15F3C",
+      accentColor: "#C15F3C",
+      secondaryColor: "#B1ADA1",
+      userMessageColor: "transparent",
+      botMessageColor: "transparent",
+      backgroundColor: "#F4F3EE",
       backgroundStyle: 'solid',
       layoutStyle: 'centered',
       fontFamily: 'Plus Jakarta Sans',
@@ -135,7 +149,10 @@ export const templates: BrandingTemplate[] = [
       messageAlignment: 'center',
       maxMessageWidth: 700,
       showAvatars: false,
-      avatarSize: 'medium',
+      showBotAvatar: true,
+      showUserAvatar: false,
+      showUserBubble: false,
+      avatarSize: 'small',
       avatarPosition: 'top',
       showSidebar: false,
       headerStyle: 'minimal',
@@ -143,6 +160,8 @@ export const templates: BrandingTemplate[] = [
       inputPosition: 'sticky-bottom',
       inputSize: 'large',
       sendButtonStyle: 'icon',
+      showAttachmentButton: true,
+      showVoiceButton: false,
       
       messageSpacing: 'relaxed',
       animationSpeed: 'slow',
@@ -179,7 +198,10 @@ export const templates: BrandingTemplate[] = [
       messageAlignment: 'left',
       maxMessageWidth: 900,
       showAvatars: true,
-      avatarSize: 'large',
+      showBotAvatar: true,
+      showUserAvatar: false,
+      showUserBubble: true,
+      avatarSize: 'medium',
       avatarPosition: 'center',
       showSidebar: false,
       headerStyle: 'minimal',
@@ -187,6 +209,8 @@ export const templates: BrandingTemplate[] = [
       inputPosition: 'sticky-bottom',
       inputSize: 'large',
       sendButtonStyle: 'icon',
+      showAttachmentButton: true,
+      showVoiceButton: false,
       
       messageSpacing: 'tight',
       animationSpeed: 'fast',
@@ -225,6 +249,9 @@ export const templates: BrandingTemplate[] = [
       messageAlignment: 'left',
       maxMessageWidth: 750,
       showAvatars: true,
+      showBotAvatar: true,
+      showUserAvatar: true,
+      showUserBubble: true,
       avatarSize: 'large',
       avatarPosition: 'top',
       showSidebar: false,
@@ -233,6 +260,8 @@ export const templates: BrandingTemplate[] = [
       inputPosition: 'sticky-bottom',
       inputSize: 'large',
       sendButtonStyle: 'icon',
+      showAttachmentButton: false,
+      showVoiceButton: false,
       
       messageSpacing: 'relaxed',
       animationSpeed: 'fast',

@@ -3,7 +3,7 @@
  * Shows realistic chat interface with mock messages
  */
 
-import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical, Sparkles, Zap, ThumbsUp, ThumbsDown, Share2, MoreHorizontal } from "lucide-react";
+import { Send, Bot, User, Copy, Check, RotateCw, MoreVertical, Sparkles, Zap, ThumbsUp, ThumbsDown, Share2, MoreHorizontal, Paperclip, Mic } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,10 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     backgroundGradientEnd,
     avatarUrl,
     showAvatars = true,
+    showBotAvatar,
+    showUserAvatar,
+    showUserBubble = true,
+    userAvatarStyle = 'rounded',
     avatarSize = 'medium',
     avatarPosition = 'top',
     messageAlignment = 'left',
@@ -74,7 +78,13 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
     showRegenerateButton = true,
     showThumbsButtons = false,
     showShareButton = false,
+    showAttachmentButton = false,
+    showVoiceButton = false,
   } = branding;
+
+  // Determine actual avatar visibility
+  const shouldShowBotAvatar = showBotAvatar ?? showAvatars;
+  const shouldShowUserAvatar = showUserAvatar ?? false;
 
   const handleCopyMessage = (messageId: number, content: string) => {
     navigator.clipboard.writeText(content);
@@ -187,48 +197,60 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
                   isUser ? 'flex-row-reverse' : 'flex-row'
                 } ${alignmentClasses[messageAlignment]}`}
               >
-                {/* Avatar */}
-                {showAvatars && (
+                {/* Bot Avatar */}
+                {!isUser && shouldShowBotAvatar && (
                   <Avatar className={avatarSizeClass}>
-                    {isUser ? (
-                      <>
-                        <AvatarFallback style={{ backgroundColor: primaryColor }}>
-                          <User className="h-3 w-3 text-primary-foreground" />
-                        </AvatarFallback>
-                      </>
-                    ) : (
-                      <>
-                        <AvatarImage src={avatarUrl} />
-                        <AvatarFallback 
-                          className={
-                            branding.primaryColor === '#34d399' 
-                              ? 'bg-[#34d399] text-white' 
-                              : branding.primaryColor === '#ec4899'
-                              ? 'bg-gradient-to-br from-[#ec4899] to-[#a855f7] text-white'
-                              : ''
-                          }
-                        >
-                          <Bot className="h-3 w-3" />
-                        </AvatarFallback>
-                      </>
-                    )}
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback 
+                      className={
+                        branding.primaryColor === '#34d399' 
+                          ? 'bg-[#34d399] text-white' 
+                          : branding.primaryColor === '#ec4899'
+                          ? 'bg-gradient-to-br from-[#ec4899] to-[#a855f7] text-white'
+                          : branding.primaryColor === '#C15F3C'
+                          ? 'bg-[#C15F3C] text-white'
+                          : ''
+                      }
+                    >
+                      <Bot className="h-3 w-3" />
+                    </AvatarFallback>
                   </Avatar>
+                )}
+                
+                {/* User Avatar */}
+                {isUser && shouldShowUserAvatar && (
+                  <div 
+                    className={`${avatarSizeClass} ${userAvatarStyle === 'circle' ? 'rounded-full' : 'rounded-md'} flex items-center justify-center text-white text-xs font-medium`}
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    U
+                  </div>
                 )}
 
                 {/* Message Bubble with Timestamp and Actions */}
                 <div className={messageAlignment === 'full-width' ? 'flex-1' : 'max-w-[80%]'}>
-                  <div
-                    className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
-                      messageAlignment === 'full-width' ? 'w-full' : ''
-                    } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (messageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')} ${branding.fontFamily === 'Inter' ? 'border border-gray-200' : ''}`}
-                    style={{ 
-                      backgroundColor: messageColor === 'transparent' ? 'transparent' : (messageColor || undefined),
-                      borderRadius: bubbleRadiusStyle,
-                      color: !isUser && branding.textColor ? branding.textColor : undefined,
-                    }}
-                  >
-                    {message.content}
-                  </div>
+                  {/* User message: check showUserBubble */}
+                  {isUser && !showUserBubble ? (
+                    <div 
+                      className={`${densityClass} ${typographyClasses} ${transitionSpeed} text-right`}
+                      style={{ color: branding.textColor || undefined }}
+                    >
+                      {message.content}
+                    </div>
+                  ) : (
+                    <div
+                      className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
+                        messageAlignment === 'full-width' ? 'w-full' : ''
+                      } ${isUser ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (messageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')} ${branding.fontFamily === 'Inter' ? 'border border-gray-200' : ''}`}
+                      style={{ 
+                        backgroundColor: messageColor === 'transparent' ? 'transparent' : (messageColor || undefined),
+                        borderRadius: bubbleRadiusStyle,
+                        color: !isUser && branding.textColor ? branding.textColor : undefined,
+                      }}
+                    >
+                      {message.content}
+                    </div>
+                  )}
                   
                   {/* Timestamp */}
                   {branding.showTimestamps !== 'never' && (
@@ -435,37 +457,59 @@ export function ChatInterfacePreview({ branding, inputPlaceholder = "Type your m
           inputPosition === 'floating' ? 'mx-4 mb-4 rounded-lg border shadow-lg' : ''
         }`}
       >
-        <div className="relative" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
-          <Input
-            placeholder={inputPlaceholder}
-            className={`${inputSizeClass} ${inputClasses} ${inputShadow} ${
-              inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
-            }`}
-            style={{ 
-              borderRadius: `${borderRadius}px`,
-              borderColor: branding.fontFamily === 'Plus Jakarta Sans' ? '#CC785C' : 
-                          branding.fontFamily === 'Inter' ? '#34D399' : undefined,
-            }}
-            disabled
-          />
-          <Button
-            size="icon"
-            variant="ghost"
-            style={buttonStyle === 'filled' ? {
-              backgroundColor: primaryColor,
-              borderRadius: `${borderRadius}px`,
-            } : {
-              borderRadius: `${borderRadius}px`,
-              borderColor: primaryColor,
-              color: primaryColor,
-            }}
-            className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${buttonClasses}`}
-            disabled
-          >
-            {sendButtonStyle === 'icon' && <Send className="h-4 w-4" />}
-            {sendButtonStyle === 'text' && <Send className="h-4 w-4" />}
-            {sendButtonStyle === 'icon-text' && <Send className="h-4 w-4" />}
-          </Button>
+        <div className="flex items-center gap-2" style={{ maxWidth: messageAlignment === 'center' ? maxMessageWidth : undefined, margin: messageAlignment === 'center' ? '0 auto' : undefined }}>
+          {showAttachmentButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground flex-shrink-0"
+              disabled
+            >
+              <Paperclip className="h-5 w-5" />
+            </Button>
+          )}
+          <div className="relative flex-1">
+            <Input
+              placeholder={inputPlaceholder}
+              className={`${inputSizeClass} ${inputClasses} ${inputShadow} ${
+                inputSize === 'compact' ? 'pr-10' : inputSize === 'large' ? 'pr-14' : 'pr-12'
+              }`}
+              style={{ 
+                borderRadius: `${borderRadius}px`,
+                borderColor: branding.fontFamily === 'Plus Jakarta Sans' ? '#C15F3C' : 
+                            branding.fontFamily === 'Inter' ? '#34D399' : undefined,
+              }}
+              disabled
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              style={buttonStyle === 'filled' ? {
+                backgroundColor: primaryColor,
+                borderRadius: `${borderRadius}px`,
+              } : {
+                borderRadius: `${borderRadius}px`,
+                borderColor: primaryColor,
+                color: primaryColor,
+              }}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 ${buttonClasses}`}
+              disabled
+            >
+              {sendButtonStyle === 'icon' && <Send className="h-4 w-4" />}
+              {sendButtonStyle === 'text' && <Send className="h-4 w-4" />}
+              {sendButtonStyle === 'icon-text' && <Send className="h-4 w-4" />}
+            </Button>
+          </div>
+          {showVoiceButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground flex-shrink-0"
+              disabled
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
