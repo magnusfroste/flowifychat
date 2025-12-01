@@ -79,9 +79,9 @@ export const templates: BrandingTemplate[] = [
       fontWeight: 'normal',
       lineHeight: 'relaxed',
       letterSpacing: 'normal',
-      messageBubbleStyle: 'rounded',
+      messageBubbleStyle: 'pill',
       messageDensity: 'spacious',
-      borderRadius: 8,
+      borderRadius: 24,
       buttonStyle: 'filled',
       inputStyle: 'outline',
       
