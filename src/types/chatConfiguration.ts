@@ -113,6 +113,10 @@ export interface ChatBranding {
   messageAlignment?: 'left' | 'center' | 'full-width';
   maxMessageWidth?: number;
   showAvatars?: boolean;
+  showBotAvatar?: boolean;
+  showUserAvatar?: boolean;
+  showUserBubble?: boolean;
+  userAvatarStyle?: 'circle' | 'rounded' | 'none';
   avatarSize?: 'small' | 'medium' | 'large';
   avatarPosition?: 'top' | 'center';
   showSidebar?: boolean;
@@ -140,6 +144,11 @@ export interface ChatBranding {
   showRegenerateButton?: boolean;
   showThumbsButtons?: boolean;
   showShareButton?: boolean;
+  showReadAloudButton?: boolean;
+  
+  // Input Accessories
+  showAttachmentButton?: boolean;
+  showVoiceButton?: boolean;
   
   // Welcome Screen (flat fields for form)
   welcomeScreenEnabled?: boolean;
@@ -203,6 +212,10 @@ export interface ChatFormValues {
   messageAlignment?: 'left' | 'center' | 'full-width';
   maxMessageWidth?: number;
   showAvatars?: boolean;
+  showBotAvatar?: boolean;
+  showUserAvatar?: boolean;
+  showUserBubble?: boolean;
+  userAvatarStyle?: 'circle' | 'rounded' | 'none';
   avatarSize?: 'small' | 'medium' | 'large';
   avatarPosition?: 'top' | 'center';
   showSidebar?: boolean;
@@ -224,6 +237,11 @@ export interface ChatFormValues {
   showRegenerateButton?: boolean;
   showThumbsButtons?: boolean;
   showShareButton?: boolean;
+  showReadAloudButton?: boolean;
+  
+  // Input Accessories
+  showAttachmentButton?: boolean;
+  showVoiceButton?: boolean;
   
   // n8n Authentication
   n8nAuthEnabled?: boolean;
