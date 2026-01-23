@@ -20,8 +20,6 @@ import { generateSlug, generateRandomChatName } from "@/lib/slugUtils";
 import type { ChatFormValues } from "@/types/chatConfiguration";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useUserPlan } from "@/hooks/useUserPlan";
-import { createCheckoutSession } from "@/lib/stripe";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -114,7 +112,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
   const [slugError, setSlugError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [chatInstances, setChatInstances] = useState<any[]>([]);
-  const { plan } = useUserPlan();
+  
 
   const form = useForm<ChatFormValues>({
     resolver: zodResolver(formSchema),
@@ -553,13 +551,6 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
     navigate("/dashboard");
   };
 
-  const handleUpgrade = async () => {
-    try {
-      await createCheckoutSession();
-    } catch (error) {
-      console.error("Upgrade error:", error);
-    }
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -582,10 +573,7 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
           selectedChatId={id || null}
           onChatSelect={() => {}}
           userEmail={user?.email}
-          userPlan={plan}
-          onUpgrade={handleUpgrade}
           onLogout={handleLogout}
-          canCreateMore={plan?.can_create_more_chats || false}
           currentChatId={id}
         />
 

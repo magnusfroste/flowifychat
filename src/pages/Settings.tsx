@@ -5,16 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, User, Lock, Bell, Sparkles, CreditCard, Check } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { useUserPlan } from "@/hooks/useUserPlan";
-import { createCheckoutSession, openCustomerPortal, checkSubscription } from "@/lib/stripe";
-import { toast } from "sonner";
+import { Loader2, User, Lock, Bell } from "lucide-react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 
@@ -22,7 +16,6 @@ interface Profile {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
-  hide_branding_badge: boolean;
 }
 
 const Settings = () => {
@@ -31,14 +24,10 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [displayName, setDisplayName] = useState("");
-  const [hideBrandingBadge, setHideBrandingBadge] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isUpgrading, setIsUpgrading] = useState(false);
-  const [chatInstances, setChatInstances] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast: toastFn } = useToast();
-  const { plan, loading: planLoading, refetch: refetchPlan } = useUserPlan();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -51,7 +40,6 @@ const Settings = () => {
       
       setUser(session.user);
       await loadProfile(session.user.id);
-      await loadChatInstances(session.user.id);
       setLoading(false);
     };
 
@@ -63,29 +51,11 @@ const Settings = () => {
       } else {
         setUser(session.user);
         loadProfile(session.user.id);
-        loadChatInstances(session.user.id);
-        checkSubscription().catch(console.error);
-        refetchPlan();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, refetchPlan]);
-
-  const loadChatInstances = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("chat_instances")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setChatInstances(data || []);
-    } catch (error) {
-      console.error("Error loading chat instances:", error);
-    }
-  };
+  }, [navigate]);
 
   const loadProfile = async (userId: string) => {
     try {
@@ -111,7 +81,6 @@ const Settings = () => {
       } else {
         setProfile(data);
         setDisplayName(data.display_name || "");
-        setHideBrandingBadge(data.hide_branding_badge || false);
       }
     } catch (error: any) {
       console.error("Error loading profile:", error);
@@ -146,58 +115,6 @@ const Settings = () => {
       });
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleUpgradeToPro = async () => {
-    setIsUpgrading(true);
-    try {
-      await createCheckoutSession();
-      toast.success("Redirecting to checkout...");
-    } catch (error) {
-      console.error("Error starting upgrade:", error);
-      toast.error("Failed to start upgrade process");
-    } finally {
-      setIsUpgrading(false);
-    }
-  };
-
-  const handleManageBilling = async () => {
-    try {
-      await openCustomerPortal();
-    } catch (error) {
-      console.error("Error opening billing portal:", error);
-      toast.error("Failed to open billing management");
-    }
-  };
-
-  const handleToggleBrandingBadge = async (checked: boolean) => {
-    if (!user || !plan?.can_hide_branding) return;
-
-    setHideBrandingBadge(checked);
-    
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ hide_branding_badge: checked })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      toastFn({
-        title: "Setting updated",
-        description: checked 
-          ? "Branding badge will be hidden on all your public chats"
-          : "Branding badge will be shown on all your public chats",
-      });
-    } catch (error: any) {
-      console.error("Error updating branding badge setting:", error);
-      setHideBrandingBadge(!checked);
-      toastFn({
-        title: "Error",
-        description: "Failed to update setting. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -270,14 +187,10 @@ const Settings = () => {
           selectedChatId={null}
           onChatSelect={() => {}}
           userEmail={user?.email}
-          userPlan={plan}
-          onUpgrade={handleUpgradeToPro}
           onLogout={handleLogout}
-          canCreateMore={plan?.can_create_more_chats || false}
         />
 
         <SidebarInset className="flex-1">
-          {/* Header */}
           <header className="border-b bg-card sticky top-0 z-10">
             <div className="px-6 py-4">
               <div>
@@ -289,10 +202,9 @@ const Settings = () => {
             </div>
           </header>
 
-          {/* Main Content */}
           <div className="px-6 py-8 max-w-4xl">
             <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="profile">
                   <User className="h-4 w-4 mr-2" />
                   Profile
@@ -300,10 +212,6 @@ const Settings = () => {
                 <TabsTrigger value="security">
                   <Lock className="h-4 w-4 mr-2" />
                   Security
-                </TabsTrigger>
-                <TabsTrigger value="plans">
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Plans & Billing
                 </TabsTrigger>
                 <TabsTrigger value="preferences">
                   <Bell className="h-4 w-4 mr-2" />
@@ -405,142 +313,6 @@ const Settings = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="plans">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Plans & Billing</CardTitle>
-                    <CardDescription>
-                      Manage your subscription and view usage statistics.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Current Plan */}
-                    <div>
-                      <h3 className="font-semibold mb-3">Current Plan</h3>
-                      {planLoading ? (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading plan details...
-                        </div>
-                      ) : plan ? (
-                        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Badge 
-                              variant={plan.plan_type === 'free' ? 'secondary' : 'default'}
-                              className={plan.plan_type !== 'free' ? 'bg-primary/20 text-primary border-primary/30 text-base px-3 py-1' : 'text-base px-3 py-1'}
-                            >
-                              {plan.plan_type === 'free' ? 'Free Plan' : plan.plan_type === 'pro' ? 'Pro Plan' : 'Enterprise Plan'}
-                            </Badge>
-                            {plan.plan_type === 'pro' && (
-                              <span className="text-sm text-muted-foreground">
-                                $9/month
-                              </span>
-                            )}
-                          </div>
-                          {plan.plan_type === 'free' ? (
-                            <Button 
-                              onClick={handleUpgradeToPro}
-                              className="bg-primary hover:bg-primary-glow"
-                              disabled={isUpgrading}
-                            >
-                              <Sparkles className="mr-2 h-4 w-4" />
-                              {isUpgrading ? "Processing..." : "Upgrade to Pro"}
-                            </Button>
-                          ) : (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={handleManageBilling}
-                            >
-                              Manage Billing
-                            </Button>
-                          )}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <Separator />
-
-                    {/* Usage Statistics */}
-                    <div>
-                      <h3 className="font-semibold mb-3">Usage Statistics</h3>
-                      {!planLoading && plan ? (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
-                            <span className="text-sm">Chat Instances</span>
-                            <span className="font-semibold">
-                              {plan.current_chat_count} / {plan.plan_type === 'free' ? plan.max_chat_instances : '∞'}
-                            </span>
-                          </div>
-                          {plan.plan_type === 'free' && (
-                            <p className="text-xs text-muted-foreground">
-                              {plan.can_create_more_chats 
-                                ? `You can create ${plan.max_chat_instances - plan.current_chat_count} more chat instance${plan.max_chat_instances - plan.current_chat_count !== 1 ? 's' : ''}.`
-                                : 'You have reached your chat instance limit. Upgrade to Pro for unlimited instances.'
-                              }
-                            </p>
-                          )}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <Separator />
-
-                    {/* Plan Features */}
-                    <div>
-                      <h3 className="font-semibold mb-3">
-                        {plan?.plan_type === 'free' ? 'Included in Your Plan' : 'Your Pro Features'}
-                      </h3>
-                      <ul className="space-y-2">
-                        {plan?.plan_type === 'free' ? (
-                          <>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>1 chat instance</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Custom branding (colors, logo, messages)</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Quick start prompts</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Webhook integration</span>
-                            </li>
-                          </>
-                        ) : (
-                          <>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Unlimited chat instances</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Advanced analytics</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Priority support</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Hide branding badge</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                              <span>Custom domains</span>
-                            </li>
-                          </>
-                        )}
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
               <TabsContent value="preferences">
                 <Card>
                   <CardHeader>
@@ -550,25 +322,9 @@ const Settings = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="hide-badge">Hide Branding Badge</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Remove "Powered by Flowify" from your public chats
-                        </p>
-                        {!plan?.can_hide_branding && (
-                          <Badge variant="secondary" className="mt-2">
-                            Pro Feature
-                          </Badge>
-                        )}
-                      </div>
-                      <Switch
-                        id="hide-badge"
-                        checked={hideBrandingBadge}
-                        onCheckedChange={handleToggleBrandingBadge}
-                        disabled={!plan?.can_hide_branding}
-                      />
-                    </div>
+                    <p className="text-muted-foreground">
+                      Flowify is completely free to use. For custom domains, you can self-host via GitHub.
+                    </p>
                   </CardContent>
                 </Card>
               </TabsContent>

@@ -41,8 +41,6 @@ import { ChatSidebar } from "@/components/ChatSidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { SignInPrompt } from "@/components/SignInPrompt";
-import { useUserPlan } from "@/hooks/useUserPlan";
-import { createCheckoutSession } from "@/lib/stripe";
 import { ChatThemeProvider } from "@/theme/ChatThemeProvider";
 import {
   getInputClasses,
@@ -137,7 +135,7 @@ const Chat = () => {
   const [viewTracked, setViewTracked] = useState(false);
   const [ownerHidesBranding, setOwnerHidesBranding] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
-  const userPlan = useUserPlan();
+  
 
   useEffect(() => {
     let isMounted = true;
@@ -781,25 +779,6 @@ const Chat = () => {
     handleResetSession();
   };
 
-  const handleUpgradeToPro = async () => {
-    try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) {
-        navigate("/auth");
-        return;
-      }
-
-      await createCheckoutSession();
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-      toast({
-        title: "Error",
-        description: "Failed to start upgrade process. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -881,10 +860,7 @@ const Chat = () => {
                 }
               }}
               userEmail={user?.email}
-              userPlan={userPlan.plan}
-              onUpgrade={handleUpgradeToPro}
               onLogout={handleLogout}
-              canCreateMore={userPlan.plan?.can_create_more_chats ?? false}
             />
             
             {/* Main content area with landing page */}
@@ -1079,10 +1055,7 @@ const Chat = () => {
               }
             }}
             userEmail={user?.email}
-            userPlan={userPlan.plan}
-            onUpgrade={handleUpgradeToPro}
             onLogout={handleLogout}
-            canCreateMore={userPlan.plan?.can_create_more_chats ?? false}
           />
         ) : (
           /* ChatSidebar for authenticated visitors OR anonymous users if allowed */
