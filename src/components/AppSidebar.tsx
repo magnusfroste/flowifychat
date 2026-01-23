@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AppSidebarHeader } from "./AppSidebarHeader";
 import { AppSidebarFooter } from "./AppSidebarFooter";
-import { UserPlan } from "@/hooks/useUserPlan";
 
 interface ChatInstance {
   id: string;
@@ -74,10 +73,7 @@ interface AppSidebarProps {
   onNewSession?: () => void;
   onChatSelect?: (chatId: string | null) => void;
   userEmail: string | undefined;
-  userPlan: UserPlan | null;
-  onUpgrade: () => void;
   onLogout: () => void;
-  canCreateMore: boolean;
 }
 
 export function AppSidebar({
@@ -89,10 +85,7 @@ export function AppSidebar({
   onNewSession,
   onChatSelect,
   userEmail,
-  userPlan,
-  onUpgrade,
   onLogout,
-  canCreateMore,
 }: AppSidebarProps) {
   const navigate = useNavigate();
   const { open: sidebarOpen } = useSidebar();
@@ -310,11 +303,7 @@ export function AppSidebar({
   };
 
   const handleCreateNew = () => {
-    if (canCreateMore) {
-      navigate("/chat/new");
-    } else {
-      onUpgrade();
-    }
+    navigate("/chat/new");
   };
 
   // CHAT MODE: Flat conversation history for single chat
@@ -400,8 +389,6 @@ export function AppSidebar({
 
           <AppSidebarFooter
             userEmail={userEmail}
-            userPlan={userPlan}
-            onUpgrade={onUpgrade}
             onLogout={onLogout}
           />
         </Sidebar>
@@ -441,11 +428,11 @@ export function AppSidebar({
             <Button
               onClick={handleCreateNew}
               className="w-full justify-start"
-              variant={canCreateMore ? "default" : "outline"}
+              variant="default"
               size={sidebarOpen ? "default" : "icon"}
             >
               <Plus className={sidebarOpen ? "mr-2 h-4 w-4" : "h-4 w-4"} />
-              {sidebarOpen && (canCreateMore ? "New Chat" : "Upgrade to Create")}
+              {sidebarOpen && "New Chat"}
             </Button>
           </div>
 
@@ -498,47 +485,25 @@ export function AppSidebar({
                                 )}
                               />
                             ) : (
-                              <MessageSquare className="h-4 w-4" />
-                            )}
-
-                            {sidebarOpen && (
-                              <>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5">
-                                    <p className="text-sm font-medium truncate">{chat.name}</p>
-                                    {chat.chat_type === 'public' ? (
-                                      <Globe className="h-3 w-3 text-muted-foreground shrink-0" />
-                                    ) : (
-                                      <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
-                                    )}
-                                  </div>
-                                  {chat.analytics && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {chat.analytics.total_messages} message{chat.analytics.total_messages !== 1 ? "s" : ""}
-                                    </p>
-                                  )}
-                                </div>
-
-                                {hasActivity && (
-                                  <Activity className="h-3 w-3 text-muted-foreground shrink-0" />
+                              <div
+                                className={cn(
+                                  "h-2 w-2 rounded-full shrink-0",
+                                  chat.is_active ? "bg-green-500" : "bg-muted"
                                 )}
-                              </>
+                              />
+                            )}
+                            {sidebarOpen && (
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{chat.name}</p>
+                                {hasActivity && (
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Activity className="h-3 w-3" />
+                                    <span>{chat.analytics?.total_messages || 0} msgs</span>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </Link>
-
-                          {sidebarOpen && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                navigate(`/chat/${chat.id}/edit`);
-                              }}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded hover:bg-accent opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity"
-                              aria-label="Chat settings"
-                            >
-                              <Settings className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
-                            </button>
-                          )}
                         </div>
                       );
                     })}
@@ -551,11 +516,30 @@ export function AppSidebar({
 
         <AppSidebarFooter
           userEmail={userEmail}
-          userPlan={userPlan}
-          onUpgrade={onUpgrade}
           onLogout={onLogout}
         />
       </Sidebar>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all messages in this conversation. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
