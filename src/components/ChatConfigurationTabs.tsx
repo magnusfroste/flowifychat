@@ -882,6 +882,56 @@ export function ChatConfigurationTabs({
           )}
         </div>
 
+        {/* Layout Section */}
+        <div className="space-y-4 pt-6 border-t">
+          <div>
+            <h3 className="font-medium text-lg mb-1">📐 Layout</h3>
+            <p className="text-sm text-muted-foreground">Sidebar and conversation history settings</p>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="showSidebar"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel>Show Sidebar</FormLabel>
+                  <FormDescription>
+                    Display a sidebar with conversation history
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="allowAnonymousHistory"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel>Anonymous History</FormLabel>
+                  <FormDescription>
+                    Allow non-logged-in users to see their local chat history
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
         {/* Interactive Elements Section */}
         <div className="space-y-4 pt-6 border-t">
           <div>
