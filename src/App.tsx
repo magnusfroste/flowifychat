@@ -14,6 +14,7 @@ import Chat from "./pages/Chat";
 import ChatConfiguration from "./pages/ChatConfiguration";
 import NotFound from "./pages/NotFound";
 import ThemeLab from "./pages/ThemeLab";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/chat/new" element={<ChatConfiguration mode="create" />} />
               <Route path="/chat/:id/edit" element={<ChatConfiguration mode="edit" />} />
               <Route path="/chat/:id" element={<Chat />} />
+              <Route path="/terms" element={<Terms />} />
               {/* Development Tools */}
               <Route path="/dev/theme-lab" element={<ThemeLab />} />
               {/* Public slug route - must come last before catch-all */}
