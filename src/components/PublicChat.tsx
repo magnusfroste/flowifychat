@@ -94,11 +94,11 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
 
   // Track page view (GDPR-safe: no personal data)
   useEffect(() => {
-    if (!viewTracked) {
+    if (!viewTracked && layoutConfig.analyticsEnabled) {
       trackPublicAnalyticsEvent(chatInstance.id, sessionId, "view");
       setViewTracked(true);
     }
-  }, [chatInstance.id, sessionId, viewTracked]);
+  }, [chatInstance.id, sessionId, viewTracked, layoutConfig.analyticsEnabled]);
 
   // Load messages from localStorage when session changes
   useEffect(() => {
@@ -206,12 +206,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     setSending(true);
 
     // Track message sent (GDPR-safe: only message length, no content)
-    trackPublicAnalyticsEvent(
-      chatInstance.id,
-      sessionId,
-      "message_sent",
-      { message_length: userMessage.content.length }
-    );
+    if (layoutConfig.analyticsEnabled) {
+      trackPublicAnalyticsEvent(
+        chatInstance.id,
+        sessionId,
+        "message_sent",
+        { message_length: userMessage.content.length }
+      );
+    }
 
     if (chatMode === 'landing') {
       setChatMode('chat');
@@ -237,12 +239,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Track message received (GDPR-safe: only response length)
-      trackPublicAnalyticsEvent(
-        chatInstance.id,
-        sessionId,
-        "message_received",
-        { response_length: assistantContent.length }
-      );
+      if (layoutConfig.analyticsEnabled) {
+        trackPublicAnalyticsEvent(
+          chatInstance.id,
+          sessionId,
+          "message_received",
+          { response_length: assistantContent.length }
+        );
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage: Message = {

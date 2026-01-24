@@ -78,6 +78,7 @@ export const getLayoutConfig = (branding: any) => {
     showSidebar: branding?.showSidebar ?? true,
     allowAnonymousHistory: branding?.allowAnonymousHistory ?? true,
     headerStyle: branding?.headerStyle || 'standard',
+    analyticsEnabled: branding?.analyticsEnabled ?? true,
   };
 };
 

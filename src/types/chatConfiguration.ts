@@ -121,6 +121,7 @@ export interface ChatBranding {
   avatarPosition?: 'top' | 'center';
   showSidebar?: boolean;
   allowAnonymousHistory?: boolean;
+  analyticsEnabled?: boolean;
   headerStyle?: 'minimal' | 'standard' | 'prominent';
   
   // Input Controls
@@ -220,6 +221,7 @@ export interface ChatFormValues {
   avatarPosition?: 'top' | 'center';
   showSidebar?: boolean;
   allowAnonymousHistory?: boolean;
+  analyticsEnabled?: boolean;
   headerStyle?: 'minimal' | 'standard' | 'prominent';
   
   // Input Controls
