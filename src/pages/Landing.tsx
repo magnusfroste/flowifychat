@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X, Cloud, Github, Globe } from "lucide-react";
+import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X, Cloud, Github, Globe, Lock, Users, BarChart3, Shield, Database, Eye } from "lucide-react";
 import flowifyLogo from "@/assets/flowify-logo-2026.png";
 import { useState } from "react";
 
@@ -23,6 +23,9 @@ const Landing = () => {
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Features
+              </a>
+              <a href="#chat-modes" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Chat Modes
               </a>
               <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Deploy
@@ -56,6 +59,13 @@ const Landing = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Features
+              </a>
+              <a
+                href="#chat-modes"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Chat Modes
               </a>
               <Link
                 to="/pricing"
@@ -206,15 +216,131 @@ const Landing = () => {
             description="Manage unlimited chat interfaces. Perfect for agencies and power users."
           />
           <FeatureCard
+            icon={<BarChart3 className="h-6 w-6" />}
+            title="GDPR-Safe Analytics"
+            description="Track views and messages without storing personal data. Toggle analytics per chat."
+          />
+          <FeatureCard
             icon={<Sparkles className="h-6 w-6" />}
             title="Customizable"
             description="Brand colors, avatars, welcome messages. Make it yours without code."
           />
-          <FeatureCard
-            icon={<Zap className="h-6 w-6" />}
-            title="Real-time"
-            description="Streaming responses. Typing indicators. Everything your users expect."
-          />
+        </div>
+      </section>
+
+      {/* Chat Modes Section */}
+      <section id="chat-modes" className="bg-muted/30 border-y border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Two Modes. One Platform.
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Choose the right chat experience for your users
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Public Chat Card */}
+            <div className="relative p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all hover:shadow-glow">
+              <div className="absolute -top-3 left-6">
+                <span className="px-3 py-1 text-xs font-medium rounded-full bg-accent/20 text-accent-foreground border border-accent/30">
+                  No Login Required
+                </span>
+              </div>
+              
+              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                <Globe className="h-7 w-7" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-3">Public Chat</h3>
+              <p className="text-muted-foreground mb-6">
+                Stateless interface for customer support, demos, and embeds. Messages go directly to your n8n webhook.
+              </p>
+              
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <Zap className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Direct n8n webhook integration</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Database className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">No messages stored in database</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Eye className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Optional local history (localStorage)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">GDPR-safe anonymous analytics</span>
+                </li>
+              </ul>
+              
+              <div className="pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Best for:</strong> Customer support, product demos, website embeds, landing pages
+                </p>
+              </div>
+            </div>
+
+            {/* Authenticated Chat Card */}
+            <div className="relative p-8 rounded-2xl bg-card border border-primary/30 hover:border-primary/50 transition-all hover:shadow-glow">
+              <div className="absolute -top-3 left-6">
+                <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/20 text-primary border border-primary/30">
+                  Login Required
+                </span>
+              </div>
+              
+              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                <Lock className="h-7 w-7" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-3">Authenticated Chat</h3>
+              <p className="text-muted-foreground mb-6">
+                Full-featured experience with persistent history, user sessions, and complete analytics.
+              </p>
+              
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <Database className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Full message history in database</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Users className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">User sessions with synced history</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <BarChart3 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Complete analytics dashboard</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <MessageSquare className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">Sidebar with conversation list</span>
+                </li>
+              </ul>
+              
+              <div className="pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Best for:</strong> Internal tools, premium services, member portals, SaaS applications
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* GDPR Compliance Callout */}
+          <div className="mt-12 max-w-3xl mx-auto">
+            <div className="flex items-start gap-4 p-6 rounded-xl bg-accent/10 border border-accent/20">
+              <Shield className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-semibold mb-1">Privacy-First Analytics</h4>
+                <p className="text-sm text-muted-foreground">
+                  Our anonymous analytics tracks only page views and message counts—no personal data, 
+                  no IP addresses, no fingerprinting. Toggle analytics on/off per chat instance in your dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
