@@ -124,14 +124,20 @@ export function MessageList({
               ) : (
                 <div
                   className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
-                    message.role === "user" ? 'bg-[var(--bubble-user)] text-[var(--bubble-user-foreground)]' : (botMessageColor === 'transparent' ? '' : 'bg-[var(--bubble-bot)] text-[var(--bubble-bot-foreground)]')
+                    message.role === "user" 
+                      ? (userMessageColor && userMessageColor !== 'transparent' 
+                          ? 'bg-[hsl(var(--bubble-user))] text-[hsl(var(--bubble-user-foreground))]' 
+                          : '')
+                      : (botMessageColor && botMessageColor !== 'transparent' 
+                          ? 'bg-[hsl(var(--bubble-bot))] text-[hsl(var(--bubble-bot-foreground))]' 
+                          : '')
                   }`}
                   style={{
                     borderRadius: bubbleRadiusStyle,
                     backgroundColor: message.role === "user" 
-                      ? (showUserBubble ? (userMessageColor || undefined) : 'transparent')
-                      : (botMessageColor === 'transparent' ? 'transparent' : (botMessageColor || undefined)),
-                    color: message.role === "assistant" && branding?.textColor ? branding.textColor : undefined,
+                      ? (showUserBubble && userMessageColor && userMessageColor !== 'transparent' ? userMessageColor : 'transparent')
+                      : (botMessageColor && botMessageColor !== 'transparent' ? botMessageColor : 'transparent'),
+                    color: branding?.textColor || undefined,
                   }}
                 >
                   <div 
