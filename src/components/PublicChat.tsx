@@ -14,6 +14,8 @@ import { ChatHeader } from "@/components/ChatHeader";
 import { ChatInput } from "@/components/ChatInput";
 import { MessageList } from "@/components/MessageList";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { ChatThemeProvider } from "@/theme/ChatThemeProvider";
+import type { ChatBranding } from "@/types/chatConfiguration";
 
 interface Message {
   id: string;
@@ -169,11 +171,73 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     ? { background: `linear-gradient(135deg, ${branding.backgroundGradientStart}, ${branding.backgroundGradientEnd})` }
     : branding?.backgroundColor ? { backgroundColor: branding.backgroundColor } : {};
 
+  // Build a ChatBranding object for theming
+  const themeBranding: ChatBranding = {
+    chatTitle: branding?.chatTitle || chatInstance.name,
+    welcomeMessage: branding?.welcomeMessage || '',
+    primaryColor: branding?.primaryColor || '#6366f1',
+    accentColor: branding?.accentColor,
+    secondaryColor: branding?.secondaryColor,
+    userMessageColor: branding?.userMessageColor,
+    botMessageColor: branding?.botMessageColor,
+    backgroundColor: branding?.backgroundColor,
+    backgroundStyle: branding?.backgroundStyle,
+    textColor: branding?.textColor,
+    fontFamily: branding?.fontFamily,
+    fontWeight: branding?.fontWeight,
+    lineHeight: branding?.lineHeight,
+    avatarUrl: branding?.avatarUrl,
+  };
+
   // Landing page mode
   if (chatMode === 'landing' && uxConfig.useLandingPageMode) {
     return (
+      <ChatThemeProvider branding={themeBranding}>
+        <div 
+          className="min-h-screen flex flex-col text-foreground"
+          style={bgStyles}
+        >
+          <ChatHeader
+            isOwner={isOwner}
+            chatTitle={chatInstance.name}
+            displayTitle={branding?.chatTitle}
+            headerStyle={layoutConfig.headerStyle}
+            showTitle={false}
+            transparent={true}
+            user={user}
+            useLandingPageMode={uxConfig.useLandingPageMode}
+          />
+          
+          <div className="flex-1">
+            <ChatLandingPage
+              branding={branding}
+              quickStartPrompts={quickStartConfig.prompts}
+              inputPlaceholder={inputConfig.placeholder}
+              input={input}
+              onInputChange={setInput}
+              onSend={handleSend}
+              onPromptClick={(text) => {
+                if (quickStartConfig.autoSend) {
+                  typeAndSend(text);
+                } else {
+                  setInput(text);
+                }
+              }}
+              sending={sending}
+              autoSend={quickStartConfig.autoSend}
+              isTypingPrompt={isTypingPrompt}
+            />
+          </div>
+        </div>
+      </ChatThemeProvider>
+    );
+  }
+
+  // Chat mode - centered window, no sidebar
+  return (
+    <ChatThemeProvider branding={themeBranding}>
       <div 
-        className="min-h-screen flex flex-col"
+        className="min-h-screen flex flex-col text-foreground"
         style={bgStyles}
       >
         <ChatHeader
@@ -181,86 +245,46 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
           chatTitle={chatInstance.name}
           displayTitle={branding?.chatTitle}
           headerStyle={layoutConfig.headerStyle}
-          showTitle={false}
-          transparent={true}
+          showTitle={true}
+          transparent={false}
           user={user}
           useLandingPageMode={uxConfig.useLandingPageMode}
         />
-        
-        <div className="flex-1">
-          <ChatLandingPage
-            branding={branding}
-            quickStartPrompts={quickStartConfig.prompts}
-            inputPlaceholder={inputConfig.placeholder}
-            input={input}
-            onInputChange={setInput}
-            onSend={handleSend}
-            onPromptClick={(text) => {
-              if (quickStartConfig.autoSend) {
-                typeAndSend(text);
-              } else {
-                setInput(text);
-              }
-            }}
-            sending={sending}
-            autoSend={quickStartConfig.autoSend}
-            isTypingPrompt={isTypingPrompt}
-          />
-        </div>
+
+        <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
+          <div className="flex-1 overflow-y-auto mb-4">
+            <MessageList
+              messages={messages}
+              branding={branding}
+              layoutConfig={layoutConfig}
+              behaviorConfig={behaviorConfig}
+              interactiveConfig={interactiveConfig}
+              copiedMessageId={null}
+              copiedCodeBlock={null}
+              onCopyMessage={() => {}}
+              onCopyCode={() => {}}
+              onRegenerate={() => {}}
+              sending={sending}
+            />
+            {sending && <TypingIndicator />}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="sticky bottom-0 pt-4 bg-background/80 backdrop-blur-sm">
+            <ChatInput
+              value={input}
+              onChange={setInput}
+              onSend={() => handleSend()}
+              sending={sending || isTypingPrompt}
+              placeholder={inputConfig.placeholder}
+              inputStyle={inputStyle as any}
+              buttonStyle={buttonStyle as any}
+              inputSize={inputSize === 'compact' ? 'compact' : inputSize === 'large' ? 'large' : 'standard'}
+              primaryColor={primaryColor}
+            />
+          </div>
+        </main>
       </div>
-    );
-  }
-
-  // Chat mode - centered window, no sidebar
-  return (
-    <div 
-      className="min-h-screen flex flex-col"
-      style={bgStyles}
-    >
-      <ChatHeader
-        isOwner={isOwner}
-        chatTitle={chatInstance.name}
-        displayTitle={branding?.chatTitle}
-        headerStyle={layoutConfig.headerStyle}
-        showTitle={true}
-        transparent={false}
-        user={user}
-        useLandingPageMode={uxConfig.useLandingPageMode}
-      />
-
-      <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
-        <div className="flex-1 overflow-y-auto mb-4">
-          <MessageList
-            messages={messages}
-            branding={branding}
-            layoutConfig={layoutConfig}
-            behaviorConfig={behaviorConfig}
-            interactiveConfig={interactiveConfig}
-            copiedMessageId={null}
-            copiedCodeBlock={null}
-            onCopyMessage={() => {}}
-            onCopyCode={() => {}}
-            onRegenerate={() => {}}
-            sending={sending}
-          />
-          {sending && <TypingIndicator />}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className="sticky bottom-0 pt-4 bg-background/80 backdrop-blur-sm">
-          <ChatInput
-            value={input}
-            onChange={setInput}
-            onSend={() => handleSend()}
-            sending={sending || isTypingPrompt}
-            placeholder={inputConfig.placeholder}
-            inputStyle={inputStyle as any}
-            buttonStyle={buttonStyle as any}
-            inputSize={inputSize === 'compact' ? 'compact' : inputSize === 'large' ? 'large' : 'standard'}
-            primaryColor={primaryColor}
-          />
-        </div>
-      </main>
-    </div>
+    </ChatThemeProvider>
   );
 }
