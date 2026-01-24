@@ -72,36 +72,69 @@ export function ChatThemeProvider({ branding, children }: ChatThemeProviderProps
     }
     
     // Set user message bubble colors
-    if (branding.userMessageColor) {
+    if (branding.userMessageColor && branding.userMessageColor !== 'transparent') {
       vars['--bubble-user'] = branding.userMessageColor.startsWith('#') ? hexToHsl(branding.userMessageColor) : branding.userMessageColor;
-      vars['--bubble-user-foreground'] = branding.userMessageColor.startsWith('#') ? getContrastColor(branding.userMessageColor) : getContrastColor('#000000');
+      vars['--bubble-user-foreground'] = branding.userMessageColor.startsWith('#') ? getContrastColor(branding.userMessageColor) : '0 0% 100%';
     }
     
     // Set bot message bubble colors
-    if (branding.botMessageColor) {
+    if (branding.botMessageColor && branding.botMessageColor !== 'transparent') {
       vars['--bubble-bot'] = branding.botMessageColor.startsWith('#') ? hexToHsl(branding.botMessageColor) : branding.botMessageColor;
-      vars['--bubble-bot-foreground'] = branding.botMessageColor.startsWith('#') ? getContrastColor(branding.botMessageColor) : getContrastColor('#000000');
+      vars['--bubble-bot-foreground'] = branding.botMessageColor.startsWith('#') ? getContrastColor(branding.botMessageColor) : '0 0% 0%';
     }
     
-    // Set background color if specified
-    if (branding.backgroundColor) {
+    // Set background color if specified (override theme background)
+    if (branding.backgroundColor && !branding.backgroundColor.startsWith('hsl(var')) {
+      const bgHsl = branding.backgroundColor.startsWith('#') 
+        ? hexToHsl(branding.backgroundColor) 
+        : branding.backgroundColor;
+      vars['--background'] = bgHsl;
       vars['--chat-bg'] = branding.backgroundColor;
+      
+      // Set matching foreground based on background luminance
+      const fgHsl = branding.backgroundColor.startsWith('#') 
+        ? getContrastColor(branding.backgroundColor) 
+        : '0 0% 0%';
+      vars['--foreground'] = fgHsl;
+      
+      // Adjust muted and card colors based on background
+      if (branding.backgroundColor.startsWith('#')) {
+        const hex = branding.backgroundColor.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        
+        if (luminance < 0.3) {
+          // Dark background - lighten muted colors
+          vars['--muted'] = '240 4% 16%';
+          vars['--muted-foreground'] = '240 5% 65%';
+          vars['--card'] = '240 6% 10%';
+          vars['--card-foreground'] = '0 0% 98%';
+          vars['--border'] = '240 6% 20%';
+          vars['--input'] = '240 6% 20%';
+        }
+      }
     }
 
-    // Set text color if specified (for Claude's warm dark brown)
+    // Set text color if specified (for Claude's warm dark brown, Grok's white)
     if (branding.textColor) {
+      const textHsl = branding.textColor.startsWith('#') 
+        ? hexToHsl(branding.textColor) 
+        : branding.textColor;
       vars['--text-color'] = branding.textColor;
+      vars['--foreground'] = textHsl;
     }
 
     // Set font weight
     if (branding.fontWeight) {
-      const weightMap = { normal: '400', medium: '500', semibold: '600' };
+      const weightMap = { light: '300', normal: '400', medium: '500', semibold: '600', bold: '700' };
       vars['--font-weight'] = weightMap[branding.fontWeight as keyof typeof weightMap] || '400';
     }
 
     // Set line height
     if (branding.lineHeight) {
-      const heightMap = { tight: '1.25', normal: '1.5', relaxed: '1.625', loose: '1.7' };
+      const heightMap = { tight: '1.25', normal: '1.5', relaxed: '1.625', loose: '1.75' };
       vars['--line-height'] = heightMap[branding.lineHeight as keyof typeof heightMap] || '1.5';
     }
     
@@ -109,12 +142,18 @@ export function ChatThemeProvider({ branding, children }: ChatThemeProviderProps
   }, [branding]);
   
   // Get font family class
-  const fontClass = branding.fontFamily 
-    ? `font-${branding.fontFamily.toLowerCase().replace(/\s+/g, '-').replace('dm-sans', 'chatgpt').replace('plus-jakarta-sans', 'claude')}`
-    : '';
+  const getFontClass = () => {
+    if (!branding.fontFamily) return '';
+    const fontName = branding.fontFamily.toLowerCase();
+    if (fontName.includes('inter')) return 'font-grok';
+    if (fontName.includes('dm sans')) return 'font-chatgpt';
+    if (fontName.includes('plus jakarta') || fontName.includes('jakarta')) return 'font-claude';
+    if (fontName.includes('poppins')) return 'font-playful';
+    return '';
+  };
 
   return (
-    <div style={cssVars as React.CSSProperties} className={fontClass}>
+    <div style={cssVars as React.CSSProperties} className={getFontClass()}>
       {children}
     </div>
   );
