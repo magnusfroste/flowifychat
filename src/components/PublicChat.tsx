@@ -7,6 +7,7 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendToWebhookViaEdge } from "@/lib/edgeWebhookService";
+import { trackPublicAnalyticsEvent } from "@/lib/analytics";
 import { getMetadataConfig, getQuickStartPromptsConfig, getInputConfig, getUXConfig, getLayoutConfig } from "@/lib/chatConfig";
 import { ChatLandingPage } from "@/components/ChatLandingPage";
 import { ChatHeader } from "@/components/ChatHeader";
@@ -54,6 +55,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
   const [isTypingPrompt, setIsTypingPrompt] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [viewTracked, setViewTracked] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -89,6 +91,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     };
     checkOwnership();
   }, [chatInstance.user_id]);
+
+  // Track page view (GDPR-safe: no personal data)
+  useEffect(() => {
+    if (!viewTracked) {
+      trackPublicAnalyticsEvent(chatInstance.id, sessionId, "view");
+      setViewTracked(true);
+    }
+  }, [chatInstance.id, sessionId, viewTracked]);
 
   // Load messages from localStorage when session changes
   useEffect(() => {
@@ -195,6 +205,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
     setInput("");
     setSending(true);
 
+    // Track message sent (GDPR-safe: only message length, no content)
+    trackPublicAnalyticsEvent(
+      chatInstance.id,
+      sessionId,
+      "message_sent",
+      { message_length: userMessage.content.length }
+    );
+
     if (chatMode === 'landing') {
       setChatMode('chat');
     }
@@ -217,6 +235,14 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Track message received (GDPR-safe: only response length)
+      trackPublicAnalyticsEvent(
+        chatInstance.id,
+        sessionId,
+        "message_received",
+        { response_length: assistantContent.length }
+      );
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage: Message = {

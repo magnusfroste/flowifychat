@@ -10,7 +10,7 @@ export interface AnalyticsEvent {
 }
 
 /**
- * Track an analytics event for a chat instance
+ * Track an analytics event for a chat instance (authenticated chats)
  */
 export const trackAnalyticsEvent = async (event: AnalyticsEvent) => {
   try {
@@ -28,6 +28,37 @@ export const trackAnalyticsEvent = async (event: AnalyticsEvent) => {
     }
   } catch (error) {
     console.error("Failed to track analytics:", error);
+  }
+};
+
+/**
+ * GDPR-safe analytics for public chats
+ * - No userAgent (fingerprinting risk)
+ * - No referrer (privacy)
+ * - Random session ID (not persistent across visits)
+ * - Only aggregated counts (message_length, response_length)
+ */
+export const trackPublicAnalyticsEvent = async (
+  chatInstanceId: string,
+  sessionId: string,
+  eventType: AnalyticsEventType,
+  safeMetadata?: { message_length?: number; response_length?: number }
+) => {
+  try {
+    const { error } = await supabase
+      .from("chat_analytics")
+      .insert({
+        chat_instance_id: chatInstanceId,
+        session_id: sessionId,
+        event_type: eventType,
+        metadata: safeMetadata || {},
+      });
+
+    if (error) {
+      console.error("Public analytics tracking error:", error);
+    }
+  } catch (error) {
+    console.error("Failed to track public analytics:", error);
   }
 };
 
