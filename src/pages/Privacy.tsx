@@ -129,7 +129,7 @@ const Privacy = () => {
                   <li>Custom data retention policies</li>
                 </ul>
                 <a 
-                  href="https://github.com" 
+                  href="https://github.com/magnusfroste/flowifychat" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex"
@@ -175,7 +175,7 @@ const Privacy = () => {
             </p>
             <div className="mt-4">
               <a 
-                href="https://github.com" 
+                href="https://github.com/magnusfroste/flowifychat/issues" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-primary hover:underline"

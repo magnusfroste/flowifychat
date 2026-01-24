@@ -162,7 +162,7 @@ const Landing = () => {
                   <Cloud className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/magnusfroste/flowifychat" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" variant="secondary" className="hover:scale-105 transition-transform">
                   <Github className="mr-2 h-5 w-5" />
                   View on GitHub
@@ -261,7 +261,7 @@ const Landing = () => {
             {/* Links */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
               <a 
-                href="https://github.com" 
+                href="https://github.com/magnusfroste/flowifychat" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
