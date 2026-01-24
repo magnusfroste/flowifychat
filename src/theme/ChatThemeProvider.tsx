@@ -91,39 +91,43 @@ export function ChatThemeProvider({ branding, children }: ChatThemeProviderProps
       vars['--background'] = bgHsl;
       vars['--chat-bg'] = branding.backgroundColor;
       
-      // Set matching foreground based on background luminance
-      const fgHsl = branding.backgroundColor.startsWith('#') 
-        ? getContrastColor(branding.backgroundColor) 
-        : '0 0% 0%';
-      vars['--foreground'] = fgHsl;
-      
-      // Adjust muted and card colors based on background
+      // Check if dark background
+      let isDarkBackground = false;
       if (branding.backgroundColor.startsWith('#')) {
         const hex = branding.backgroundColor.replace('#', '');
         const r = parseInt(hex.substring(0, 2), 16);
         const g = parseInt(hex.substring(2, 4), 16);
         const b = parseInt(hex.substring(4, 6), 16);
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        isDarkBackground = luminance < 0.3;
         
-        if (luminance < 0.3) {
-          // Dark background - lighten muted colors
+        if (isDarkBackground) {
+          // Dark background - set light foreground and adjust UI colors
+          vars['--foreground'] = '0 0% 98%';
           vars['--muted'] = '240 4% 16%';
           vars['--muted-foreground'] = '240 5% 65%';
           vars['--card'] = '240 6% 10%';
           vars['--card-foreground'] = '0 0% 98%';
           vars['--border'] = '240 6% 20%';
           vars['--input'] = '240 6% 20%';
+          vars['--accent'] = '240 4% 16%';
+          vars['--accent-foreground'] = '0 0% 98%';
+        } else {
+          // Light background - set dark foreground
+          vars['--foreground'] = '0 0% 4%';
         }
       }
     }
 
-    // Set text color if specified (for Claude's warm dark brown, Grok's white)
+    // Set explicit text color if specified (overrides auto-calculated foreground)
+    // This allows presets like Grok (#fafafa) and Claude (#191514) to have exact text colors
     if (branding.textColor) {
       const textHsl = branding.textColor.startsWith('#') 
         ? hexToHsl(branding.textColor) 
         : branding.textColor;
       vars['--text-color'] = branding.textColor;
       vars['--foreground'] = textHsl;
+      vars['--card-foreground'] = textHsl;
     }
 
     // Set font weight
