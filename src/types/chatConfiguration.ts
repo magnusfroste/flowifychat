@@ -239,6 +239,12 @@ export interface ChatFormValues {
   showShareButton?: boolean;
   showReadAloudButton?: boolean;
   
+  // Typography
+  textColor?: string;
+  fontWeight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
+  lineHeight?: 'tight' | 'normal' | 'relaxed' | 'loose';
+  letterSpacing?: 'tight' | 'normal' | 'wide';
+  
   // Input Accessories
   showAttachmentButton?: boolean;
   showVoiceButton?: boolean;
