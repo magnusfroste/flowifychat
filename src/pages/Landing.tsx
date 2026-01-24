@@ -80,41 +80,67 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-primary opacity-10 blur-3xl" />
+      <section className="relative overflow-hidden min-h-[80vh] flex items-center">
+        {/* Animated gradient background */}
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 animate-gradient-shift"
+          style={{ backgroundSize: "200% 200%" }}
+        />
+        
+        {/* Floating bubbles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Large bubble - top left */}
+          <div className="absolute -top-20 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
+          
+          {/* Medium bubble - top right */}
+          <div className="absolute top-10 right-10 w-48 h-48 bg-accent/15 rounded-full blur-2xl animate-float-slow" style={{ animationDelay: "1s" }} />
+          
+          {/* Small bubble - center left */}
+          <div className="absolute top-1/3 left-10 w-32 h-32 bg-primary/20 rounded-full blur-xl animate-float" style={{ animationDelay: "2s" }} />
+          
+          {/* Large bubble - bottom right */}
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float-slower" />
+          
+          {/* Medium bubble - bottom left */}
+          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-primary/15 rounded-full blur-2xl animate-float-slow" style={{ animationDelay: "3s" }} />
+          
+          {/* Small accent bubbles */}
+          <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-accent/20 rounded-full blur-xl animate-pulse-glow" />
+          <div className="absolute top-20 left-1/3 w-16 h-16 bg-primary/25 rounded-full blur-lg animate-pulse-glow" style={{ animationDelay: "2s" }} />
+        </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pt-24 sm:pb-32">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-              <Sparkles className="h-4 w-4 text-primary" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 backdrop-blur-sm animate-fade-in">
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
               <span className="text-sm text-primary font-medium">Let it Flowify</span>
             </div>
             
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-primary bg-clip-text text-transparent animate-fade-in" style={{ animationDelay: "0.1s" }}>
               n8n Builds the Brain.
               <br />
               Flowify Creates the Face.
             </h1>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
               Instantly launch ChatGPT, Claude, and Grok-inspired chat interfaces for your n8n AI agents.
               Beautiful. Fast. Free.
             </p>
 
             {/* Comparison Pills */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border">
+            <div className="flex flex-wrap justify-center gap-3 mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border backdrop-blur-sm">
                 <span className="text-sm text-muted-foreground">n8n Native:</span>
                 <span className="text-sm font-medium">Developer-focused</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-sm">
                 <span className="text-sm text-primary">+ Flowify:</span>
                 <span className="text-sm font-medium text-primary">Customer-ready</span>
               </div>
             </div>
 
             {/* Value Props */}
-            <div className="flex flex-wrap justify-center gap-6 mb-12">
+            <div className="flex flex-wrap justify-center gap-6 mb-12 animate-fade-in" style={{ animationDelay: "0.4s" }}>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Cloud className="h-5 w-5 text-primary" />
                 <span>Free Cloud Hosting</span>
@@ -129,15 +155,15 @@ const Landing = () => {
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.5s" }}>
               <Link to="/auth">
-                <Button size="lg" className="bg-primary hover:bg-primary-glow shadow-glow transition-all">
+                <Button size="lg" className="bg-primary hover:bg-primary-glow shadow-glow transition-all hover:scale-105">
                   Start Free in Cloud
                   <Cloud className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="secondary">
+                <Button size="lg" variant="secondary" className="hover:scale-105 transition-transform">
                   <Github className="mr-2 h-5 w-5" />
                   View on GitHub
                 </Button>
