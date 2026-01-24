@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Github, Shield, Database, Eye, Server } from "lucide-react";
+import { ArrowLeft, Github, Shield, Database, Eye, Server, Globe, Lock, BarChart3, ToggleRight } from "lucide-react";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 
 const Privacy = () => {
@@ -47,6 +47,75 @@ const Privacy = () => {
             </p>
           </section>
 
+          {/* Chat Modes & Data Handling */}
+          <section className="bg-accent/10 border border-accent/20 rounded-xl p-6">
+            <h2 className="text-2xl font-semibold mb-6">How Your Data Is Handled by Chat Type</h2>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Public Chat */}
+              <div className="bg-background/50 rounded-lg p-5 border border-border">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Public Chat</h3>
+                    <span className="text-xs text-muted-foreground">No login required</span>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    Messages sent directly to your n8n webhook
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    <strong className="text-foreground">No messages stored</strong> in our database
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    Optional local history (browser localStorage only)
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    GDPR-safe anonymous analytics (toggleable)
+                  </li>
+                </ul>
+              </div>
+
+              {/* Authenticated Chat */}
+              <div className="bg-background/50 rounded-lg p-5 border border-border">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Lock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Authenticated Chat</h3>
+                    <span className="text-xs text-muted-foreground">Login required</span>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    Messages stored for conversation history
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    User sessions linked to your account
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    Synced history across devices
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    Full analytics with user counts
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
           {/* What We Collect - Highlighted */}
           <section className="bg-primary/10 border border-primary/20 rounded-xl p-6">
             <div className="flex items-start gap-4">
@@ -59,26 +128,50 @@ const Privacy = () => {
                 <ul className="list-disc list-inside text-muted-foreground space-y-2">
                   <li><strong className="text-foreground">Account data:</strong> Email address for authentication</li>
                   <li><strong className="text-foreground">Chat configurations:</strong> Your chat instance settings and customizations</li>
-                  <li><strong className="text-foreground">Chat messages:</strong> Conversations between users and your n8n agents</li>
+                  <li><strong className="text-foreground">Chat messages:</strong> Conversations in authenticated chats only</li>
                   <li><strong className="text-foreground">Session data:</strong> Anonymous session IDs for conversation continuity</li>
-                  <li><strong className="text-foreground">Basic analytics:</strong> Page views and message counts (aggregated)</li>
+                  <li><strong className="text-foreground">Basic analytics:</strong> Page views and message counts (aggregated, no PII)</li>
                 </ul>
               </div>
             </div>
           </section>
 
-          {/* What We Don't Collect */}
+          {/* GDPR-Safe Analytics */}
           <section className="bg-muted/50 border border-border rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <BarChart3 className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">GDPR-Safe Analytics</h2>
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  Our analytics system is designed for GDPR compliance:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground space-y-2">
+                  <li><strong className="text-foreground">Anonymous session IDs:</strong> Randomly generated, not linked to users</li>
+                  <li><strong className="text-foreground">No personal data:</strong> No IP addresses, user agents, or fingerprints</li>
+                  <li><strong className="text-foreground">Aggregated metrics:</strong> Only page views and message counts</li>
+                  <li><strong className="text-foreground">Per-chat toggle:</strong> Chat owners can disable analytics entirely</li>
+                </ul>
+                <div className="mt-4 flex items-center gap-2 text-sm text-primary">
+                  <ToggleRight className="h-4 w-4" />
+                  <span>Analytics can be toggled on/off per chat instance in your dashboard</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* What We Don't Collect */}
+          <section className="bg-muted/30 border border-border rounded-xl p-6">
             <div className="flex items-start gap-4">
               <Eye className="h-6 w-6 text-muted-foreground flex-shrink-0 mt-1" />
               <div>
                 <h2 className="text-2xl font-semibold mb-4">What We Don't Collect</h2>
                 <ul className="list-disc list-inside text-muted-foreground space-y-2">
                   <li>Personal information beyond your email</li>
+                  <li>IP addresses or device fingerprints</li>
+                  <li>User agent strings or browser data</li>
                   <li>Tracking cookies or advertising data</li>
                   <li>Browsing history outside of Flowify</li>
-                  <li>Payment information (the service is free)</li>
-                  <li>Location data or device fingerprints</li>
+                  <li>Message content in public chats (stateless)</li>
                 </ul>
               </div>
             </div>
