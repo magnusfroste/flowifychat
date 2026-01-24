@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X } from "lucide-react";
+import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X, Cloud, Github, Globe } from "lucide-react";
 import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 import { useState } from "react";
 
@@ -25,7 +25,7 @@ const Landing = () => {
                 Features
               </a>
               <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Pricing
+                Deploy
               </Link>
               <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Sign In
@@ -62,7 +62,7 @@ const Landing = () => {
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Pricing
+                Deploy
               </Link>
               <Link
                 to="/auth"
@@ -87,7 +87,7 @@ const Landing = () => {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm text-primary font-medium">Built for n8n Flowgrammers</span>
+              <span className="text-sm text-primary font-medium">100% Free & Open Source</span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-primary bg-clip-text text-transparent">
@@ -96,23 +96,40 @@ const Landing = () => {
               For Your n8n Workflows
             </h1>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
-              Stop rebuilding chat UIs. Create ChatGPT-quality interfaces for your n8n webhooks in seconds. 
-              Just paste, customize, and share.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+              Create ChatGPT-quality interfaces for your n8n webhooks in seconds.
+              Free in cloud, or self-host for custom domains.
             </p>
+
+            {/* Value Props */}
+            <div className="flex flex-wrap justify-center gap-6 mb-12">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Cloud className="h-5 w-5 text-primary" />
+                <span>Free Cloud Hosting</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Github className="h-5 w-5 text-primary" />
+                <span>Open Source</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Globe className="h-5 w-5 text-primary" />
+                <span>Self-Host for Custom Domains</span>
+              </div>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
                 <Button size="lg" className="bg-primary hover:bg-primary-glow shadow-glow transition-all">
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  Start Free in Cloud
+                  <Cloud className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/demo">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" variant="secondary">
-                  View Demo
+                  <Github className="mr-2 h-5 w-5" />
+                  View on GitHub
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -211,7 +228,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Pricing
+                    Deploy
                   </Link>
                 </li>
                 <li>
