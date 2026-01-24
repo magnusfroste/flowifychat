@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { ChatInterfacePreview } from "@/components/ChatInterfacePreview";
 import { ChatLandingPagePreview } from "@/components/ChatLandingPagePreview";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { ChatThemeProvider } from "@/theme/ChatThemeProvider";
 import type { ChatFormValues, ChatBranding } from "@/types/chatConfiguration";
 
 interface ChatConfigurationPreviewProps {
@@ -70,6 +71,10 @@ export function ChatConfigurationPreview({
     messageAlignment: formValues.messageAlignment || 'left',
     maxMessageWidth: formValues.maxMessageWidth || 800,
     showAvatars: formValues.showAvatars ?? true,
+    showBotAvatar: formValues.showBotAvatar,
+    showUserAvatar: formValues.showUserAvatar,
+    showUserBubble: formValues.showUserBubble,
+    userAvatarStyle: formValues.userAvatarStyle,
     avatarSize: formValues.avatarSize || 'medium',
     avatarPosition: formValues.avatarPosition || 'top',
     showSidebar: formValues.showSidebar ?? false,
@@ -79,6 +84,8 @@ export function ChatConfigurationPreview({
     inputPosition: formValues.inputPosition || 'sticky-bottom',
     inputSize: formValues.inputSize || 'comfortable',
     sendButtonStyle: formValues.sendButtonStyle || 'icon',
+    showAttachmentButton: formValues.showAttachmentButton,
+    showVoiceButton: formValues.showVoiceButton,
     
     // Message Behavior
     messageSpacing: formValues.messageSpacing || 'normal',
@@ -88,6 +95,14 @@ export function ChatConfigurationPreview({
     messageActions: formValues.messageActions || 'inline',
     showCopyButton: formValues.showCopyButton ?? true,
     showRegenerateButton: formValues.showRegenerateButton ?? true,
+    showThumbsButtons: formValues.showThumbsButtons,
+    showShareButton: formValues.showShareButton,
+    
+    // Typography
+    textColor: formValues.textColor,
+    fontWeight: formValues.fontWeight,
+    lineHeight: formValues.lineHeight,
+    letterSpacing: formValues.letterSpacing,
     
     // Welcome Screen
     welcomeScreenEnabled: formValues.welcomeScreenEnabled,
@@ -173,33 +188,35 @@ export function ChatConfigurationPreview({
             <div className="h-6 bg-gray-800 rounded-b-2xl mx-auto w-40 relative -top-[14px]" />
           )}
 
-          {/* Preview Content */}
-          <div className={`h-full ${device === 'mobile' ? '-mt-6' : ''}`}>
-            {viewMode === 'landing' ? (
-              <ChatLandingPagePreview
-                branding={branding}
-                inputPlaceholder={inputPlaceholder}
-                quickStartPrompts={formValues.quickStartPrompts || []}
-              />
-            ) : formValues.welcomeScreenEnabled && showWelcomeScreen ? (
-              <WelcomeScreen
-                config={{
-                  enabled: true,
-                  subtitle: formValues.welcomeSubtitle,
-                  disclaimer: formValues.welcomeDisclaimer,
-                }}
-                chatTitle={formValues.chatTitle || "Chat Preview"}
-                primaryColor={formValues.primaryColor || "#6366f1"}
-                branding={branding}
-                onStart={() => setShowWelcomeScreen(false)}
-              />
-            ) : (
-              <ChatInterfacePreview
-                branding={branding}
-                inputPlaceholder={inputPlaceholder}
-              />
-            )}
-          </div>
+          {/* Preview Content - Wrapped in ChatThemeProvider for proper CSS variable scoping */}
+          <ChatThemeProvider branding={branding}>
+            <div className={`h-full ${device === 'mobile' ? '-mt-6' : ''}`}>
+              {viewMode === 'landing' ? (
+                <ChatLandingPagePreview
+                  branding={branding}
+                  inputPlaceholder={inputPlaceholder}
+                  quickStartPrompts={formValues.quickStartPrompts || []}
+                />
+              ) : formValues.welcomeScreenEnabled && showWelcomeScreen ? (
+                <WelcomeScreen
+                  config={{
+                    enabled: true,
+                    subtitle: formValues.welcomeSubtitle,
+                    disclaimer: formValues.welcomeDisclaimer,
+                  }}
+                  chatTitle={formValues.chatTitle || "Chat Preview"}
+                  primaryColor={formValues.primaryColor || "#6366f1"}
+                  branding={branding}
+                  onStart={() => setShowWelcomeScreen(false)}
+                />
+              ) : (
+                <ChatInterfacePreview
+                  branding={branding}
+                  inputPlaceholder={inputPlaceholder}
+                />
+              )}
+            </div>
+          </ChatThemeProvider>
         </div>
       </div>
 
