@@ -55,11 +55,11 @@ export const getDensityPadding = (density?: string): string => {
 export function getMessageSpacing(spacing?: string): string {
   switch (spacing) {
     case 'tight':
-      return 'space-y-1';
+      return 'space-y-2';
     case 'relaxed':
-      return 'space-y-10';
+      return 'space-y-6';
     default:
-      return 'space-y-4';
+      return 'space-y-3';
   }
 }
 
