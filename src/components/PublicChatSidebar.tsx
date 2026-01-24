@@ -106,6 +106,7 @@ export function PublicChatSidebar({
   const [sessions, setSessions] = useState<LocalSession[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [clearAllDialogOpen, setClearAllDialogOpen] = useState(false);
 
   // Load sessions from localStorage
   useEffect(() => {
@@ -168,6 +169,20 @@ export function PublicChatSidebar({
     
     setDeleteDialogOpen(false);
     setSessionToDelete(null);
+  };
+
+  const handleClearAllHistory = () => {
+    // Clear all sessions from localStorage
+    localStorage.removeItem(getStorageKey(chatInstanceId));
+    
+    // Clear all message data for each session
+    sessions.forEach(session => {
+      localStorage.removeItem(`flowify_messages_${chatInstanceId}_${session.id}`);
+    });
+    
+    setSessions([]);
+    onNewSession();
+    setClearAllDialogOpen(false);
   };
 
   // Expose a refresh method via custom event
@@ -270,12 +285,25 @@ export function PublicChatSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Subtle tagline */}
-      {sidebarOpen && !logoUrl && !avatarUrl && (
-        <div className="mt-auto p-4 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center opacity-50">
-            Let it Flowify
-          </p>
+      {/* Footer with clear history */}
+      {sidebarOpen && (
+        <div className="mt-auto p-4 border-t border-border space-y-3">
+          {sessions.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setClearAllDialogOpen(true)}
+              className="w-full justify-center text-xs text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-3 w-3 mr-1.5" />
+              Clear all history
+            </Button>
+          )}
+          {!logoUrl && !avatarUrl && (
+            <p className="text-xs text-muted-foreground text-center opacity-50">
+              Let it Flowify
+            </p>
+          )}
         </div>
       )}
 
@@ -294,6 +322,26 @@ export function PublicChatSidebar({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={clearAllDialogOpen} onOpenChange={setClearAllDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all chat history?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all your local conversations and messages. This action cannot be undone and is useful for GDPR compliance.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearAllHistory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear all history
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
