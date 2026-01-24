@@ -87,19 +87,31 @@ const Landing = () => {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm text-primary font-medium">100% Free & Open Source</span>
+              <span className="text-sm text-primary font-medium">The Beautiful Frontend for n8n AI Agents</span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-primary bg-clip-text text-transparent">
-              Beautiful Chat Interfaces
+              n8n Builds the Brain.
               <br />
-              For Your n8n Workflows
+              Flowify Creates the Face.
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Create ChatGPT-quality interfaces for your n8n webhooks in seconds.
-              Free in cloud, or self-host for custom domains.
+              n8n's AI Agents are powerful—but their chat is built for developers, not customers.
+              Flowify gives you the polished interface that ChatGPT, Claude, and Grok set the standard for.
             </p>
+
+            {/* Comparison Pills */}
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border">
+                <span className="text-sm text-muted-foreground">n8n Native:</span>
+                <span className="text-sm font-medium">Developer-focused</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
+                <span className="text-sm text-primary">+ Flowify:</span>
+                <span className="text-sm font-medium text-primary">Customer-ready</span>
+              </div>
+            </div>
 
             {/* Value Props */}
             <div className="flex flex-wrap justify-center gap-6 mb-12">
