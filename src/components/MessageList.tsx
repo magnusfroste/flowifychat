@@ -162,12 +162,17 @@ export function MessageList({
                     backgroundColor: message.role === "user" 
                       ? (showUserBubble && userMessageColor && userMessageColor !== 'transparent' ? userMessageColor : 'transparent')
                       : (botMessageColor && botMessageColor !== 'transparent' ? botMessageColor : 'transparent'),
-                    // Calculate text color: use contrast for colored bubbles, explicit textColor for transparent, or inherit
-                    color: message.role === "user" && showUserBubble && userMessageColor && userMessageColor !== 'transparent'
-                      ? getContrastTextColor(userMessageColor)
-                      : (message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent')
-                        ? getContrastTextColor(botMessageColor)
-                        : (branding?.textColor || 'inherit'),
+                    // Calculate text color based on bubble background
+                    color: (() => {
+                      if (message.role === "user" && showUserBubble && userMessageColor && userMessageColor !== 'transparent') {
+                        return getContrastTextColor(userMessageColor);
+                      }
+                      if (message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent') {
+                        return getContrastTextColor(botMessageColor);
+                      }
+                      // For transparent bubbles, use explicit textColor
+                      return branding?.textColor || 'inherit';
+                    })(),
                   }}
                 >
                   <div 
