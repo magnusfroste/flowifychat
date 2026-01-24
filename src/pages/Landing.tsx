@@ -243,79 +243,57 @@ const Landing = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-background/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            {/* Logo Column */}
-            <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="flex items-center gap-2 mb-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            {/* Logo & Open Source Badge */}
+            <div className="flex flex-col items-center md:items-start gap-3">
+              <Link to="/" className="flex items-center gap-2">
                 <img src={flowifyLogo} alt="Flowify" className="h-8 w-8" />
                 <span className="text-lg font-bold">Flowify</span>
               </Link>
-              <p className="text-sm text-muted-foreground">
-                Let it Flowify
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                  Open Source
+                </span>
+                <span className="text-sm text-muted-foreground">Let it Flowify</span>
+              </div>
             </div>
 
-            {/* Product Column */}
-            <div>
-              <h3 className="font-semibold mb-3">Product</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Deploy
-                  </Link>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Documentation
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company Column */}
-            <div>
-              <h3 className="font-semibold mb-3">Company</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal Column */}
-            <div>
-              <h3 className="font-semibold mb-3">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Terms
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Privacy
-                  </a>
-                </li>
-              </ul>
+            {/* Links */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+              <a 
+                href="https://github.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Github className="h-4 w-4" />
+                GitHub
+              </a>
+              <a 
+                href="#features" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Features
+              </a>
+              <Link 
+                to="/pricing" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Deploy
+              </Link>
+              <Link 
+                to="/terms" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Terms
+              </Link>
             </div>
           </div>
 
-          {/* Bottom Bar */}
-          <div className="pt-8 border-t border-border">
+          {/* Copyright */}
+          <div className="mt-8 pt-8 border-t border-border">
             <p className="text-sm text-muted-foreground text-center">
-              © 2025 Flowify. All rights reserved.
+              © 2025 Flowify. Open Source under MIT License.
             </p>
           </div>
         </div>
