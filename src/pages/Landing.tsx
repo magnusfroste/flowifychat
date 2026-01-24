@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X, Cloud, Github, Globe } from "lucide-react";
-import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import flowifyLogo from "@/assets/flowify-logo-2026.png";
 import { useState } from "react";
 
 const Landing = () => {
