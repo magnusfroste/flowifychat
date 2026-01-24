@@ -287,6 +287,12 @@ const Landing = () => {
               >
                 Terms
               </Link>
+              <Link 
+                to="/privacy" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Privacy
+              </Link>
             </div>
           </div>
 
