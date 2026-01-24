@@ -1,4 +1,4 @@
-import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import flowifyLogo from "@/assets/flowify-logo-2026.png";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 export function AppSidebarHeader() {

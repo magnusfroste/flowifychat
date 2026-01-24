@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MessageSquare, Plus, Trash2, ArrowLeft, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import flowifyLogo from "@/assets/flowify-logo-2026.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SessionManager } from "@/lib/SessionManager";

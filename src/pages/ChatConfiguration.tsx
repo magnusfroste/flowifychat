@@ -139,6 +139,8 @@ export default function ChatConfiguration({ mode }: ChatConfigurationProps) {
       primaryColor: "#6366f1",
       accentColor: "#8b5cf6",
       secondaryColor: "#64748b",
+      // Default Flowify logo - admin can replace with their own
+      logoUrl: "/flowify-logo-2026.png",
       quickStartPrompts: [
         { id: 'prompt-1', text: 'Tell me a story', enabled: true },
         { id: 'prompt-2', text: 'Help me brainstorm', enabled: true },

@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from "react";
 import { MessageSquare, Plus, Trash2, X } from "lucide-react";
-import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
+import flowifyLogo from "@/assets/flowify-logo-2026.png";
 import {
   Sidebar,
   SidebarContent,
