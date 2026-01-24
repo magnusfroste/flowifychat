@@ -5,7 +5,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Palette, Minimize2, Zap } from "lucide-react";
+import { Sparkles, Palette, Minimize2, Zap, X } from "lucide-react";
 
 export interface BrandingTemplate {
   name: string;
@@ -176,7 +176,7 @@ export const templates: BrandingTemplate[] = [
   {
     name: "Grok",
     description: "Bold, dark xAI interface",
-    icon: Zap,
+    icon: X,
     values: {
       primaryColor: "#ffffff",
       accentColor: "#40E0D0",
@@ -299,9 +299,13 @@ export function BrandingTemplates({ onApplyTemplate }: BrandingTemplatesProps) {
               <div className="flex flex-col items-center text-center space-y-2">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: template.values.primaryColor }}
+                  style={{ 
+                    backgroundColor: template.values.primaryColor,
+                    border: template.values.primaryColor === '#ffffff' ? '2px solid #27272a' : 'none',
+                    color: template.values.primaryColor === '#ffffff' ? '#0a0a0a' : 'white'
+                  }}
                 >
-                  <Icon className="w-6 h-6 text-primary-foreground" />
+                  <Icon className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="font-medium text-sm">{template.name}</div>
