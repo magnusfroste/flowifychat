@@ -107,7 +107,7 @@ export function MessageList({
     : false;
 
   return (
-    <div className={`space-y-6 pb-[var(--input-bar-height,8rem)] ${getMessageAlignment()}`}>
+    <div className={`${spacingClass} pb-[var(--input-bar-height,8rem)] ${getMessageAlignment()}`}>
       {messages.map((message, index) => {
         const isLastAssistantMessage = 
           message.role === "assistant" && 
@@ -116,7 +116,7 @@ export function MessageList({
         return (
           <div
             key={message.id}
-            className={`flex animate-scale-in group ${getMessageSpacing()} ${
+            className={`flex animate-scale-in group ${
               layoutConfig.messageAlignment === 'full-width' 
                 ? 'w-full' 
                 : message.role === "user" ? "justify-end" : "justify-start"
