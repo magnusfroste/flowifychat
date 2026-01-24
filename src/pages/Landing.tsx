@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X, Cloud, Github, Globe, Lock, Users, BarChart3, Shield, Database, Eye } from "lucide-react";
+import { MessageSquare, Zap, Share2, Code, Sparkles, ArrowRight, Menu, X, Cloud, Github, Globe, Lock, Users, BarChart3, Shield, Database, Eye, Webhook, Cpu, Monitor, ChevronRight } from "lucide-react";
 import flowifyLogo from "@/assets/flowify-logo-2026.png";
 import { useState } from "react";
 
@@ -21,6 +21,9 @@ const Landing = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
+              <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                How It Works
+              </a>
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Features
               </a>
@@ -53,6 +56,13 @@ const Landing = () => {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border bg-background">
             <div className="px-4 py-4 space-y-3">
+              <a
+                href="#how-it-works"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                How It Works
+              </a>
               <a
                 href="#features"
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -178,6 +188,167 @@ const Landing = () => {
                   View on GitHub
                 </Button>
               </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="bg-muted/30 border-y border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Three simple steps to deploy your AI chat interface
+            </p>
+          </div>
+
+          {/* Flow Diagram */}
+          <div className="max-w-5xl mx-auto">
+            {/* Desktop Flow */}
+            <div className="hidden md:flex items-center justify-between gap-4">
+              {/* Step 1: n8n */}
+              <div className="flex-1 text-center">
+                <div className="relative inline-block">
+                  <div className="h-24 w-24 mx-auto rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
+                    <Webhook className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                    1
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold mt-4 mb-2">n8n Workflow</h3>
+                <p className="text-sm text-muted-foreground">
+                  Build your AI agent with<br />n8n's visual workflow editor
+                </p>
+              </div>
+
+              {/* Arrow 1 */}
+              <div className="flex items-center">
+                <div className="w-16 h-0.5 bg-gradient-to-r from-orange-500 to-primary" />
+                <ChevronRight className="h-6 w-6 text-primary -ml-1" />
+              </div>
+
+              {/* Step 2: Flowify */}
+              <div className="flex-1 text-center">
+                <div className="relative inline-block">
+                  <div className="h-24 w-24 mx-auto rounded-2xl bg-gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <img src={flowifyLogo} alt="Flowify" className="h-14 w-14" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                    2
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold mt-4 mb-2">Flowify</h3>
+                <p className="text-sm text-muted-foreground">
+                  Configure branding &<br />paste your webhook URL
+                </p>
+              </div>
+
+              {/* Arrow 2 */}
+              <div className="flex items-center">
+                <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-accent" />
+                <ChevronRight className="h-6 w-6 text-accent -ml-1" />
+              </div>
+
+              {/* Step 3: Users */}
+              <div className="flex-1 text-center">
+                <div className="relative inline-block">
+                  <div className="h-24 w-24 mx-auto rounded-2xl bg-gradient-to-br from-accent to-primary/60 flex items-center justify-center shadow-lg">
+                    <Monitor className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                    3
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold mt-4 mb-2">Your Users</h3>
+                <p className="text-sm text-muted-foreground">
+                  Share your polished<br />ChatGPT-style interface
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile Flow */}
+            <div className="md:hidden space-y-6">
+              {/* Step 1 */}
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border">
+                <div className="relative flex-shrink-0">
+                  <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                    <Webhook className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                    1
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold">n8n Workflow</h3>
+                  <p className="text-sm text-muted-foreground">Build your AI agent with n8n's visual workflow editor</p>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="flex justify-center">
+                <ChevronRight className="h-6 w-6 text-primary rotate-90" />
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-card border border-primary/30">
+                <div className="relative flex-shrink-0">
+                  <div className="h-16 w-16 rounded-xl bg-gradient-primary flex items-center justify-center">
+                    <img src={flowifyLogo} alt="Flowify" className="h-10 w-10" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                    2
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Flowify</h3>
+                  <p className="text-sm text-muted-foreground">Configure branding & paste your webhook URL</p>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="flex justify-center">
+                <ChevronRight className="h-6 w-6 text-primary rotate-90" />
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border">
+                <div className="relative flex-shrink-0">
+                  <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-accent to-primary/60 flex items-center justify-center">
+                    <Monitor className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                    3
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Your Users</h3>
+                  <p className="text-sm text-muted-foreground">Share your polished ChatGPT-style interface</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Flow Indicator */}
+            <div className="mt-12 p-6 rounded-xl bg-card border border-border max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2 text-sm">
+                  <Cpu className="h-4 w-4 text-orange-500" />
+                  <span className="text-muted-foreground">n8n processes AI logic</span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={flowifyLogo} alt="" className="h-4 w-4" />
+                  <span className="text-muted-foreground">Flowify renders the UI</span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
+                <div className="flex items-center gap-2 text-sm">
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">Users chat seamlessly</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
