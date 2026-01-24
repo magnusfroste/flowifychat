@@ -87,7 +87,7 @@ const Landing = () => {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm text-primary font-medium">The Beautiful Frontend for n8n AI Agents</span>
+              <span className="text-sm text-primary font-medium">Let it Flowify</span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-gradient-primary bg-clip-text text-transparent">
@@ -97,8 +97,8 @@ const Landing = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              n8n's AI Agents are powerful—but their chat is built for developers, not customers.
-              Flowify gives you the polished interface that ChatGPT, Claude, and Grok set the standard for.
+              Instantly launch ChatGPT, Claude, and Grok-inspired chat interfaces for your n8n AI agents.
+              Beautiful. Fast. Free.
             </p>
 
             {/* Comparison Pills */}
@@ -225,7 +225,7 @@ const Landing = () => {
                 <span className="text-lg font-bold">Flowify</span>
               </Link>
               <p className="text-sm text-muted-foreground">
-                Beautiful chat interfaces for your n8n workflows
+                Let it Flowify
               </p>
             </div>
 
