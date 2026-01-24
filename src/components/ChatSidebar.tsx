@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MessageSquare, Plus, Trash2, ArrowLeft, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import flowifyLogo from "@/assets/logo-concept-1-flowing-bubble.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SessionManager } from "@/lib/SessionManager";
@@ -246,12 +247,17 @@ export function ChatSidebar({
     <Sidebar className={sidebarOpen ? "w-64" : "w-14"} collapsible="icon">
       {/* Branded Header - Always visible for authenticated users */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        {sidebarOpen && (logoUrl || avatarUrl) && (
-          <img 
-            src={logoUrl || avatarUrl || ''} 
-            alt={chatTitle || "Chat"} 
-            className="h-10 w-auto max-w-[120px] rounded-lg object-contain flex-shrink-0"
-          />
+        {sidebarOpen && (
+          <div className="flex items-center gap-2">
+            <img 
+              src={logoUrl || avatarUrl || flowifyLogo} 
+              alt={chatTitle || "Flowify"} 
+              className="h-8 w-8 rounded-lg object-contain flex-shrink-0"
+            />
+            {!logoUrl && !avatarUrl && (
+              <span className="text-sm font-semibold text-foreground">Flowify</span>
+            )}
+          </div>
         )}
         <SidebarTrigger className={!sidebarOpen ? "mx-auto" : ""} />
       </div>
@@ -390,6 +396,15 @@ export function ChatSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Subtle tagline for non-branded chats */}
+      {sidebarOpen && !logoUrl && !avatarUrl && (
+        <div className="mt-auto p-4 border-t border-border">
+          <p className="text-xs text-muted-foreground text-center opacity-50">
+            Let it Flowify
+          </p>
+        </div>
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
