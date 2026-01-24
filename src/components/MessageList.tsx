@@ -19,6 +19,28 @@ import {
   getTransitionSpeed,
 } from "@/theme/brandingStyles";
 
+/**
+ * Calculate contrast text color (white or black) for given background hex
+ */
+function getContrastTextColor(hex: string): string {
+  if (!hex || hex === 'transparent') return 'inherit';
+  
+  // Remove # if present
+  const cleanHex = hex.replace('#', '');
+  if (cleanHex.length !== 6) return 'inherit';
+  
+  // Convert to RGB
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return white for dark backgrounds, dark for light backgrounds
+  return luminance < 0.5 ? '#fafafa' : '#171717';
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -126,22 +148,27 @@ export function MessageList({
                   className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
                     message.role === "user" 
                       ? (userMessageColor && userMessageColor !== 'transparent' 
-                          ? 'bg-[hsl(var(--bubble-user))] text-[hsl(var(--bubble-user-foreground))]' 
-                          : '')
+                          ? '' 
+                          : 'text-foreground')
                       : (botMessageColor && botMessageColor !== 'transparent' 
-                          ? 'bg-[hsl(var(--bubble-bot))] text-[hsl(var(--bubble-bot-foreground))]' 
-                          : '')
+                          ? '' 
+                          : 'text-foreground')
                   }`}
                   style={{
                     borderRadius: bubbleRadiusStyle,
                     backgroundColor: message.role === "user" 
                       ? (showUserBubble && userMessageColor && userMessageColor !== 'transparent' ? userMessageColor : 'transparent')
                       : (botMessageColor && botMessageColor !== 'transparent' ? botMessageColor : 'transparent'),
-                    color: branding?.textColor || undefined,
+                    // For bubbles with background, calculate contrast color; otherwise use theme foreground
+                    color: message.role === "user" && showUserBubble && userMessageColor && userMessageColor !== 'transparent'
+                      ? getContrastTextColor(userMessageColor)
+                      : (botMessageColor && botMessageColor !== 'transparent' 
+                        ? getContrastTextColor(botMessageColor)
+                        : undefined),
                   }}
                 >
                   <div 
-                    className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
+                    className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-headings:text-inherit prose-p:text-inherit prose-li:text-inherit prose-strong:text-inherit prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
                   >
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
