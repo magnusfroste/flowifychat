@@ -94,6 +94,17 @@ export function MessageList({
   const showUserBubble = branding?.showUserBubble ?? true;
   const shouldShowBotAvatar = branding?.showBotAvatar ?? layoutConfig.showAvatars;
   const shouldShowUserAvatar = branding?.showUserAvatar ?? false;
+  
+  // Determine if we're on a dark background for code highlighting
+  const isDarkBackground = branding?.backgroundColor?.startsWith('#') 
+    ? (() => {
+        const hex = branding.backgroundColor.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
+      })()
+    : false;
 
   return (
     <div className={`space-y-6 pb-[var(--input-bar-height,8rem)] ${getMessageAlignment()}`}>
@@ -145,30 +156,23 @@ export function MessageList({
                 </div>
               ) : (
                 <div
-                  className={`${densityClass} ${typographyClasses} ${transitionSpeed} ${
-                    message.role === "user" 
-                      ? (userMessageColor && userMessageColor !== 'transparent' 
-                          ? '' 
-                          : 'text-foreground')
-                      : (botMessageColor && botMessageColor !== 'transparent' 
-                          ? '' 
-                          : 'text-foreground')
-                  }`}
+                  className={`${densityClass} ${typographyClasses} ${transitionSpeed}`}
                   style={{
                     borderRadius: bubbleRadiusStyle,
                     backgroundColor: message.role === "user" 
                       ? (showUserBubble && userMessageColor && userMessageColor !== 'transparent' ? userMessageColor : 'transparent')
                       : (botMessageColor && botMessageColor !== 'transparent' ? botMessageColor : 'transparent'),
-                    // For bubbles with background, calculate contrast color; otherwise use theme foreground
+                    // Calculate text color: use contrast for colored bubbles, explicit textColor for transparent, or inherit
                     color: message.role === "user" && showUserBubble && userMessageColor && userMessageColor !== 'transparent'
                       ? getContrastTextColor(userMessageColor)
-                      : (botMessageColor && botMessageColor !== 'transparent' 
+                      : (message.role === "assistant" && botMessageColor && botMessageColor !== 'transparent')
                         ? getContrastTextColor(botMessageColor)
-                        : undefined),
+                        : (branding?.textColor || 'inherit'),
                   }}
                 >
                   <div 
-                    className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-headings:text-inherit prose-p:text-inherit prose-li:text-inherit prose-strong:text-inherit prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']"
+                    className="text-sm leading-relaxed [&_p]:my-2 [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded"
+                    style={{ color: 'inherit' }}
                   >
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
@@ -177,7 +181,6 @@ export function MessageList({
                           const match = /language-(\w+)/.exec(className || "");
                           const codeContent = String(children).replace(/\n$/, "");
                           const blockId = `${message.id}-${codeContent.substring(0, 20)}`;
-                          const isDarkMode = document.documentElement.classList.contains('dark');
                           
                           return !inline && match ? (
                             <div className="relative group/code">
@@ -195,7 +198,7 @@ export function MessageList({
                                 )}
                               </Button>
                               <SyntaxHighlighter
-                                style={isDarkMode ? oneDark : oneLight}
+                                style={isDarkBackground ? oneDark : oneLight}
                                 language={match[1]}
                                 PreTag="div"
                                 {...props}
