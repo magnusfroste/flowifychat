@@ -4,9 +4,22 @@
  */
 
 /**
- * Get border radius classes for message bubbles
+ * Get border radius CSS value for message bubbles (for inline styles)
  */
 export const getBubbleRadius = (style?: string, borderRadius?: number): string => {
+  if (style === 'pill') return '9999px';
+  if (style === 'sharp') return '0px';
+  
+  if (borderRadius) return `${borderRadius}px`;
+  
+  // Default rounded-lg equivalent
+  return '8px';
+};
+
+/**
+ * Get border radius Tailwind class for message bubbles (for className)
+ */
+export const getBubbleRadiusClass = (style?: string, borderRadius?: number): string => {
   if (style === 'pill') return 'rounded-full';
   if (style === 'sharp') return 'rounded-none';
   
