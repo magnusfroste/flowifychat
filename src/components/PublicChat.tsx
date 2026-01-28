@@ -411,7 +411,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
                 user={user}
                 useLandingPageMode={uxConfig.useLandingPageMode}
               />
-              <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
+              <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex-1 overflow-y-auto mb-4">
                   <MessageList
                     messages={messages}
@@ -468,7 +468,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
           useLandingPageMode={uxConfig.useLandingPageMode}
         />
 
-        <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
+        <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex-1 overflow-y-auto mb-4">
             <MessageList
               messages={messages}

@@ -404,6 +404,18 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Keyboard shortcut: Cmd+[ or Ctrl+[ for quick navigation to dashboard
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '[') {
+        e.preventDefault();
+        navigate('/dashboard');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
+
   // Cleanup typing animation on unmount
   useEffect(() => {
     return () => {
