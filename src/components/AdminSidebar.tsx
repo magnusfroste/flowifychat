@@ -69,10 +69,6 @@ interface AdminSidebarProps {
 
 const dashboardLinks: SidebarLink[] = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
-  { id: 'settings', label: 'Account Settings', icon: Settings },
-];
-
-const chatAdminLinks: SidebarLink[] = [
   { id: 'design', label: 'Design', icon: Palette },
   { id: 'settings', label: 'Settings', icon: Wrench },
 ];
