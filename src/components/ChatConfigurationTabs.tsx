@@ -73,16 +73,10 @@ export function ChatConfigurationTabs({
 
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-6">
-        <TabsTrigger value="chat" className="text-xs">
-          💬 Chat
-        </TabsTrigger>
-        <TabsTrigger value="design" className="text-xs">
-          🎨 Design
-        </TabsTrigger>
-        <TabsTrigger value="settings" className="text-xs">
-          ⚙️ Settings
-        </TabsTrigger>
+      <TabsList className="hidden">
+        <TabsTrigger value="chat" />
+        <TabsTrigger value="design" />
+        <TabsTrigger value="settings" />
       </TabsList>
 
       {/* TAB 1: CHAT EXPERIENCE */}
