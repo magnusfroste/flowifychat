@@ -320,8 +320,9 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
     );
   }
 
-  // Show only the relevant tab based on activeView
-  const showDesign = activeView === 'design';
+  // Map activeView to the corresponding tab in ChatConfigurationTabs
+  const defaultTab = activeView === 'design' ? 'design' : activeView === 'settings' ? 'settings' : 'chat';
+  const viewLabel = activeView === 'design' ? 'Design' : activeView === 'settings' ? 'Settings' : 'Chat';
 
   return (
     <div className="h-full flex flex-col">
