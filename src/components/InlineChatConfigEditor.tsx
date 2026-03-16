@@ -13,7 +13,6 @@ import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ChatConfigurationTabs } from "@/components/ChatConfigurationTabs";
-import { ChatConfigurationPreview } from "@/components/ChatConfigurationPreview";
 import { BrandingTemplate } from "@/components/BrandingTemplates";
 import { generateSlug } from "@/lib/slugUtils";
 import type { ChatFormValues } from "@/types/chatConfiguration";
@@ -343,25 +342,17 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-hidden flex">
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <ChatConfigurationTabs
-                form={form}
-                mode="edit"
-                onTemplateApply={handleTemplateApply}
-                isSlugChecking={checkingSlug}
-                slugError={slugError}
-                onSlugChange={handleSlugChange}
-                onNameChange={handleNameChange}
-                defaultTab={showDesign ? 'design' : 'settings'}
-              />
-            </div>
-            <div className="w-[400px] border-l shrink-0 overflow-hidden p-4">
-              <ChatConfigurationPreview
-                formValues={form.watch()}
-                useLandingPageMode={form.watch('useLandingPageMode')}
-              />
-            </div>
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <ChatConfigurationTabs
+              form={form}
+              mode="edit"
+              onTemplateApply={handleTemplateApply}
+              isSlugChecking={checkingSlug}
+              slugError={slugError}
+              onSlugChange={handleSlugChange}
+              onNameChange={handleNameChange}
+              defaultTab={showDesign ? 'design' : 'settings'}
+            />
           </div>
         </form>
       </Form>
