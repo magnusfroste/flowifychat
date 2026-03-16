@@ -43,6 +43,7 @@ interface ChatConfigurationTabsProps {
   slugError: string | null;
   onSlugChange: (slug: string) => void;
   onNameChange: (name: string) => void;
+  defaultTab?: 'chat' | 'design' | 'settings';
 }
 
 export function ChatConfigurationTabs({
@@ -53,6 +54,7 @@ export function ChatConfigurationTabs({
   slugError,
   onSlugChange,
   onNameChange,
+  defaultTab = 'chat',
 }: ChatConfigurationTabsProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const { toast } = useToast();
