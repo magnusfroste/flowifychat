@@ -143,8 +143,8 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     );
   }
 
-  const selectedChat = activeTab !== 'dashboard'
-    ? chatInstances.find((c) => c.id === activeTab) || null
+  const selectedChat = selectedChatId
+    ? chatInstances.find((c) => c.id === selectedChatId) || null
     : null;
 
   const context: AdminContext = {
@@ -152,6 +152,7 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     activeView,
     chatInstances,
     selectedChat,
+    selectedChatId,
     user,
     loadChatInstances,
     currentSessionId,
