@@ -13,6 +13,7 @@ import type { AdminChatInstance, AdminActiveTab } from "@/types/adminLayout";
 interface AdminTopHeaderProps {
   chatInstances: AdminChatInstance[];
   activeTab: AdminActiveTab;
+  selectedChatId: string | null;
   onTabChange: (tab: AdminActiveTab) => void;
   onNewChat: () => void;
   userEmail?: string;
@@ -22,6 +23,7 @@ interface AdminTopHeaderProps {
 export function AdminTopHeader({
   chatInstances,
   activeTab,
+  selectedChatId,
   onTabChange,
   onNewChat,
   userEmail,
