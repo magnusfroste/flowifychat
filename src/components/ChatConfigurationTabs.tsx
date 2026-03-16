@@ -72,7 +72,7 @@ export function ChatConfigurationTabs({
   };
 
   return (
-    <Tabs defaultValue={defaultTab} className="w-full">
+    <Tabs value={defaultTab} className="w-full">
       <TabsList className="hidden">
         <TabsTrigger value="chat" />
         <TabsTrigger value="design" />
