@@ -60,7 +60,7 @@ export function AdminTopHeader({
             onClick={() => onTabChange(chat.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
-              activeTab === chat.id
+              (activeTab === chat.id || (activeTab === 'dashboard' && selectedChatId === chat.id))
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
