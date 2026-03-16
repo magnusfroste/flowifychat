@@ -326,7 +326,7 @@ function DashboardContent({ context }: { context: AdminContext }) {
 }
 
 function ChatContent({ context }: { context: AdminContext }) {
-  const { selectedChat, activeView, user } = context;
+  const { selectedChat, activeView, user, currentSessionId, onSessionSelect } = context;
 
   if (!selectedChat) return null;
 
@@ -335,6 +335,8 @@ function ChatContent({ context }: { context: AdminContext }) {
       <AdminChatView
         chatInstance={selectedChat}
         user={user}
+        externalSessionId={currentSessionId || undefined}
+        onSessionIdChange={onSessionSelect}
       />
     );
   }
@@ -350,17 +352,6 @@ function ChatContent({ context }: { context: AdminContext }) {
           <Link to={`/chat/${selectedChat.id}/edit`}>
             <Button>Open Editor</Button>
           </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (activeView === 'sessions') {
-    return (
-      <div className="h-full flex items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <h2 className="text-lg font-semibold mb-2">Sessions</h2>
-          <p className="text-sm">Session management coming soon</p>
         </div>
       </div>
     );
