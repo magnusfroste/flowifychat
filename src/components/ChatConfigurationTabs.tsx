@@ -43,7 +43,6 @@ interface ChatConfigurationTabsProps {
   slugError: string | null;
   onSlugChange: (slug: string) => void;
   onNameChange: (name: string) => void;
-  defaultTab?: 'chat' | 'design' | 'settings';
 }
 
 export function ChatConfigurationTabs({
@@ -54,7 +53,6 @@ export function ChatConfigurationTabs({
   slugError,
   onSlugChange,
   onNameChange,
-  defaultTab = 'chat',
 }: ChatConfigurationTabsProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const { toast } = useToast();
@@ -72,11 +70,17 @@ export function ChatConfigurationTabs({
   };
 
   return (
-    <Tabs value={defaultTab} className="w-full">
-      <TabsList className="hidden">
-        <TabsTrigger value="chat" />
-        <TabsTrigger value="design" />
-        <TabsTrigger value="settings" />
+    <Tabs defaultValue="chat" className="w-full">
+      <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsTrigger value="chat" className="text-xs">
+          💬 Chat
+        </TabsTrigger>
+        <TabsTrigger value="design" className="text-xs">
+          🎨 Design
+        </TabsTrigger>
+        <TabsTrigger value="settings" className="text-xs">
+          ⚙️ Settings
+        </TabsTrigger>
       </TabsList>
 
       {/* TAB 1: CHAT EXPERIENCE */}

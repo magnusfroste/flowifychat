@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Landing from "./pages/Landing";
@@ -34,7 +34,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/chat/new" element={<ChatConfiguration mode="create" />} />
-              <Route path="/chat/:id/edit" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/chat/:id/edit" element={<ChatConfiguration mode="edit" />} />
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
