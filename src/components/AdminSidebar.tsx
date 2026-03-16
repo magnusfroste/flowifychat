@@ -31,6 +31,8 @@ import {
   Search,
   X,
   Trash2,
+  Palette,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SessionManager } from "@/lib/SessionManager";
@@ -68,6 +70,11 @@ interface AdminSidebarProps {
 const dashboardLinks: SidebarLink[] = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
   { id: 'settings', label: 'Account Settings', icon: Settings },
+];
+
+const chatAdminLinks: SidebarLink[] = [
+  { id: 'design', label: 'Design', icon: Palette },
+  { id: 'settings', label: 'Settings', icon: Wrench },
 ];
 
 
@@ -389,21 +396,31 @@ export function AdminSidebar({
         {isDashboard ? (
           <NavLinks links={dashboardLinks} activeView={activeView} onViewChange={onViewChange} />
         ) : (
-          chatInstanceId && userId && (
-            <SessionList
-              chatInstanceId={chatInstanceId}
-              userId={userId}
-              currentSessionId={currentSessionId}
-              onSessionSelect={(sid) => {
-                onSessionSelect?.(sid);
-                onViewChange('chat');
-              }}
-              onNewSession={() => {
-                onNewSession?.();
-                onViewChange('chat');
-              }}
+          <>
+            <NavLinks
+              links={chatAdminLinks}
+              activeView={activeView}
+              onViewChange={onViewChange}
             />
-          )
+            <div className="px-4 py-2">
+              <div className="border-t border-border" />
+            </div>
+            {chatInstanceId && userId && (
+              <SessionList
+                chatInstanceId={chatInstanceId}
+                userId={userId}
+                currentSessionId={currentSessionId}
+                onSessionSelect={(sid) => {
+                  onSessionSelect?.(sid);
+                  onViewChange('chat');
+                }}
+                onNewSession={() => {
+                  onNewSession?.();
+                  onViewChange('chat');
+                }}
+              />
+            )}
+          </>
         )}
       </div>
     </aside>
