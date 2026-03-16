@@ -8,8 +8,6 @@ import { AdminSidebar } from "@/components/AdminSidebar";
 import type { AdminChatInstance, AdminActiveTab, AdminActiveView } from "@/types/adminLayout";
 
 interface AdminLayoutProps {
-  children?: React.ReactNode;
-  /** Render prop for main content based on current state */
   renderContent?: (context: AdminContext) => React.ReactNode;
 }
 
@@ -20,6 +18,10 @@ export interface AdminContext {
   selectedChat: AdminChatInstance | null;
   user: any;
   loadChatInstances: () => Promise<void>;
+  // Session management
+  currentSessionId: string;
+  onSessionSelect: (sessionId: string) => void;
+  onNewSession: () => void;
 }
 
 export function AdminLayout({ renderContent }: AdminLayoutProps) {
@@ -28,6 +30,8 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
   const [chatInstances, setChatInstances] = useState<AdminChatInstance[]>([]);
   const [activeTab, setActiveTab] = useState<AdminActiveTab>('dashboard');
   const [activeView, setActiveView] = useState<AdminActiveView>('overview');
+  const [currentSessionId, setCurrentSessionId] = useState<string>("");
+  const [sessionResetCounter, setSessionResetCounter] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -66,22 +70,14 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
       setChatInstances(instancesWithAnalytics);
     } catch (error) {
       console.error("Error loading chat instances:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load chat instances",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to load chat instances", variant: "destructive" });
     }
   }, [user?.id, toast]);
 
-  // Auth check
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
+      if (!session) { navigate("/auth"); return; }
       setUser(session.user);
       await loadChatInstances(session.user.id);
       setLoading(false);
@@ -90,39 +86,27 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-      }
+      if (!session) navigate("/auth");
+      else setUser(session.user);
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Realtime subscription
   useEffect(() => {
     if (!user) return;
-
     const channel = supabase
       .channel('admin-chat-instances')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'chat_instances',
-        filter: `user_id=eq.${user.id}`,
-      }, () => {
-        loadChatInstances();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_instances', filter: `user_id=eq.${user.id}` },
+        () => { loadChatInstances(); })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [user, loadChatInstances]);
 
   const handleTabChange = (tab: AdminActiveTab) => {
     setActiveTab(tab);
-    // Reset to default view for context
     setActiveView(tab === 'dashboard' ? 'overview' : 'chat');
+    setCurrentSessionId(""); // Reset session when switching tabs
   };
 
   const handleLogout = async () => {
@@ -130,8 +114,17 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     toast({ title: "Logged out", description: "Come back soon!" });
   };
 
-  const handleNewChat = () => {
-    navigate("/chat/new");
+  const handleNewChat = () => { navigate("/chat/new"); };
+
+  const handleSessionSelect = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    setActiveView('chat');
+  };
+
+  const handleNewSession = () => {
+    setCurrentSessionId("");
+    setSessionResetCounter(c => c + 1);
+    setActiveView('chat');
   };
 
   if (loading) {
@@ -153,10 +146,10 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     selectedChat,
     user,
     loadChatInstances,
+    currentSessionId,
+    onSessionSelect: handleSessionSelect,
+    onNewSession: handleNewSession,
   };
-
-  // Hide sidebar when in full chat view for maximum fidelity
-  const hideSidebar = activeTab !== 'dashboard' && activeView === 'chat';
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -169,13 +162,16 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
         onLogout={handleLogout}
       />
       <div className="flex flex-1 overflow-hidden">
-        {!hideSidebar && (
-          <AdminSidebar
-            activeTab={activeTab}
-            activeView={activeView}
-            onViewChange={setActiveView}
-          />
-        )}
+        <AdminSidebar
+          activeTab={activeTab}
+          activeView={activeView}
+          onViewChange={setActiveView}
+          chatInstanceId={selectedChat?.id}
+          userId={user?.id}
+          currentSessionId={currentSessionId}
+          onSessionSelect={handleSessionSelect}
+          onNewSession={handleNewSession}
+        />
         <main className="flex-1 overflow-hidden">
           {renderContent?.(context)}
         </main>
