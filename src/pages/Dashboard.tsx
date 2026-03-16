@@ -337,32 +337,18 @@ function DashboardContent({ context }: { context: AdminContext }) {
 }
 
 function ChatContent({ context }: { context: AdminContext }) {
-  const { selectedChat, activeView, user, currentSessionId, onSessionSelect } = context;
+  const { selectedChat, user, currentSessionId, onSessionSelect } = context;
 
   if (!selectedChat) return null;
 
-  if (activeView === 'chat') {
-    return (
-      <AdminChatView
-        chatInstance={selectedChat}
-        user={user}
-        externalSessionId={currentSessionId || undefined}
-        onSessionIdChange={onSessionSelect}
-      />
-    );
-  }
-
-  if (activeView === 'design' || activeView === 'settings') {
-    return (
-      <InlineChatConfigEditor
-        chatInstanceId={selectedChat.id}
-        activeView={activeView}
-        onSaved={() => context.loadChatInstances()}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <AdminChatView
+      chatInstance={selectedChat}
+      user={user}
+      externalSessionId={currentSessionId || undefined}
+      onSessionIdChange={onSessionSelect}
+    />
+  );
 }
 
 const Dashboard = () => {
