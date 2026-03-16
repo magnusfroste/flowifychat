@@ -16,9 +16,9 @@ export interface AdminContext {
   activeView: AdminActiveView;
   chatInstances: AdminChatInstance[];
   selectedChat: AdminChatInstance | null;
+  selectedChatId: string | null;
   user: any;
   loadChatInstances: () => Promise<void>;
-  // Session management
   currentSessionId: string;
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
