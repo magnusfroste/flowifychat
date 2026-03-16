@@ -27,8 +27,6 @@ import {
   LayoutGrid,
   Settings,
   MessageSquare,
-  Palette,
-  Wrench,
   Plus,
   Search,
   X,
