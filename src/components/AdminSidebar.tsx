@@ -392,31 +392,21 @@ export function AdminSidebar({
         {isDashboard ? (
           <NavLinks links={dashboardLinks} activeView={activeView} onViewChange={onViewChange} />
         ) : (
-          <>
-            <NavLinks
-              links={chatAdminLinks}
-              activeView={activeView}
-              onViewChange={onViewChange}
+          chatInstanceId && userId && (
+            <SessionList
+              chatInstanceId={chatInstanceId}
+              userId={userId}
+              currentSessionId={currentSessionId}
+              onSessionSelect={(sid) => {
+                onSessionSelect?.(sid);
+                onViewChange('chat');
+              }}
+              onNewSession={() => {
+                onNewSession?.();
+                onViewChange('chat');
+              }}
             />
-            <div className="px-4 py-2">
-              <div className="border-t border-border" />
-            </div>
-            {chatInstanceId && userId && (
-              <SessionList
-                chatInstanceId={chatInstanceId}
-                userId={userId}
-                currentSessionId={currentSessionId}
-                onSessionSelect={(sid) => {
-                  onSessionSelect?.(sid);
-                  onViewChange('chat');
-                }}
-                onNewSession={() => {
-                  onNewSession?.();
-                  onViewChange('chat');
-                }}
-              />
-            )}
-          </>
+          )
         )}
       </div>
     </aside>
