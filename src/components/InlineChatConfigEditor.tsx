@@ -331,7 +331,7 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
           {/* Sticky save bar */}
           <div className="border-b bg-card px-6 py-3 flex items-center justify-between shrink-0">
             <h2 className="text-sm font-semibold text-foreground">
-              {showDesign ? 'Design' : 'Settings'}
+              {viewLabel}
             </h2>
             <Button type="submit" size="sm" disabled={saving || checkingSlug}>
               {saving ? (
