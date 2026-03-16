@@ -343,25 +343,17 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-hidden flex">
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <ChatConfigurationTabs
-                form={form}
-                mode="edit"
-                onTemplateApply={handleTemplateApply}
-                isSlugChecking={checkingSlug}
-                slugError={slugError}
-                onSlugChange={handleSlugChange}
-                onNameChange={handleNameChange}
-                defaultTab={showDesign ? 'design' : 'settings'}
-              />
-            </div>
-            <div className="w-[400px] border-l shrink-0 overflow-hidden p-4">
-              <ChatConfigurationPreview
-                formValues={form.watch()}
-                useLandingPageMode={form.watch('useLandingPageMode')}
-              />
-            </div>
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <ChatConfigurationTabs
+              form={form}
+              mode="edit"
+              onTemplateApply={handleTemplateApply}
+              isSlugChecking={checkingSlug}
+              slugError={slugError}
+              onSlugChange={handleSlugChange}
+              onNameChange={handleNameChange}
+              defaultTab={showDesign ? 'design' : 'settings'}
+            />
           </div>
         </form>
       </Form>
