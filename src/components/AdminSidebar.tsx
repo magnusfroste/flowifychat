@@ -27,8 +27,6 @@ import {
   LayoutGrid,
   Settings,
   MessageSquare,
-  Palette,
-  Wrench,
   Plus,
   Search,
   X,
@@ -72,10 +70,6 @@ const dashboardLinks: SidebarLink[] = [
   { id: 'settings', label: 'Account Settings', icon: Settings },
 ];
 
-const chatAdminLinks: SidebarLink[] = [
-  { id: 'design', label: 'Design', icon: Palette },
-  { id: 'settings', label: 'Settings', icon: Wrench },
-];
 
 // --- Helpers ---
 
@@ -391,35 +385,25 @@ export function AdminSidebar({
 
   return (
     <aside className="w-56 border-r border-border bg-sidebar shrink-0 flex flex-col overflow-hidden">
-      {/* Top section: navigation links */}
-      <div className="py-3">
+      <div className="py-3 flex flex-col flex-1 overflow-hidden">
         {isDashboard ? (
           <NavLinks links={dashboardLinks} activeView={activeView} onViewChange={onViewChange} />
         ) : (
-          <>
-            {/* Chat admin links at top */}
-            <NavLinks links={chatAdminLinks} activeView={activeView} onViewChange={onViewChange} />
-
-            {/* Divider */}
-            <div className="mx-3 my-3 border-t border-border" />
-
-            {/* Session list fills remaining space */}
-            {chatInstanceId && userId && (
-              <SessionList
-                chatInstanceId={chatInstanceId}
-                userId={userId}
-                currentSessionId={currentSessionId}
-                onSessionSelect={(sid) => {
-                  onSessionSelect?.(sid);
-                  onViewChange('chat');
-                }}
-                onNewSession={() => {
-                  onNewSession?.();
-                  onViewChange('chat');
-                }}
-              />
-            )}
-          </>
+          chatInstanceId && userId && (
+            <SessionList
+              chatInstanceId={chatInstanceId}
+              userId={userId}
+              currentSessionId={currentSessionId}
+              onSessionSelect={(sid) => {
+                onSessionSelect?.(sid);
+                onViewChange('chat');
+              }}
+              onNewSession={() => {
+                onNewSession?.();
+                onViewChange('chat');
+              }}
+            />
+          )
         )}
       </div>
     </aside>
