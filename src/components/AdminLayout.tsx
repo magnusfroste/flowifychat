@@ -165,6 +165,7 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
       <AdminTopHeader
         chatInstances={chatInstances}
         activeTab={activeTab}
+        selectedChatId={selectedChatId}
         onTabChange={handleTabChange}
         onNewChat={handleNewChat}
         userEmail={user?.email}
