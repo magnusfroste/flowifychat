@@ -34,7 +34,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/chat/new" element={<ChatConfiguration mode="create" />} />
-              <Route path="/chat/:id/edit" element={<ChatConfiguration mode="edit" />} />
+              <Route path="/chat/:id/edit" element={<Navigate to="/dashboard" replace />} />
               <Route path="/chat/:id" element={<Chat />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
