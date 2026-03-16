@@ -28,7 +28,6 @@ import { ChatUsersList } from "@/components/ChatUsersList";
 import { AdminLayout, type AdminContext } from "@/components/AdminLayout";
 import { AdminChatView } from "@/components/AdminChatView";
 import type { AdminChatInstance } from "@/types/adminLayout";
-import type { AdminChatInstance } from "@/types/adminLayout";
 
 function DashboardContent({ context }: { context: AdminContext }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
