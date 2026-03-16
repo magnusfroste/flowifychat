@@ -41,9 +41,13 @@ interface Message {
 interface AdminChatViewProps {
   chatInstance: AdminChatInstance;
   user: any;
+  /** Externally controlled session ID from AdminLayout */
+  externalSessionId?: string;
+  /** Callback to report the active session back to parent */
+  onSessionIdChange?: (sessionId: string) => void;
 }
 
-export function AdminChatView({ chatInstance, user }: AdminChatViewProps) {
+export function AdminChatView({ chatInstance, user, externalSessionId, onSessionIdChange }: AdminChatViewProps) {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -59,6 +63,13 @@ export function AdminChatView({ chatInstance, user }: AdminChatViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Sync external session ID
+  useEffect(() => {
+    if (externalSessionId && externalSessionId !== sessionId) {
+      setSessionId(externalSessionId);
+    }
+  }, [externalSessionId]);
+
   // Initialize session
   useEffect(() => {
     let isMounted = true;
@@ -66,11 +77,21 @@ export function AdminChatView({ chatInstance, user }: AdminChatViewProps) {
     const initSession = async () => {
       if (!chatInstance || !user) return;
 
+      // If we already have an external session, use it
+      if (externalSessionId) {
+        if (isMounted) {
+          setSessionId(externalSessionId);
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         const manager = new SessionManager(chatInstance.id, user.id);
         const activeSessionId = await manager.getLatestSession() || await manager.createNewSession();
         if (isMounted) {
           setSessionId(activeSessionId);
+          onSessionIdChange?.(activeSessionId);
           setLoading(false);
         }
       } catch (error) {
@@ -86,7 +107,7 @@ export function AdminChatView({ chatInstance, user }: AdminChatViewProps) {
     initSession();
 
     return () => { isMounted = false; };
-  }, [chatInstance.id, user?.id]);
+  }, [chatInstance.id, user?.id, externalSessionId]);
 
   // Load messages
   useEffect(() => {
@@ -351,6 +372,7 @@ export function AdminChatView({ chatInstance, user }: AdminChatViewProps) {
     const manager = new SessionManager(chatInstance.id, user.id);
     const newSessionId = await manager.createNewSession();
     setSessionId(newSessionId);
+    onSessionIdChange?.(newSessionId);
 
     const branding = chatInstance.custom_branding;
     const uxConfig = getUXConfig(branding);
