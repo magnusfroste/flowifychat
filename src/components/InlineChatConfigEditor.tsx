@@ -320,8 +320,9 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
     );
   }
 
-  // Show only the relevant tab based on activeView
-  const showDesign = activeView === 'design';
+  // Map activeView to the corresponding tab in ChatConfigurationTabs
+  const defaultTab = activeView === 'design' ? 'design' : activeView === 'settings' ? 'settings' : 'chat';
+  const viewLabel = activeView === 'design' ? 'Design' : activeView === 'settings' ? 'Settings' : 'Chat';
 
   return (
     <div className="h-full flex flex-col">
@@ -330,7 +331,7 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
           {/* Sticky save bar */}
           <div className="border-b bg-card px-6 py-3 flex items-center justify-between shrink-0">
             <h2 className="text-sm font-semibold text-foreground">
-              {showDesign ? 'Design' : 'Settings'}
+              {viewLabel}
             </h2>
             <Button type="submit" size="sm" disabled={saving || checkingSlug}>
               {saving ? (
@@ -351,7 +352,7 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
               slugError={slugError}
               onSlugChange={handleSlugChange}
               onNameChange={handleNameChange}
-              defaultTab={showDesign ? 'design' : 'settings'}
+              defaultTab={defaultTab}
             />
           </div>
         </form>

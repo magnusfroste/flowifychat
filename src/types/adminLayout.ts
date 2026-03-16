@@ -16,4 +16,4 @@ export interface AdminChatInstance {
 }
 
 export type AdminActiveTab = 'dashboard' | string; // string = chatInstanceId
-export type AdminActiveView = 'overview' | 'chat' | 'design' | 'settings' | 'sessions';
+export type AdminActiveView = 'overview' | 'chat' | 'chat-settings' | 'design' | 'settings' | 'sessions';
