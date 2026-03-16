@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatUsersList } from "@/components/ChatUsersList";
 import { AdminLayout, type AdminContext } from "@/components/AdminLayout";
 import { AdminChatView } from "@/components/AdminChatView";
+import { InlineChatConfigEditor } from "@/components/InlineChatConfigEditor";
 import type { AdminChatInstance } from "@/types/adminLayout";
 
 function DashboardContent({ context }: { context: AdminContext }) {
