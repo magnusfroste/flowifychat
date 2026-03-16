@@ -344,17 +344,11 @@ function ChatContent({ context }: { context: AdminContext }) {
 
   if (activeView === 'design' || activeView === 'settings') {
     return (
-      <div className="h-full flex items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <h2 className="text-lg font-semibold mb-2">
-            {activeView === 'design' ? 'Design Editor' : 'Chat Settings'}
-          </h2>
-          <p className="text-sm mb-4">Configuration editor will render here</p>
-          <Link to={`/chat/${selectedChat.id}/edit`}>
-            <Button>Open Editor</Button>
-          </Link>
-        </div>
-      </div>
+      <InlineChatConfigEditor
+        chatInstanceId={selectedChat.id}
+        activeView={activeView}
+        onSaved={() => context.loadChatInstances()}
+      />
     );
   }
 
