@@ -31,6 +31,8 @@ import {
   Search,
   X,
   Trash2,
+  Palette,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SessionManager } from "@/lib/SessionManager";
