@@ -30,6 +30,7 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
   const [chatInstances, setChatInstances] = useState<AdminChatInstance[]>([]);
   const [activeTab, setActiveTab] = useState<AdminActiveTab>('dashboard');
   const [activeView, setActiveView] = useState<AdminActiveView>('overview');
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string>("");
   const [sessionResetCounter, setSessionResetCounter] = useState(0);
   const navigate = useNavigate();
