@@ -13,7 +13,6 @@ import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ChatConfigurationTabs } from "@/components/ChatConfigurationTabs";
-import { ChatConfigurationPreview } from "@/components/ChatConfigurationPreview";
 import { BrandingTemplate } from "@/components/BrandingTemplates";
 import { generateSlug } from "@/lib/slugUtils";
 import type { ChatFormValues } from "@/types/chatConfiguration";
