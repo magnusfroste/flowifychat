@@ -76,13 +76,23 @@ function DashboardContent({ context }: { context: AdminContext }) {
     setUsersListOpen(true);
   };
 
-  // Account settings view
-  if (activeView === 'settings') {
+  // Design or Settings view — show config editor for selected chat
+  if (activeView === 'design' || activeView === 'settings') {
+    // Use the first chat instance as default, or show a prompt to create one
+    const targetChat = chatInstances[0];
+    if (!targetChat) {
+      return (
+        <div className="h-full flex items-center justify-center text-muted-foreground">
+          <p className="text-sm">Create a chat instance first to configure it.</p>
+        </div>
+      );
+    }
     return (
-      <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
-        <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
-        <p className="text-muted-foreground">Account settings coming soon.</p>
-      </div>
+      <InlineChatConfigEditor
+        chatInstanceId={targetChat.id}
+        activeView={activeView}
+        onSaved={() => context.loadChatInstances()}
+      />
     );
   }
 
@@ -327,32 +337,18 @@ function DashboardContent({ context }: { context: AdminContext }) {
 }
 
 function ChatContent({ context }: { context: AdminContext }) {
-  const { selectedChat, activeView, user, currentSessionId, onSessionSelect } = context;
+  const { selectedChat, user, currentSessionId, onSessionSelect } = context;
 
   if (!selectedChat) return null;
 
-  if (activeView === 'chat') {
-    return (
-      <AdminChatView
-        chatInstance={selectedChat}
-        user={user}
-        externalSessionId={currentSessionId || undefined}
-        onSessionIdChange={onSessionSelect}
-      />
-    );
-  }
-
-  if (activeView === 'design' || activeView === 'settings') {
-    return (
-      <InlineChatConfigEditor
-        chatInstanceId={selectedChat.id}
-        activeView={activeView}
-        onSaved={() => context.loadChatInstances()}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <AdminChatView
+      chatInstance={selectedChat}
+      user={user}
+      externalSessionId={currentSessionId || undefined}
+      onSessionIdChange={onSessionSelect}
+    />
+  );
 }
 
 const Dashboard = () => {
