@@ -16,9 +16,9 @@ export interface AdminContext {
   activeView: AdminActiveView;
   chatInstances: AdminChatInstance[];
   selectedChat: AdminChatInstance | null;
+  selectedChatId: string | null;
   user: any;
   loadChatInstances: () => Promise<void>;
-  // Session management
   currentSessionId: string;
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
@@ -30,6 +30,7 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
   const [chatInstances, setChatInstances] = useState<AdminChatInstance[]>([]);
   const [activeTab, setActiveTab] = useState<AdminActiveTab>('dashboard');
   const [activeView, setActiveView] = useState<AdminActiveView>('overview');
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string>("");
   const [sessionResetCounter, setSessionResetCounter] = useState(0);
   const navigate = useNavigate();
@@ -104,9 +105,16 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
   }, [user, loadChatInstances]);
 
   const handleTabChange = (tab: AdminActiveTab) => {
-    setActiveTab(tab);
-    setActiveView(tab === 'dashboard' ? 'overview' : 'chat');
-    setCurrentSessionId(""); // Reset session when switching tabs
+    if (tab === 'dashboard') {
+      setActiveTab('dashboard');
+      setActiveView('overview');
+      // Keep selectedChatId so dashboard shows config for that chat
+    } else {
+      setActiveTab(tab);
+      setActiveView('chat');
+      setSelectedChatId(tab);
+      setCurrentSessionId("");
+    }
   };
 
   const handleLogout = async () => {
@@ -135,8 +143,8 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     );
   }
 
-  const selectedChat = activeTab !== 'dashboard'
-    ? chatInstances.find((c) => c.id === activeTab) || null
+  const selectedChat = selectedChatId
+    ? chatInstances.find((c) => c.id === selectedChatId) || null
     : null;
 
   const context: AdminContext = {
@@ -144,6 +152,7 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     activeView,
     chatInstances,
     selectedChat,
+    selectedChatId,
     user,
     loadChatInstances,
     currentSessionId,
@@ -156,6 +165,7 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
       <AdminTopHeader
         chatInstances={chatInstances}
         activeTab={activeTab}
+        selectedChatId={selectedChatId}
         onTabChange={handleTabChange}
         onNewChat={handleNewChat}
         userEmail={user?.email}
