@@ -105,9 +105,16 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
   }, [user, loadChatInstances]);
 
   const handleTabChange = (tab: AdminActiveTab) => {
-    setActiveTab(tab);
-    setActiveView(tab === 'dashboard' ? 'overview' : 'chat');
-    setCurrentSessionId(""); // Reset session when switching tabs
+    if (tab === 'dashboard') {
+      setActiveTab('dashboard');
+      setActiveView('overview');
+      // Keep selectedChatId so dashboard shows config for that chat
+    } else {
+      setActiveTab(tab);
+      setActiveView('chat');
+      setSelectedChatId(tab);
+      setCurrentSessionId("");
+    }
   };
 
   const handleLogout = async () => {
