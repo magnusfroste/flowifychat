@@ -372,6 +372,7 @@ export function AdminChatView({ chatInstance, user, externalSessionId, onSession
     const manager = new SessionManager(chatInstance.id, user.id);
     const newSessionId = await manager.createNewSession();
     setSessionId(newSessionId);
+    onSessionIdChange?.(newSessionId);
 
     const branding = chatInstance.custom_branding;
     const uxConfig = getUXConfig(branding);
