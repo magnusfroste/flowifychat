@@ -155,6 +155,9 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
     loadChatInstances,
   };
 
+  // Hide sidebar when in full chat view for maximum fidelity
+  const hideSidebar = activeTab !== 'dashboard' && activeView === 'chat';
+
   return (
     <div className="h-screen flex flex-col bg-background">
       <AdminTopHeader
@@ -166,12 +169,14 @@ export function AdminLayout({ renderContent }: AdminLayoutProps) {
         onLogout={handleLogout}
       />
       <div className="flex flex-1 overflow-hidden">
-        <AdminSidebar
-          activeTab={activeTab}
-          activeView={activeView}
-          onViewChange={setActiveView}
-        />
-        <main className="flex-1 overflow-auto">
+        {!hideSidebar && (
+          <AdminSidebar
+            activeTab={activeTab}
+            activeView={activeView}
+            onViewChange={setActiveView}
+          />
+        )}
+        <main className="flex-1 overflow-hidden">
           {renderContent?.(context)}
         </main>
       </div>
