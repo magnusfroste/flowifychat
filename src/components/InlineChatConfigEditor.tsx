@@ -352,7 +352,7 @@ export function InlineChatConfigEditor({ chatInstanceId, activeView, onSaved }: 
               slugError={slugError}
               onSlugChange={handleSlugChange}
               onNameChange={handleNameChange}
-              defaultTab={showDesign ? 'design' : 'settings'}
+              defaultTab={defaultTab}
             />
           </div>
         </form>
