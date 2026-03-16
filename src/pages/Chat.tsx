@@ -129,7 +129,7 @@ const Chat = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isTypingPrompt, setIsTypingPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Session management will be initialized after we know the chatInstance.id
   const [sessionId, setSessionId] = useState<string>("");
   const [viewTracked, setViewTracked] = useState(false);
