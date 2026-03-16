@@ -76,14 +76,13 @@ function DashboardContent({ context }: { context: AdminContext }) {
     setUsersListOpen(true);
   };
 
-  // Design or Settings view — show config editor for selected chat
+  // Design or Settings view — show config editor for the selected chat
   if (activeView === 'design' || activeView === 'settings') {
-    // Use the first chat instance as default, or show a prompt to create one
-    const targetChat = chatInstances[0];
+    const targetChat = context.selectedChat;
     if (!targetChat) {
       return (
         <div className="h-full flex items-center justify-center text-muted-foreground">
-          <p className="text-sm">Create a chat instance first to configure it.</p>
+          <p className="text-sm">Select a chat instance from the header to configure it.</p>
         </div>
       );
     }
