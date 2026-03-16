@@ -72,6 +72,11 @@ const dashboardLinks: SidebarLink[] = [
   { id: 'settings', label: 'Account Settings', icon: Settings },
 ];
 
+const chatAdminLinks: SidebarLink[] = [
+  { id: 'design', label: 'Design', icon: Palette },
+  { id: 'settings', label: 'Settings', icon: Wrench },
+];
+
 
 // --- Helpers ---
 
