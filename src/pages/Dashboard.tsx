@@ -327,21 +327,16 @@ function DashboardContent({ context }: { context: AdminContext }) {
 }
 
 function ChatContent({ context }: { context: AdminContext }) {
-  const { selectedChat, activeView } = context;
+  const { selectedChat, activeView, user } = context;
 
   if (!selectedChat) return null;
 
   if (activeView === 'chat') {
     return (
-      <div className="h-full flex items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <h2 className="text-lg font-semibold mb-2">Chat Preview</h2>
-          <p className="text-sm mb-4">Full chat interface will render here</p>
-          <Link to={`/chat/${selectedChat.id}`}>
-            <Button>Open Full Chat</Button>
-          </Link>
-        </div>
-      </div>
+      <AdminChatView
+        chatInstance={selectedChat}
+        user={user}
+      />
     );
   }
 
