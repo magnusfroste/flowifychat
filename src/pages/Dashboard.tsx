@@ -77,7 +77,7 @@ function DashboardContent({ context }: { context: AdminContext }) {
   };
 
   // Design or Settings view — show config editor for the selected chat
-  if (activeView === 'design' || activeView === 'settings') {
+  if (activeView === 'chat-settings' || activeView === 'design' || activeView === 'settings') {
     const targetChat = context.selectedChat;
     if (!targetChat) {
       return (
