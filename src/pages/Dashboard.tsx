@@ -29,25 +29,9 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ChatUsersList } from "@/components/ChatUsersList";
 
-interface ChatInstance {
-  id: string;
-  name: string;
-  slug: string | null;
-  webhook_url: string;
-  is_active: boolean;
-  created_at: string;
-  chat_type?: 'public' | 'authenticated';
-  custom_branding: {
-    primaryColor: string;
-    chatTitle: string;
-  };
-  analytics?: {
-    total_views: number;
-    unique_views: number;
-    total_messages: number;
-    active_sessions: number;
-  };
-}
+import type { DashboardChatInstance } from "@/types/chat";
+
+type ChatInstance = DashboardChatInstance;
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);

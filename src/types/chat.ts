@@ -26,6 +26,7 @@ export interface ChatInstance {
 /**
  * Minimal branding stored on chat_instances.custom_branding
  * Full branding config is ChatBranding from chatConfiguration.ts
+ * Uses `any` for extra fields since this is a dynamic JSON blob from DB
  */
 export interface ChatInstanceBranding {
   primaryColor: string;
@@ -34,7 +35,7 @@ export interface ChatInstanceBranding {
   avatarUrl?: string | null;
   welcomeMessage?: string;
   logoUrl?: string | null;
-  [key: string]: unknown; // allow extra branding fields
+  [key: string]: any; // dynamic JSON fields from database
 }
 
 /**
