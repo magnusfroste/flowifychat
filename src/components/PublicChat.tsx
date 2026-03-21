@@ -57,7 +57,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
   const [isOwner, setIsOwner] = useState(false);
   const [viewTracked, setViewTracked] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const branding = chatInstance.custom_branding;
   const uxConfig = getUXConfig(branding);
