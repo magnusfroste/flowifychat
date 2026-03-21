@@ -146,7 +146,7 @@ const Chat = () => {
   }
 
   // AUTHENTICATED CHAT MODE
-  const branding = chatInstance.custom_branding;
+  const branding = chatInstance.custom_branding as unknown as Record<string, any>;
   const quickStartConfig = getQuickStartPromptsConfig(branding);
   const welcomeScreenConfig = getWelcomeScreen(branding);
   const inputConfig = getInputConfig(branding);
