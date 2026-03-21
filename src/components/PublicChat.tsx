@@ -19,24 +19,7 @@ import { PublicChatSidebar, saveLocalSession, getLocalSessions } from "@/compone
 import { SidebarProvider } from "@/components/ui/sidebar";
 import type { ChatBranding } from "@/types/chatConfiguration";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
-
-interface ChatInstance {
-  id: string;
-  name: string;
-  slug: string | null;
-  webhook_url: string;
-  user_id: string;
-  n8n_auth_enabled?: boolean;
-  n8n_auth_username?: string;
-  n8n_auth_password?: string;
-  custom_branding: any;
-}
+import type { ChatInstance, Message } from "@/types/chat";
 
 interface PublicChatProps {
   chatInstance: ChatInstance;
