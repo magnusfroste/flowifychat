@@ -42,7 +42,7 @@ export function PublicChat({ chatInstance }: PublicChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const branding = chatInstance.custom_branding;
+  const branding = chatInstance.custom_branding as any;
   const uxConfig = getUXConfig(branding);
   const quickStartConfig = getQuickStartPromptsConfig(branding);
   const inputConfig = getInputConfig(branding);
