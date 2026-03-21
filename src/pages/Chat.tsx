@@ -155,8 +155,8 @@ const Chat = () => {
   const interactiveConfig = getInteractiveConfig(branding);
   const uxConfig = getUXConfig(branding);
 
-  const inputStyle = (branding?.inputStyle as string) || "outline";
-  const buttonStyle = (branding?.buttonStyle as string) || "filled";
+  const inputStyle = ((branding?.inputStyle as string) || "outline") as 'outline' | 'filled' | 'underline';
+  const buttonStyle = ((branding?.buttonStyle as string) || "filled") as 'filled' | 'ghost' | 'outline';
 
   const bgStyles =
     branding?.backgroundStyle === "gradient" &&
