@@ -365,6 +365,17 @@ export type Database = {
       }
     }
     Functions: {
+      get_session_messages: {
+        Args: { p_chat_instance_id: string; p_session_ids: string[] }
+        Returns: {
+          chat_instance_id: string
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }[]
+      }
       check_rate_limit: {
         Args: {
           p_action_type: string

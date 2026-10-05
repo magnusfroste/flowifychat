@@ -106,12 +106,10 @@ export function useChatMessages({
       if (!chatInstance || !sessionId) return;
 
       try {
-        const { data, error } = await supabase
-          .from("chat_messages")
-          .select("*")
-          .eq("chat_instance_id", chatInstance.id)
-          .eq("session_id", sessionId)
-          .order("created_at", { ascending: true });
+        const { data, error } = await supabase.rpc("get_session_messages", {
+          p_chat_instance_id: chatInstance.id,
+          p_session_ids: [sessionId],
+        });
 
         if (!isMounted) return;
         if (error) throw error;
@@ -381,18 +379,20 @@ export function useChatMessages({
       }
 
       try {
-        const { data: savedMessage } = await supabase
+        // Client-generated id: visitors can't read rows back, so no .select()
+        const savedId = crypto.randomUUID();
+        const { error: saveError } = await supabase
           .from("chat_messages")
           .insert({
+            id: savedId,
             chat_instance_id: chatInstance.id,
             session_id: sessionId,
             role: "assistant",
             content: assistantContent,
-          })
-          .select()
-          .single();
+          });
 
-        if (savedMessage) {
+        if (!saveError) {
+          const savedMessage = { id: savedId };
           setMessages((prev) =>
             prev.map((m) =>
               m.id === newAssistantMessage.id ? { ...m, id: savedMessage.id } : m

@@ -98,12 +98,10 @@ export function ChatSidebar({
           return;
         }
 
-        const { data, error } = await supabase
-          .from("chat_messages")
-          .select("session_id, created_at, content, role")
-          .eq("chat_instance_id", chatInstanceId)
-          .in("session_id", visibleSessionIds)
-          .order("created_at", { ascending: true });
+        const { data, error } = await supabase.rpc("get_session_messages", {
+          p_chat_instance_id: chatInstanceId,
+          p_session_ids: visibleSessionIds,
+        });
 
         if (!isMounted) return;
         if (error) throw error;
