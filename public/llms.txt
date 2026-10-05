@@ -1,0 +1,14 @@
+# Flowify
+
+> Beautiful, ChatGPT-quality chat interfaces for n8n workflows and AI agents.
+
+Flowify turns an n8n webhook endpoint into a production-ready, shareable chat interface without coding. It supports streaming responses, markdown, brand presets, custom colors, fonts, avatars and quick-start prompts, and lets you manage many chat interfaces from one multi-tenant dashboard. Flowify is open source (MIT) and can be self-hosted.
+
+Built for n8n users, automation builders and agencies who want to put a polished chat front end on their AI workflows.
+
+## Links
+
+- [Flowify](https://flowify.chat/): Landing page and sign-up.
+- [Pricing](https://flowify.chat/pricing): Plans and pricing.
+- [Terms](https://flowify.chat/terms) and [Privacy](https://flowify.chat/privacy)
+- [Source code](https://github.com/magnusfroste/flowifychat)
