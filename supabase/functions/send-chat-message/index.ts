@@ -93,6 +93,7 @@ function validateMessage(message: string): { valid: boolean; sanitized: string; 
   // Basic sanitization - remove null bytes and control characters (except newlines/tabs)
   const sanitized = trimmed
     .replace(/\0/g, '')
+    // eslint-disable-next-line no-control-regex -- avsiktlig rensning av kontrolltecken
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 
   return { valid: true, sanitized };
